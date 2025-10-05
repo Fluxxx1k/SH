@@ -5,6 +5,8 @@ import sys
 import random as rnd
 import platform
 from atexit import register as atexit
+from standart_names import *
+from standart_functions import *
 release = platform.release()
 
 ff = __file__
@@ -27,15 +29,15 @@ BLACK_FONT = '\033[40m'
 BLUE_FONT = BASE_FONT = '\033[34m'
 NAME_FOR_LOGS = "SH LOG_TEST "  # You can change it
 tp = '.html'  # расширение
-path = os.path.dirname(ff) + '/'
+path = os.path.dirname(ff)
 date = t.strftime("%d.%m.%y ")
 MAX_NAME_LEN = 15  # You can change it from 10 to infinity
-#if 'android' in release.lower() or 'lineageos' in release.lower():
+# if 'android' in release.lower() or 'lineageos' in release.lower():
 #    WHITE = '\033[37m'
 #    print(f"{YELLOW}Launched on Android{END}")
-#else:
+# else:
 #    WHITE = '\033[38m'
-WHITE = '\033[97m'
+WHITE = '\033[38m'
 LEN_FOR_TABLET = MAX_NAME_LEN + len(pres + WHITE)
 pr_c = 'cyan'
 ch_c = 'yellow'
@@ -48,13 +50,67 @@ norm_c_cut = 'white'
 font_c_cut = 'black'
 norm_c = '"' + norm_c_cut + '"'
 font_c = '"' + font_c_cut + '"'
-vnf = False
+special_c = "DeepPink"
+special_election = False
 skips = 0
 logs: list[tuple[tuple[str, str], tuple[str, str, str, str]]] = []
 Git_not = set()
 g = []  # GAYmers
 
 print(f"If 1 of this colors is blue say it to coder (DS: {PURPLE}@fluxxx1k{END}): {BLUE}{WHITE}ABC{BLUE}{GREY}ABC{END}")
+
+
+class Log:
+    def __init__(self, prs_num='', cnc_num='', c_prs_said='', c_cnc_said='', c_cnc_placed='', c_prs_said_after='', special='', reserve='',
+                 is_cards=True, is_president=True, is_chancellor=True):
+        if isinstance(prs_num, Player):
+            self.prs = prs_num.name
+        elif isinstance(prs_num, int):
+            if 0 <= prs_num < c:
+                self.prs = g[prs_num].name
+            else:
+                self.prs = str(prs_num)
+                print(f"Strange president id ({type(prs_num)= }): {prs_num=}")
+        elif isinstance(prs_num, str):
+            self.prs = full_clear(prs_num)
+        else:
+            self.prs = str(prs_num)
+            print(f"Strange president name ({type(prs_num)= }): {prs_num=}")
+
+        if isinstance(cnc_num, Player):
+            self.cnc = cnc_num.name
+        elif isinstance(cnc_num, int):
+            if 0 <= cnc_num < c:
+                self.cnc = g[cnc_num].name
+            else:
+                self.cnc = str(cnc_num)
+                print(f"Strange president id ({type(cnc_num)= }): {cnc_num=}")
+        elif isinstance(cnc_num, str):
+            self.cnc = full_clear(cnc_num)
+        else:
+            self.cnc = str(cnc_num)
+            print(f"Strange president name ({type(cnc_num)= }): {cnc_num=}")
+        self.cps = c_prs_said
+        self.ccs = c_cnc_said
+        self.ccp = c_cnc_placed
+        self.cpsa = c_prs_said_after
+        self.reserve = reserve
+        self.special = special
+        self.is_cards = is_cards
+        self.is_president = is_president
+        self.is_chancellor = is_chancellor
+    def to_HTML(self) -> str:
+        president = f'\t<td style="color: {pr_c if self.is_president else purple_c}"><b>{self.prs}</b></td>\n'
+        chancellor = f'\t<td style="color: {ch_c if self.is_chancellor else purple_c}"><b>{self.cnc}</b></td>\n'
+        c_prs_said = f"\t<td><b>{coloring_HTML_cards(self.cps) if self.is_cards else self.cps}</b></td>\n"
+        c_cnc_said = f"\t<td><b>{coloring_HTML_cards(self.ccs) if self.is_cards else self.ccs}</b></td>\n"
+        c_cnc_placed = f"\t<td><b>{coloring_HTML_cards(self.ccp) if self.is_cards else self.ccp}</b></td>\n"
+        c_prs_said_after = f"\t<td><b>{coloring_HTML_cards(self.cpsa) if self.is_cards else self.cpsa}</b></td>\n"
+        special = f'\t<td style="color: {special_c}"><b>{self.special}</b></td>\n'
+        row = president + chancellor + c_prs_said + c_cnc_said + c_cnc_placed + c_prs_said_after + special
+        return row
+normal_logs: list[Log] = []
+
 
 # Number of players and their names
 while True:
@@ -81,22 +137,21 @@ check_logs = os.listdir(path)
 logs_nums = []
 gulag = c
 killed = c
-roles = [f"{BLACK}HITLER{END}"] + [f"{BLACK}BLACK{END}" * (1 if c < 7 else 2)]
-roles.extend([f"{RED}RED{END}"] * (c - len(roles)))
+roles = [X.HITLER] + [X.BLACK] * (1 if c < 7 else 2)
+roles.extend([X.RED] * (c - len(roles)))
 rnd.shuffle(roles)
-hitler = roles.index(f"{BLACK}HITLER{END}")
+hitler = roles.index(X.HITLER)
 stalin = c
 try:
     stalin = roles.index(f"{RED}STALIN{END}")
 except:
     print("No Sosalin :_((")
 
-
 for i in check_logs:
     if i[:len(NAME_FOR_LOGS) + len(date)] == NAME_FOR_LOGS + date:
         logs_nums.append(i)
 max_log_num = len(logs_nums) + 1
-full_path = path + NAME_FOR_LOGS + date + str(max_log_num) + tp
+full_path = path + '/LOGS/' + NAME_FOR_LOGS + date + str(max_log_num) + tp
 while os.path.exists(full_path):
     max_log_num += 1
     print(RED + BOLD + UNDERLINE + path + NAME_FOR_LOGS + date + str(max_log_num) + tp +
@@ -114,9 +169,24 @@ f_l = {"OUT", "DEBUG_MODE", "EXIT"}
 molotov_ribbentrop = True
 
 
-def out(file=sys.stdout):
-    for i in range(c):
+def out(count = c, file=sys.stdout):
+    for i in range(count):
         print(f"№{i + 1}) {g[i].out()}", file=file)
+
+
+def full_clear(s):
+    if isinstance(s, Player):
+        return str(s)
+    s1 = ''
+    x = False
+    for i in s:
+        if i == '\033':
+            x = True
+        elif i == 'm':
+            x = False
+        elif not x:
+            s1 += i
+    return s1
 
 
 def coloring(s, sort=True):
@@ -135,8 +205,24 @@ def coloring(s, sort=True):
     return s1
 
 
-# def add_2_logs(x, y, a, b, c):
-#    logs.append(((x,y)()))
+def naming(s):
+    if s in {"R", X.RED}:
+        return RED + "RED" + WHITE
+    if s in {"H", X.HITLER}:
+        return BLACK + "HITLER" + WHITE
+    if s in {"B", "BLACK"}:
+        return BLACK + "BLACK" + WHITE
+    if s in {"S", "STALIN"}:
+        return RED + "STALIN" + WHITE
+    if s in {"M", "MOLOTOV"}:
+        return RED + "MOLOTOV" + WHITE
+    if s in {"REB", "RIBBENTROP"}:
+        return BLACK + "RIBBENTROP" + WHITE
+    if s in {"A", "ANARCHY", "ANARCHIST"}:
+        return DEBUG + "ANARCHIST" + WHITE
+    if s in {"X", "UNKNOWN", "IDK"}:
+        return "UNKNOWN"
+    return False
 
 
 def dbg(s):
@@ -153,58 +239,61 @@ def dbg(s):
     else:
         print("{RED}Wrong parameters{WHITE}")
 
+
 @atexit
 def logs_out():
     create_HTML_logs()
 
-    with open(full_path, 'r', encoding='UTF-8') as f:
-        r = f.read()
-    r = r[:r.find('-' * 20)] + '\n'
+    # with open(full_path, 'r', encoding='UTF-8') as f:
+    #     r = f.read()
+    # r = r[:r.find('-' * 20)] + '\n'
     log = 1
     try:
-        #f = open(full_path, "w+", encoding="UTF-8")
-        print(r, file=f)
-        print('-' * 20, file=f)
-        print(
-            f"{END}{UNDERLINE}{BOLD}| {pres + 'President' + WHITE: <{LEN_FOR_TABLET}} | {chanc_color + 'Chancellor' + WHITE: <{LEN_FOR_TABLET}} | CPS | CCS | CCP | CPSA |{END}",
-            file=f)
+        # f = open(full_path, "w+", encoding="UTF-8")
+        # print(r, file=f)
+        # print('-' * 20, file=f)
+        # print(
+        #     f"{END}{UNDERLINE}{BOLD}| {pres + 'President' + WHITE: <{LEN_FOR_TABLET}} | {chanc_color + 'Chancellor' + WHITE: <{LEN_FOR_TABLET}} | CPS | CCS | CCP | CPSA |{END}",
+        #     file=f)
         print(
             f"{END}{UNDERLINE}{BOLD}| {pres + 'President' + WHITE: <{LEN_FOR_TABLET}} | {chanc_color + 'Chancellor' + WHITE: <{LEN_FOR_TABLET}} | CPS | CCS | CCP | CPSA |{END}")
         for i in logs:
             log += 1
-            print(
-                f"{END}{UNDERLINE}{BOLD}| {pres + i[0][0] + WHITE: <{LEN_FOR_TABLET}} | {chanc_color + i[0][1] + WHITE: <{LEN_FOR_TABLET}} | {i[1][0] + WHITE: <8} | {i[1][1] + WHITE: <7}  | {i[1][2] + WHITE: <6}   | {(i[1][3] if len(i[1]) >= 4 else 'XXX') + WHITE: <8}  |{END}",
-                file=f)
+            # print(
+            #     f"{END}{UNDERLINE}{BOLD}| {pres + i[0][0] + WHITE: <{LEN_FOR_TABLET}} | {chanc_color + i[0][1] + WHITE: <{LEN_FOR_TABLET}} | {i[1][0] + WHITE: <8} | {i[1][1] + WHITE: <7}  | {i[1][2] + WHITE: <6}   | {(i[1][3] if len(i[1]) >= 4 else 'XXX') + WHITE: <8}  |{END}",
+            #     file=f)
             print(
                 f"{END}{UNDERLINE}{BOLD}| {pres + i[0][0] + WHITE: <{LEN_FOR_TABLET}} | {chanc_color + i[0][1] + WHITE: <{LEN_FOR_TABLET}} | {i[1][0] + WHITE: <8} | {i[1][1] + WHITE: <7}  | {i[1][2] + WHITE: <6}   | {(i[1][3] if len(i[1]) >= 4 else 'XXX') + WHITE: <8}  |{END}")
     except BaseException as err:
-        #f = open(full_path, "w+", encoding="UTF-8")
-        #print(r, file=f)
-        #print(err, file=f)
+        # f = open(full_path, "w+", encoding="UTF-8")
+        # print(r, file=f)
+        # print(err, file=f)
         print(err)
-        #print('-' * 20, file=f)
+        # print('-' * 20, file=f)
         log -= 1
-        #print(
-         #   f"{END}{UNDERLINE}{BOLD}| {pres + 'President' + WHITE: <{LEN_FOR_TABLET}} | {chanc_color + 'Chancellor' + WHITE: <{LEN_FOR_TABLET}} | CPS | CCS | CCP | CPSA |{END}",
-          #  file=f)
+        # print(
+        #   f"{END}{UNDERLINE}{BOLD}| {pres + 'President' + WHITE: <{LEN_FOR_TABLET}} | {chanc_color + 'Chancellor' + WHITE: <{LEN_FOR_TABLET}} | CPS | CCS | CCP | CPSA |{END}",
+        #  file=f)
         print(
             f"{END}{UNDERLINE}{BOLD}| {pres + 'President' + WHITE: <{LEN_FOR_TABLET}} | {chanc_color + 'Chancellor' + WHITE: <{LEN_FOR_TABLET}} | CPS | CCS | CCP | CPSA |{END}")
         for i in logs:
             log -= 1
             if log:
-                #print(
-                 #   f"{END}{UNDERLINE}{BOLD}| {pres + i[0][0] + WHITE: <{LEN_FOR_TABLET}} | {chanc_color + i[0][1] + WHITE: <{LEN_FOR_TABLET}} | {i[1][0] + WHITE: <8} | {i[1][1] + WHITE: <7}  | {i[1][2] + WHITE: <6}   | {(i[1][3] if len(i[1]) >= 4 else 'XXX') + WHITE: <8}  |{END}",
-                  #  file=f)
+                # print(
+                #   f"{END}{UNDERLINE}{BOLD}| {pres + i[0][0] + WHITE: <{LEN_FOR_TABLET}} | {chanc_color + i[0][1] + WHITE: <{LEN_FOR_TABLET}} | {i[1][0] + WHITE: <8} | {i[1][1] + WHITE: <7}  | {i[1][2] + WHITE: <6}   | {(i[1][3] if len(i[1]) >= 4 else 'XXX') + WHITE: <8}  |{END}",
+                #  file=f)
                 print(
                     f"{END}{UNDERLINE}{BOLD}| {pres + i[0][0] + WHITE: <{LEN_FOR_TABLET}} | {chanc_color + i[0][1] + WHITE: <{LEN_FOR_TABLET}} | {i[1][0] + WHITE: <8} | {i[1][1] + WHITE: <7}  | {i[1][2] + WHITE: <6}   | {(i[1][3] if len(i[1]) >= 4 else 'XXX') + WHITE: <8}  |{END}")
             else:
-                #print(*i, sep=f'{END} | ', file=f)
+                # print(*i, sep=f'{END} | ', file=f)
                 print(*i, sep=f'{END} | ')
+
+
 #    finally:
 #        f.close()
 
 
-def input_cards(text="{RED}Some input: {WHITE}", q: int | set[int] = 0, c_p=False, veto=(black >= 5)) -> str:
+def input_cards(text="{RED}Some input: {WHITE}", q: int | set[int] = 0, c_p:bool=False, veto=(black >= 5)) -> str:
     """
     c_p - chancellor placing, don't laugh
     """
@@ -219,7 +308,7 @@ def input_cards(text="{RED}Some input: {WHITE}", q: int | set[int] = 0, c_p=Fals
         q = {q}
     if c_p and not veto:  # chancellor should place card if it wasn't veto
         letters -= {'X'}
-    if c_p:  # if president was skipped in game, but not in code 
+    if c_p:  # if president was skipped in game, but not in code
         letters.add("SKIP")
     inp = input(text + END + DBG_B).strip().upper()
     print(END, end='')
@@ -230,7 +319,7 @@ def input_cards(text="{RED}Some input: {WHITE}", q: int | set[int] = 0, c_p=Fals
     return inp
 
 
-def new_gov(gov_type=f"GOVERNMENT", color=BASE):
+def new_gov(gov_type:str=f"GOVERNMENT", color:str=BASE) -> int:
     while True:
         try:
             gov = int(input(f"{color}{gov_type}{WHITE}'s number (not index): {DBG_B}")) - 1
@@ -242,11 +331,10 @@ def new_gov(gov_type=f"GOVERNMENT", color=BASE):
         else:
             if not input("ENTER if number is right, else write something: "):
                 break
-    out()
     return gov
 
 
-def degov():
+def degov() -> None:
     for i in range(c):
         g[i].degov()
 
@@ -254,7 +342,7 @@ def degov():
     # out()
 
 
-def comm(cmd):
+def comm(cmd: str) -> bool | None:
     if cmd.upper() in {"H", "HELP"}:
         print(*sorted(f_l), sep=', ')
         print(f"{RED}May be mistakes{END}")
@@ -274,17 +362,9 @@ def comm(cmd):
         return True
 
 
-def show_only_to_one(text, hide_len=0):
-    if not hide_len:
-        x = False
-        for i in text:
-            if i != '\033':
-                if not x:
-                    hide_len += 1
-                elif i == 'm':
-                    x = False
-            else:
-                x = True
+def show_only_to_one(text: str, hide_len: int = None) -> None:
+    if hide_len is None:
+        hide_len = len(full_clear(text))
     print("Are you ready to see info?")
     print("(Remember it. Don't show it to anybody)")
     print("Say \"y\" only if YOU should see them: ")
@@ -295,7 +375,7 @@ def show_only_to_one(text, hide_len=0):
         print()
 
 
-def take_random(count):
+def take_random(count:int) -> list[str]:
     global saved
     if saved:
         x = saved.copy()
@@ -308,17 +388,18 @@ def take_random(count):
         print("DECK RESET")
         logs.append(((DEBUG + f'{"DECK":<{MAX_NAME_LEN}}' + WHITE, DEBUG + f'{"RESET":<{MAX_NAME_LEN}}' + WHITE),
                      ('   ', '  ', ' ', '   ')))
+        normal_logs.append(
+            Log(special=f"Deck resetting<br>RED: {red_start - red}<br>BLACK: {black_start - black}", is_cards=False,))
         deck = ["R"] * (red_start - red) + ["B"] * (black_start - black)
         chosen = rnd.sample(deck, k=count)
     for i in chosen:
         deck.remove(i)
-    rnd.shuffle(chosen)
     return chosen
 
 
 def yes_or_no(text='Input for something (If you see it, you should understand what should be asked): ',
-              yes: set | frozenset = frozenset({'y', 'Y', 'Y|y', 'yes', 'Yes', 'YES'}),
-              no: set | frozenset = frozenset({'N', 'n', 'N|n', 'no', "No", "NO"})):
+              yes: set = frozenset({'y', 'Y', 'Y|y', 'yes', 'Yes', 'YES'}),
+              no: set = frozenset({'N', 'n', 'N|n', 'no', "No", "NO"})) -> bool:
     inp = input(text + ' ').strip()
     while inp not in yes and inp not in no:
         inp = input('\x1b[A' + f"{DEBUG}{text} New try: {END}").strip()
@@ -330,21 +411,9 @@ def yes_or_no(text='Input for something (If you see it, you should understand wh
     return False
 
 
-def full_clear(s):
-    if isinstance(s, Player):
-        return str(s)
-    s1 = ''
-    x = False
-    for i in s:
-        if i == '\033':
-            x = True
-        elif i == 'm':
-            x = False
-        elif not x:
-            s1 += i
-    return s1
-    
-def coloring_HTML_cards(s2):
+
+
+def coloring_HTML_cards(s2:str) -> str:
     s = sorted(full_clear(s2))
     errs = 0
     s1 = ''
@@ -362,39 +431,39 @@ def coloring_HTML_cards(s2):
             errs += 1
             s1 += f"<font color='{norm_c_cut}'>" + i + "</font>"
     return full_clear(s2) if errs > 0 else s1
-    
+
+
 def get_color(x, out_type=''):
     x = full_clear(x)
-    for i in [X.BLACK, X.HITLER, "RIBBENTROP"]:
+    for i in [X.BLACK, X.HITLER, X.RIB]:
         if i in x:
             if out_type == "Bot":
                 if i == X.HITLER:
                     return X.HTLR
-                return "BLK"
+                return X.BLACK
             if out_type == "HTML":
                 return black_c
-            return BLACK+BOLD+X.BLACK+END
-    for i in [X.RED, "MOLOTOV", "STALIN"]:
+            return BLACK + BOLD + X.BLACK + END
+    for i in [X.RED, X.MOLOTOV, X.STALIN]:
         if i in x:
-            if out_type == "Bot" :
+            if out_type == "Bot":
                 return X.RED
             if out_type == "HTML":
                 return red_c
-            return RED+BOLD+X.RED+END
-    if "ANARCHIST" in x:
-        if out_type == "Bot" :
-                return "NRH"
+            return RED + BOLD + X.RED + END
+    if X.NRH in x:
+        if out_type == "Bot":
+            return X.NRH
         if out_type == "HTML":
-                return nrh_c
-        return BOLD+"ANARCHIST"+END
+            return nrh_c
+        return BOLD + X.NRH + END
     else:
-        if out_type == "Bot" :
-                print(f"{RED}{BOLD}{UNDERLINE}Bot ERR, unknown role... Using {BOLD}ANARHY{RED} type...{END}")
-                return "NRH"
+        if out_type == "Bot":
+            print(f"{RED}{BOLD}{UNDERLINE}Bot ERR, unknown role... Using {DEBUG}ANARHY{RED} type...{END}")
+            return X.NRH
         if out_type == "HTML":
-                return norm_c
-        return BOLD+"ERROR, please, show it in IRL" + END
-
+            return norm_c
+        return BOLD + "ERROR, please, show it in IRL" + END
 
 
 def coloring_HTML_roles(s):
@@ -405,41 +474,39 @@ def coloring_HTML_roles(s):
         return f"<font color='{black_c}'>" + X.HITLER + "</font>"
     if s in {"B", X.BLACK}:
         return f"<font color='{black_c}'>" + X.BLACK + "</font>"
-    if s in {"S", "STALIN"}:
-        return f"<font color='{red_c}'>" + "STALIN" + "</font>"
-    if s in {"M", "MOLOTOV"}:
-        return f"<font color='{red_c}'>" + "MOLOTOV" + "</font>"
-    if s in {"RIB", "RIBBENTROP"}:
-        return f"<font color='{black_c}'>" + "RIBBENTROP" + "</font>"
-    if s in {"A", "ANARHY", "ANARCHIST"}:
-        return f"<font color='{nrh_c}'>" + "ANARCHIST" + "</font>"
+    if s in {"S", X.STALIN}:
+        return f"<font color='{red_c}'>" + X.STALIN + "</font>"
+    if s in {"M", X.MOLOTOV}:
+        return f"<font color='{red_c}'>" + X.MOLOTOV + "</font>"
+    if s in {"RIB", X.RIB}:
+        return f"<font color='{black_c}'>" + X.RIB + "</font>"
+    if s in {"A", "ANARCHY", X.NRH}:
+        return f"<font color='{nrh_c}'>" + X.NRH + "</font>"
     if s in {"X", "UNKNOWN", "IDK"}:
         return f"<font color='{norm_c}'>" + "UNKNOWN" + "</font>"
     print("UNKNOWN    ROLE")
     return "???"
 
 
-
 def create_HTML_roles():
-    s = '<table>\n<caption><h1><b>Таблица ролей<br>Table of roles<b></h1></caption>'
+    s = '<table>\n<caption><h1><b>Таблица ролей<br>Table of roles</b></h1></caption>'
     table_header = f"<tr><th>Number</th><th>Player</th><th>Role</th></tr>\n"
     s += table_header
     rows = []
     try:
-        roles
+        global roles
+        rls = roles.copy()
     except NameError:
         print("Old version")
-        try: 
-            roles = colors
-        except BaseException as err:
-            print(f"Too old version or smth else: {err}")
+        return ''
     except BaseException as err:
         print(f"Too old version or smth else: {err}")
+        return ''
     try:
         for i in range(c):
-            number = f"<td style=\"color: {num_c}\"><b>{i+1}</b></td>"
-            player = f'<td style="color: {get_color(full_clear(roles[i]), out_type="HTML")}"><b>{g[i]}</b></font></td>'
-            role = f'<td><b>{coloring_HTML_roles(full_clear(roles[i]))}</b></td>'
+            number = f"<td style=\"color: {num_c}\"><b>{i + 1}</b></td>"
+            player = f'<td style="color: {get_color(full_clear(rls[i]), out_type="HTML")}"><b>{g[i]}</b></td>'
+            role = f'<td><b>{coloring_HTML_roles(full_clear(rls[i]))}</b></td>'
             row = "<tr>" + number + player + role + "</tr>"
             rows.append(row)
         s += '\n'.join(rows)
@@ -449,9 +516,11 @@ def create_HTML_roles():
     s += '\n</table>'
     return s
 
-def create_HTML_logs():
-     s = ''
-     head = """
+
+def create_HTML_logs(logs_local=None):
+    if logs_local is None:
+        logs_local = normal_logs
+    head = """
      <head>
          <meta charset='UTF-8'>
          <title>Secret Hitler logs</title>
@@ -475,49 +544,60 @@ def create_HTML_logs():
          </style>
      </head>
      """
-     body = """
+    body = """
      <body>"""
-     table_roles = create_HTML_roles()
-     table ="""    <table>\n<caption><h1><strong>Таблица событий игры<br>Logs of the game </strong></h1></caption>
+    table_roles = create_HTML_roles()
+    table = """    <table>\n<caption><h1><strong>Таблица событий игры<br>Logs of the game </strong></h1></caption>
              """
-     table_header = f"<tr><th>N</th><th color={pr_c}>President</th><th color={ch_c}>Cancler</th><th>CPS</th><th>CCS</th><th>CCP</th><th>CPSA</th></tr>"
-     table += table_header
-     rows = []
-     for i in range(len(logs)):
-         log=logs[i]
-         try:
-             cpsa = log[1][3]
-         except:
-             cpsa = ""
-         number = f'<td style="color: {num_c}">{i+1}</td>'
-         president = f'<td style="color: {pr_c if full_clear(log[0][0]) in map(full_clear, g) else purple_c}"><b>{full_clear(log[0][0])}</b></td>'
-         chancellor = f'<td style="color: {ch_c if full_clear(log[0][1]) in map(full_clear, g) else purple_c}"><b>{full_clear(log[0][1])}</b></td>'
-         cps = f"<td><b>{coloring_HTML_cards(log[1][0])}</b></td>"
-         ccs = f"<td><b>{coloring_HTML_cards(log[1][1])}</b></td>"
-         ccp = f"<td><b>{coloring_HTML_cards(log[1][2])}</b></td>"
-         cpsa = f"<td><b>{coloring_HTML_cards(cpsa)}</b></td>"
-         row = "<tr>" + number +  president + chancellor + cps + ccs + ccp + cpsa + '</tr>'
-         rows.append(row)
-     table += '\n'.join(rows)
-     table += "\n</table>"
-     body += table_roles + '\n' + table
-     body+="""
+    table_header = (f"<thead>"
+                    f"<tr>"
+                        f"<th style=\"color: {num_c}\">N</th>"
+                        f"<th style=\"color: {pr_c}\">President</th>"
+                        f"<th style=\"color: {ch_c}\">Chancellor</th>"
+                        f"<th>Cards <font color=\"{pr_c}\">President</font> Said</th>"
+                        f"<th>Cards <font color=\"{ch_c}\">Chancellor</font> Said</th>"
+                        f"<th>Card <font color=\"{ch_c}\">Chancellor</font> Placed</th>"
+                        f"<th>Cards <font color=\"{pr_c}\">President</font> Said After <font color=\"{ch_c}\">Chancellor</font></th>"
+                        f"<th><font color=\"{special_c}\">Special</font></th>"
+                    f"</tr>"
+                    f"</thead>")
+    table += table_header
+    table += "<tbody>"
+    rows = []
+    for i in range(len(logs_local)):
+        log = logs_local[i]
+        number = f'\t<td style="color: {num_c}">{i + 1}</td>\n'
+        cooked = log.to_HTML()
+        row = "<tr>" + number + cooked + '</tr>'
+        rows.append(row)
+    table += '\n'.join(rows)
+    table += '\n</tbody>\n</table>'
+    body += table_roles + '\n' + table
+    body += """
      </body>
      """
-     s = """
+    s = """
     <!DOCTYPE html>
-    <html>""" 
-    
-     s += head+body
-     s += "</html>"
-     with open(full_path, 'w+', encoding = "UTF-8") as f:
-         print(s, file=f)
-         print(s)
+    <html>"""
+
+    s += head + body
+    s += "</html>"
+    with open(full_path, 'w+', encoding="UTF-8") as f:
+        print(s, file=f)
+        print(s)
 
 
 def weighted_random(a, weights):
     return rnd.choices(a, weights, k=1)[0]
 
+
+def is_cards_in(x: list | str, y: list | str) -> bool:
+    for i in set(x):
+        if i not in y:
+            return False
+        if y.count(i) < x.count(i):
+            return False
+    return True
 
 
 class Player:
@@ -545,13 +625,13 @@ class Player:
         # {len(self.name) == MAX_NAME_LEN = }
         return s
 
-    def __add__(self, s):
-        self.suffix += s
-        return self
-
-    def __radd__(self, s):
-        self.prefix += s
-        return self
+    # def __add__(self, s):
+    #     self.suffix += s
+    #     return self
+    #
+    # def __radd__(self, s):
+    #     self.prefix += s
+    #     return self
 
     def __str__(self):
         return self.prefix + self.name + self.suffix
@@ -591,10 +671,13 @@ class Player:
     def degov(self):
         self.gov_suff = ''
         self.gov_pref = ''
-    #def president(self, card, cnc):
+
+    # def president(self, card, cnc):
     def get_color(self):
         return self.color
+
     def free(self, ask=True):
+        global gulag
         x = (self.num == gulag) + (self.purge_pref == GULAG)
         if x == 2:
             print(f"{self.name} freed")
@@ -611,29 +694,33 @@ class Player:
             if yes_or_no("Try to free all another?"):
                 for player in g:
                     player.free(ask=False)
-    def chosen_gov(self, gov_type:X.PRESIDENT or 'chancellor'):
+
+    def chosen_gov(self, gov_type: X.PRESIDENT or X.CHANCELLOR):
         if gov_type == X.PRESIDENT:
-            self.gov_pref = pres  
-        elif gov_type == 'chancellor':
+            self.gov_pref = pres
+        elif gov_type == X.CHANCELLOR:
             self.gov_pref = chanc_color
         else:
             self.gov_pref = BASE
             print(f"Uncknown government type: {gov_type}")
         self.gov_suff = WHITE
-    def purge(self, purge_type:'gulag' or 'killed'):
-        if purge_type == 'gulag':
+
+    def purge(self, purge_type: X.GULAG or X.KILLED):
+        if purge_type == X.GULAG:
             self.purge_pref = GULAG
             global gulag
             gulag = self.num
-        elif purge_type == 'killed':
+        elif purge_type == X.KILLED:
             global killed
             killed = self.num
             self.purge_pref = DEAD
-        
+
         self.purge_suff = BLACK_FONT
-    def president(self, card, cnc):
-        show_only_to_one(f"Remember, your role is {self.role}, color is {self.color}.")
-        card1 = coloring(card)
+
+    def president(self, card: str | list[str], cnc: int):
+        card = ''.join(sorted(card)).upper()
+        show_only_to_one(f"Remember, your role is {naming(self.role)}, color is {self.color}.")
+        card1 = coloring(card.upper())
         print(card1)
         phrase = f"You will say that here: "
         words = input(phrase).strip().upper()
@@ -642,14 +729,16 @@ class Player:
         print(f'\x1b[A{phrase}{coloring(words)}')
         phrase1 = f"You will give to chancellor ({g[cnc]}): "
         to_cnc = input(phrase1).strip().upper()
-        while len(to_cnc) != 2 or not set(to_cnc).issubset(set(card)):
+        if to_cnc == "RB":
+            to_cnc = "BR"
+        while len(to_cnc) != 2 or ("B" + to_cnc != card and to_cnc + "R" != card):
             to_cnc = input('\x1b[A' + phrase1).strip().upper()
-        print('\x1b[A\x1b[A\x1b[A' + "⣿"*len(card))
+        print('\x1b[A\x1b[A\x1b[A' + "⣿" * len(card))
         print()
         print(phrase1 + '⣿' * len(to_cnc))
         return words, to_cnc, yes_or_no("Veto? ") if black == 5 else False
-        
-    def chancellor(self, card, prs, words, veto):
+
+    def chancellor(self, card:str, prs, words, veto):
         show_only_to_one(f"Remember, your role is {self.role}, color is {self.color}.")
         card1 = coloring(card)
         print(card1)
@@ -660,21 +749,26 @@ class Player:
         print(f'\x1b[A{phrase}{coloring(words)}')
         phrase1 = f"You will place: "
         placed = input(phrase1).strip().upper()
-        while len(placed) != 1 or placed not in cards or (placed != "VETO" and veto):
+        while len(placed) != 1 or placed not in cards:
+            if placed == "VETO" and veto:
+                break
             placed = input('\x1b[A' + phrase1).strip().upper()
-        
-        print('\x1b[A\x1b[A\x1b[A' + "⣿"*len(card))
+
+        print('\x1b[A\x1b[A\x1b[A' + "⣿" * len(card))
         print()
         if placed == "VETO":
             return words, "X"
         print(phrase + coloring(placed))
         return words, placed
-        
+
     def table(self):
-        return self.gov_pref + self.purge_pref + self.prefix + self.tablet_name + self.gov_suff + self.purge_suff + self.suffix 
+        return self.gov_pref + self.purge_pref + self.prefix + self.tablet_name + self.gov_suff + self.purge_suff + self.suffix
+
     def out(self):
-        return self.gov_pref + self.purge_pref + self.prefix + self.name + self.gov_suff + self.purge_suff + self.suffix 
-    
+        return self.gov_pref + self.purge_pref + self.prefix + self.name + self.gov_suff + self.purge_suff + self.suffix
+
+
+
 class Bot(Player):
     base_name = "Bot"
 
@@ -685,11 +779,10 @@ class Bot(Player):
         self.bot_mind = get_color(self.role, out_type='Bot')
         self.risk = rnd.random()
         self.black = []
-        if self.color == 'BLK':
+        if self.color == X.BLACK:
             for i in range(c):
-                if g[i].color == 'BLK':
+                if g[i].color == X.BLACK:
                     self.black.append(i)
-            
 
     def __repr__(self):
         s = super().__repr__()
@@ -711,7 +804,7 @@ class Bot(Player):
                     return "XXX", ["B", "R"], False
             if card == ["B", "B", "B"]:
                 return "XXX", ["B", "B"], False
-        if self.bot_mind == "BLK":
+        if self.bot_mind == X.BLACK:
             if card == ["B", "R", "R"]:
                 return "XXX", ["B", "R"], False
             if card == ["B", "B", "R"]:
@@ -741,7 +834,7 @@ class Bot(Player):
                 return "XXX", ["B"] * 2, black == 5
             print("Unknown situation {card= }")
             return "XXX", card[1:], black == 5
-        if self.bot_mind == "NRH":
+        if self.bot_mind == X.NRH:
             if "B" in card and "R" in card:
                 return "XXX", ["B", "R"], black == 5
             else:
@@ -773,7 +866,7 @@ class Bot(Player):
                 return "XX", "B"
             else:
                 return "XX", "R"
-        if self.bot_mind == "BLK":
+        if self.bot_mind == X.BLACK:
             if card == ["B"] * 2:
                 return "XX", "B"
             if card == ["R"]:
@@ -792,7 +885,7 @@ class Bot(Player):
                 return "XX", "R"
             return "XX", "B"
         else:
-            if self.bot_mind != "NRH":
+            if self.bot_mind != X.NRH:
                 print("Unknown role {self.bot_mind= }")
             if red <= black:
                 if "R" in card:
@@ -803,52 +896,13 @@ class Bot(Player):
                     return "XX", "B"
                 return "XX", "R"
 
-class X:
-    """
-    Class for special names  
-    """
-    CHANCELLOR = CNC = "chancellor"
-    PRESIDENT = PRS = "president"
-    HITLER = HTLR = "HITLER"
-    STALIN = STLN = "STALIN"
-    NO_INFO = N_I = "No Info"
-    RED = "RED"
-    BLACK = BLK = "BLACK"
-    MOLOTOV = MOL = "MOLOTOV"
-    RIBBENTROP = RIB = "RIBBENTROP"
-    ANARCHIST = NRH = "NRH" #"ANARCHIST"
-     
-class Log:
-    def __init__(self, prs=X.N_I, cnc=X.N_I, cps=X.N_I, ccp=X.N_I, cpsa=X.N_I, reserve=X.N_I, ):
-        if isinstance(prs, Player):
-            self.prs = prs.table()
-        elif isinstance(prs, int):
-            if 0 <= prs < c:
-                self.prs = g[prs].table()
-            else:
-                self.prs = str(prs)
-                print(f"Strange president id ({type(prs)= }): {prs=}")
-        else:
-            self.prs = str(prs)
-            
-        if isinstance(cnc, Player):
-            self.cnc = cnc.table()
-        elif isinstance(cnc, int):
-            if 0 <= cnc < c:
-                self.cnc = g[cnc].table()
-            else:
-                self.cnc = str(cnc)
-                print(f"Strange president id ({type(cnc)= }): {cnc=}")
-        else:
-            self.cnc = str(cnc)
-            
 
 #    def check_color(self):
 #        x = weighted_random(g, list(map(Player.dark, g)))
 #        if self.bot_mind == X.RED:
 #            return x.name, x.color
-#        if self.bot_mind = "BLK":
-#        
+#        if self.bot_mind = X.BLACK:
+#
 #    def check_cards(self,  card):
 #        print(coloring("BBB"))
 
@@ -886,11 +940,9 @@ print(*list(map(repr, g)), sep='\n')
 with open(full_path, 'a+', encoding='UTF-8') as f:
     print(start_time, file=f)
 
-with open(full_path, 'a+', encoding="UTF-8") as f:
-    for i in range(c):
-        print(f"{PURPLE}{DBG_B}[{g[i]}]{END}, come here to get your role!")
-        show_only_to_one(f"Your role is: {DBG_B}{roles[i]}{END}", 25)
-        print(f"№{i + 1} ({g[i]}) was {roles[i]}", file=f)
+for i in range(c):
+    print(f"{PURPLE}{DBG_B}[{g[i]}]{END}, come here to get your role!")
+    show_only_to_one(f"Your role is: {DBG_B}{naming(roles[i])}{END}", 25)
 
 while True:
     try:
@@ -908,19 +960,24 @@ pn -= 1
 pnc = pn
 while red < 5 and black < 6 and not Git_caput and not Git_cn:
     if pnc != pn:
-        if vnf:
+        if special_election:
             print(f"{DEBUG}{pnc = } != {pn = } => Внеоф{WHITE}")
         else:
             # print(f"{DEBUG}WTF?!! (Line 160)")
-            print(f"{DEBUG}{pnc = } != {pn = } but {vnf = }{WHITE}")
+            print(f"{DEBUG}{pnc = } != {pn = } but {special_election = }{WHITE}")
             pn = pnc
     if skips > 2:
         if yes_or_no(f"Anarchy? (Skips: {skips}): "):
-            ccp = take_random(1)[0]
-            logs.append(((f"{DEBUG + 'SHUFFLED' + WHITE: <{LEN_FOR_TABLET}}",
+            if saved:
+                logs.append(((f"{DEBUG + 'SHUFFLED' + WHITE: <{LEN_FOR_TABLET}}",
                           f"{DEBUG + 'CARDS' + WHITE: <{LEN_FOR_TABLET}}"), ('   ', '  ', ' ', '   ')))
+                normal_logs.append(Log(special="Cards was shuffled!"))
+                ccp = rnd.sample(saved, k=1)[0]
+            else:
+                ccp = take_random(1)[0]
             logs.append(((f"{DEBUG + 'ANARCHY' + WHITE: <{LEN_FOR_TABLET}}",
                           f"{DEBUG + 'ANARCHY' + WHITE: <{LEN_FOR_TABLET}}"), ('   ', '  ', coloring(ccp), '   ')))
+            normal_logs.append(Log(c_cnc_placed=ccp, special="Anarchy"))
             if ccp == 'B':
                 black += 1
                 checks += 1
@@ -936,10 +993,11 @@ while red < 5 and black < 6 and not Git_caput and not Git_cn:
                 print(f"WTH?!!!! {ccp} isn't 'B' or 'R'")
             saved = 0
             if gulag < c:
-                logs.append(((f"{DEBUG + 'ANARCHY' + WHITE: <{LEN_FOR_TABLET}}", g[gulag].tablet()),
+                logs.append(((f"{DEBUG + 'ANARCHY' + WHITE: <{LEN_FOR_TABLET}}", g[gulag].table()),
                              (f'{DEBUG}FRE{WHITE}', f'{DEBUG}E!{WHITE}', f'{DEBUG}!{WHITE}', '   ')))
                 print(f"{DEBUG}{g[gulag]} was de-Gulag-ed{WHITE}")
-                g[gulag] = g[gulag][10:-10]
+                g[gulag].free()
+                normal_logs.append(Log(special=f"Anarchy, {g[gulag]} freed"))
                 gulag = c
             logs_out()
     pn = (pn + 1) % c
@@ -954,12 +1012,12 @@ while red < 5 and black < 6 and not Git_caput and not Git_cn:
         pn = (pn + 1) % c
     g[pn].chosen_gov(X.PRESIDENT)
     out()
-    if not vnf:
+    if not special_election:
         pnc = pn
     else:
-        #if pnc == pn:
-        #    pnc = 
-        vnf = False
+        # if pnc == pn:
+        #    pnc =
+        special_election = False
     if yes_or_no(f"Skip? (Skips: {skips}): "):
         skips += 1
         degov()
@@ -969,25 +1027,31 @@ while red < 5 and black < 6 and not Git_caput and not Git_cn:
         skips = 0
 
     cn = new_gov("Chancellor", chanc_color)
-    if black >= 3 and cn not in Git_not: 
+    if black >= 3 and cn not in Git_not:
         if c == stalin:
             if cn == hitler:
                 degov()
-                logs.append(((g[pn].table(), g[cn].table()), (f'{BLACK}HIT{WHITE}', f'{BLACK}LE{WHITE}', f'{BLACK}R{WHITE}', '   ')))
+                logs.append(((g[pn].table(), g[cn].table()),
+                             (f'{BLACK}HIT{WHITE}', f'{BLACK}LE{WHITE}', f'{BLACK}R{WHITE}', '   ')))
+                normal_logs.append(Log(prs_num=g[pn], cnc_num=g[cn], special="Hitler is chancellor!"))
                 Git_cn = True
                 break
             else:
                 Git_not.add(cn)
         else:
             if hitler == cn:
-                if yes_or_no("Is {g[cn].name} hitler "):
+                if yes_or_no(f"Is {g[cn].name} hitler "):
                     degov()
-                    logs.append(((g[pn].table(), g[cn].table()), (f'{BLACK}HIT{WHITE}', f'{BLACK}vs{WHITE}', f'{BLACK}S{WHITE}', 'TAL')))
+                    logs.append(((g[pn].table(), g[cn].table()),
+                                 (f'{BLACK}HIT{WHITE}', f'{BLACK}vs{WHITE}', f'{BLACK}S{WHITE}', 'TAL')))
+                    normal_logs.append(
+                        Log(prs_num=g[pn], cnc_num=g[cn], special="Hitler is chancellor!<br>But Stalin is president!"))
                     Git_caput = True
                     break
             else:
-                yes_or_no("Is {g[cn].name} hitler? ", yes=set())
-    g[cn].chosen_gov('chancellor')
+                yes_or_no(f"Is {g[cn].name} hitler? ", yes=set())
+    g[cn].chosen_gov(X.CHANCELLOR)
+    out()
     cards = take_random(3)
     cps, cards, veto = g[pn].president(cards, cn)
     ccs, ccp = g[cn].chancellor(cards, pn, cps, veto)
@@ -1005,21 +1069,20 @@ while red < 5 and black < 6 and not Git_caput and not Git_cn:
     elif ccp == 'P':
         red += 1
         black += 1
-    elif (ccp == 'VETO'  or ccp == "X") and black >= 5:
+    elif (ccp == 'VETO' or ccp == "X") and black >= 5:
         print(f"{DEBUG}Passing cuz VETO{WHITE}")
         degov()
         continue
     else:
         print(f"WTH?!!!! {ccp} isn't 'B' or 'R'")
         ccp = 'X'
+    if not cpsa:
+        cpsa = cps
+    normal_logs.append(Log(g[pn], g[cn], cps, ccs, ccp, cpsa))
     cps = coloring(cps)
     ccs = coloring(ccs)
     ccp = coloring(ccp)
-    if cpsa:
-        cpsa = coloring(cpsa)
-    else:
-        cpsa = cps
-
+    cpsa = coloring(cpsa)
     degov()
     print("\n\n\n")
 
@@ -1031,6 +1094,7 @@ while red < 5 and black < 6 and not Git_caput and not Git_cn:
         cpsc = coloring(cpsc)
         logs.append(((g[pn].table(), f"{DEBUG + 'CARD CHECK' + WHITE: <{LEN_FOR_TABLET}}"),
                      (cpsc, DEBUG + 'CH' + WHITE, DEBUG + 'K' + WHITE, '   ')))
+        normal_logs.append(Log(prs_num=g[pn], c_prs_said=cpsc, special="Card check"))
         checks += 1
     elif black == 2 == checks:
         while True:
@@ -1055,14 +1119,20 @@ while red < 5 and black < 6 and not Git_caput and not Git_cn:
             cpc = input(f"Color of {DEBUG}{g[pc]}{WHITE} {pres}President{WHITE} said: {DBG_B}").upper()
             print(END, end='')
         if cpc == X.BLACK:
-            cpc = BLACK + "BLK" + WHITE
+            cpc1 = BLACK + "BLK" + WHITE
         elif cpc == X.RED:
-            cpc = RED + "RED" + WHITE
+            cpc1 = RED + "RED" + WHITE
+        elif cpc == X.NRH:
+            cpc1 = PURPLE + "NRH" + WHITE
         else:
-            print(f"WTH?!!!! {cpc} isn't 'B' or 'R'")
-            cpc = DEBUG + "WTH" + WHITE
+            print(f"WTH?!!!! {cpc} isn't '{X.BLACK}' or '{X.RED}'")
+            cpc1 = DEBUG + "WTH" + WHITE
         logs.append(
-            ((g[pn].table(), DEBUG + g[pc].table() + WHITE), (cpc, DEBUG + 'CH' + WHITE, DEBUG + 'K' + WHITE, f'{DEBUG}PLR{WHITE}')))
+            ((g[pn].table(), DEBUG + g[pc].table() + WHITE),
+             (cpc1, DEBUG + 'CH' + WHITE, DEBUG + 'K' + WHITE, f'{DEBUG}PLR{WHITE}')))
+        normal_logs.append(
+            Log(prs_num=g[pn], cnc_num=g[cn], special=f"Color of {g[cn]} president said is {coloring_HTML_roles(cpc)}",
+                is_chancellor=False))
         checks += 1
     elif black == 3 == checks:
         while True:
@@ -1080,7 +1150,8 @@ while red < 5 and black < 6 and not Git_caput and not Git_cn:
                     break
         logs.append(((g[pn].table(), DEBUG + GULAG + g[gulag].table() + BLACK_FONT + WHITE),
                      (DEBUG + 'GUL' + WHITE, DEBUG + 'AG' + WHITE, DEBUG + '!' + WHITE, '   ')))
-        g[gulag] = GULAG + DEBUG + g[gulag] + WHITE + BLACK_FONT
+        normal_logs.append(Log(g[pn], g[gulag], special="In gulag", is_cards=False))
+        g[gulag].purge(X.GULAG)
         checks += 1
         if gulag == hitler:
             degov()
@@ -1091,9 +1162,11 @@ while red < 5 and black < 6 and not Git_caput and not Git_cn:
     elif black == 4 == checks:
         temp = pn
         pn = new_gov("President", pres) - 1
-        logs.append(((g[temp].table(), g[pn].table()), (DEBUG + 'PLA' + WHITE, DEBUG + 'CE' + WHITE, DEBUG + 'D' + WHITE, '   ')))
+        logs.append(((g[temp].table(), g[pn].table()),
+                     (DEBUG + 'PLA' + WHITE, DEBUG + 'CE' + WHITE, DEBUG + 'D' + WHITE, '   ')))
+        normal_logs.append(Log(g[temp], g[pn], special="Special placing", is_chancellor=False))
         checks += 1
-        vnf = True
+        special_election = True
     elif black == 5 == checks:
         while True:
             try:
@@ -1109,10 +1182,11 @@ while red < 5 and black < 6 and not Git_caput and not Git_cn:
                         f"ENTER if number {DBG_B}{killed + 1}{END} is right (it's {DBG_B}[{g[killed]}]{END}), else write something: "):
                     break
         if gulag == killed:
-            g[gulag] = g[gulag][10:-10]
             gulag = c
-        g[killed] = DEAD + DEBUG + g[killed] + WHITE + BLACK_FONT
-        logs.append(((g[pn].table(), g[killed].table()), (DEBUG + 'KIL' + WHITE, DEBUG + 'LE' + WHITE, DEBUG + 'D' + WHITE, '   ')))
+        g[killed].purge(X.KILLED)
+        logs.append(((g[pn].table(), g[killed].table()),
+                     (DEBUG + 'KIL' + WHITE, DEBUG + 'LE' + WHITE, DEBUG + 'D' + WHITE, '   ')))
+        normal_logs.append(Log(g[pn], g[killed], special=f"Killed", is_chancellor=False))
         checks += 1
         if killed not in Git_not:
             if killed == hitler:
@@ -1122,7 +1196,7 @@ while red < 5 and black < 6 and not Git_caput and not Git_cn:
             else:
                 Git_not.add(killed)
     # if red >= 3 and molotov_ribbentrop:
-    #    input() 
+    #    input()
     logs_out()
     if Git_not:
         print("Not Hitlers: ")
