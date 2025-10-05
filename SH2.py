@@ -24,16 +24,18 @@ saved = []
 DEAD = '\033[41m'  # RED_FONT
 GULAG = '\033[43m'  # YELLOW_FONT
 BLACK_FONT = '\033[40m'
+BLUE_FONT = BASE_FONT = '\033[34m'
 NAME_FOR_LOGS = "SH LOG_TEST "  # You can change it
 tp = '.txt'  # расширение
 path = os.path.dirname(ff) + '/'
 date = t.strftime("%d.%m.%y ")
 MAX_NAME_LEN = 15  # You can change it from 10 to infinity
-if 'android' in release.lower() or 'lineageos' in release.lower():
-    WHITE = '\033[37m'
-    print(f"{YELLOW}Launched on Android{END}")
-else:
-    WHITE = '\033[38m'
+#if 'android' in release.lower() or 'lineageos' in release.lower():
+#    WHITE = '\033[37m'
+#    print(f"{YELLOW}Launched on Android{END}")
+#else:
+#    WHITE = '\033[38m'
+WHITE = '\033[97m'
 LEN_FOR_TABLET = MAX_NAME_LEN + len(pres + WHITE)
 
 print(f"If 1 of this colors is blue say it to coder (DS: {PURPLE}@fluxxx1k{END}): {BLUE}{WHITE}ABC{BLUE}{GREY}ABC{END}")
@@ -86,7 +88,7 @@ molotov_ribbentrop = True
 
 def out(file=sys.stdout):
     for i in range(c):
-        print(f"№{i + 1}) {g[i]}", file=file)
+        print(f"№{i + 1}) {g[i].out()}", file=file)
 
 
 def coloring(s, sort=True):
@@ -125,6 +127,8 @@ def dbg(s):
 
 
 def logs_out():
+    create_HTML_logs()
+    return
     with open(full_path, 'r', encoding='UTF-8') as f:
         r = f.read()
     r = r[:r.find('-' * 20)] + '\n'
@@ -210,7 +214,6 @@ def new_gov(gov_type=f"GOVERNMENT", color=BASE):
         else:
             if not input("ENTER if number is right, else write something: "):
                 break
-    g[gov] = color + g[gov] + WHITE
     out()
     return gov
 
@@ -299,28 +302,187 @@ def yes_or_no(text='Input for something (If you see it, you should understand wh
     return False
 
 
+def full_clear(s):
+    s1 = ''
+    x = False
+    for i in s:
+        if i == '\033':
+            x = True
+        elif i == 'm':
+            x = False
+        elif not x:
+            s1 += i
+    return s1
+    
+def coloring_HTML_cards(s2):
+    s = sorted(full_clear(s2))
+    errs = 0
+    s1 = ''
+    for i in s:
+        if i == "B":
+            s1 += f"<font color='{black_c}'>" + i + "</font>"
+        elif i == 'R':
+            s1 += f"<font color='{red_c}'>" + i + "</font>"
+        elif i == 'X':
+            s1 += f"<font color='{norm_c_cut}'>" + i + "</font>"
+        elif i == 'P':
+            s1 += f"<font color='{nrh_c}'>" + i + "</font>"
+        else:
+            print(f"{i} should be 'X' or 'R' or 'B' or 'P'")
+            errs += 1
+            s1 += f"<font color='{norm_c_cut}'>" + i + "</font>"
+    return full_clear(s2) if errs == len(s) else s1
+    
 def get_color(x, out_type=''):
+    x = full_clear(x)
     for i in ["BLACK", "HITLER", "RIBBENTROP"]:
         if i in x:
             if out_type == "Bot":
                 if i == "HITLER":
                     return "HTLR"
                 return "BLK"
-            return BLACK + BOLD + "BLACK" + END
+            if out_type == "HTML":
+                return black_c
+            return BLACK+BOLD+"BLACK"+END
     for i in ["RED", "MOLOTOV", "STALIN"]:
         if i in x:
-            if out_type == "Bot":
+            if out_type == "Bot" :
                 return "RED"
-            return RED + BOLD + "RED" + END
+            if out_type == "HTML":
+                return red_c
+            return RED+BOLD+"RED"+END
     if "ANARCHIST" in x:
-        if out_type == "Bot":
-            return "NRH"
-        return DBG_B + "ANARCHIST" + END
+        if out_type == "Bot" :
+                return "NRH"
+        if out_type == "HTML":
+                return nrh_c
+        return BOLD+"ANARCHIST"+END
     else:
-        if out_type == "Bot":
-            print(f"{RED}{BOLD}{UNDERLINE}Bot ERR, unknown role... Using {DBG_B}ANARCHY{RED} type...{END}")
-            return "NRH"
-        return BOLD + "ERROR, please, show it in IRL" + END
+        if out_type == "Bot" :
+                print(f"{RED}{BOLD}{UNDERLINE}Bot ERR, unknown role... Using {BOLD}ANARHY{RED} type...{END}")
+                return "NRH"
+        if out_type == "HTML":
+                return norm_c
+        return BOLD+"ERROR, please, show it in IRL" + END
+
+
+
+def coloring_HTML_roles(s):
+    s = full_clear(s)
+    if s in {"R", "RED"}:
+        return f"<font color='{red_c}'>" + "RED" + "</font>"
+    if s in {"H", "HITLER"}:
+        return f"<font color='{black_c}'>" + "HITLER" + "</font>"
+    if s in {"B", "BLACK"}:
+        return f"<font color='{black_c}'>" + "BLACK" + "</font>"
+    if s in {"S", "STALIN"}:
+        return f"<font color='{red_c}'>" + "STALIN" + "</font>"
+    if s in {"M", "MOLOTOV"}:
+        return f"<font color='{red_c}'>" + "MOLOTOV" + "</font>"
+    if s in {"RIB", "RIBBENTROP"}:
+        return f"<font color='{black_c}'>" + "RIBBENTROP" + "</font>"
+    if s in {"A", "ANARHY", "ANARCHIST"}:
+        return f"<font color='{nrh_c}'>" + "ANARCHIST" + "</font>"
+    if s in {"X", "UNKNOWN", "IDK"}:
+        return f"<font color='{norm_c}'>" + "UNKNOWN" + "</font>"
+    print("UNKNOWN    ROLE")
+    return "???"
+
+
+
+def create_HTML_roles():
+    s = '<table>\n<caption><h1><b>Таблица ролей<br>Table of roles<b></h1></caption>'
+    table_header = f"<tr><th>Number</th><th>Player</th><th>Role</th></tr>\n"
+    s += table_header
+    rows = []
+    try:
+        roles
+    except    NameError:
+        print("Old version")
+        try: 
+            roles=colors
+        except BaseException as err:
+            print(f"Too old version or smth else: {err}")
+    except BaseException as err:
+        print("Too old version or smth else: {err}")
+    try:
+        for i in range(c):
+            number = f"<td style=\"color: {num_c}\"><b>{i+1}</b></td>"
+            player = f'<td style="color: {get_color(full_clear(roles[i]), out_type="HTML")}"><b>{g[i]}</b></font></td>'
+            role = f'<td><b>{coloring_HTML_roles(full_clear(roles[i]))}</b></td>'
+            row = "<tr>" + number + player + role + "</tr>"
+            rows.append(row)
+        s += '\n'.join(rows)
+    except BaseException as r:
+        print(f"No roles, old version or using cards: {r}")
+        return ''
+    s += '\n</table>'
+    return s
+
+def create_HTML_logs():
+     s = ''
+     head = """
+     <head>
+         <meta charset='UTF-8'>
+         <title>Secret Hitler logs</title>
+         <style>
+         body {
+         color:""" + norm_c_cut + """;
+         background-color: """ + font_c_cut + """;
+         }
+         table {
+         border:5px solid """ + norm_c_cut + """;
+         <!-- bgcolor: black; -->
+         padding: 10px;
+         cellpadding: 10px;
+         cellspacing: 2px;
+         border-collapse: collapse;
+         width: 100%;
+         margin-bottom: 20px;
+         }
+         th {border: 3px """ + norm_c_cut + """ solid;}
+         td {border: 2px """ + norm_c_cut + """ solid;}
+         </style>
+     </head>
+     """
+     body = """
+     <body>"""
+     table_roles = create_HTML_roles()
+     table ="""    <table>\n<caption><h1><strong>Таблица событий игры<br>Logs of the game </strong></h1></caption>
+             """
+     table_header = f"<tr><th>N</th><th color={pr_c}>President</th><th color={ch_c}>Cancler</th><th>CPS</th><th>CCS</th><th>CCP</th><th>CPSA</th></tr>"
+     table += table_header
+     rows = []
+     for i in range(len(logs)):
+         log=logs[i]
+         try:
+             cpsa = log[1][3]
+         except:
+             cpsa = ""
+         number = f'<td style="color: {num_c}">{i+1}</td>'
+         president = f'<td style="color: {pr_c if full_clear(log[0][0]) in map(full_clear, g) else purple_c}"><b>{full_clear(log[0][0])}</b></td>'
+         chancellor = f'<td style="color: {ch_c if full_clear(log[0][1]) in map(full_clear, g) else purple_c}"><b>{full_clear(log[0][1])}</b></td>'
+         cps = f"<td><b>{coloring_HTML_cards(log[1][0])}</b></td>"
+         ccs = f"<td><b>{coloring_HTML_cards(log[1][1])}</b></td>"
+         ccp = f"<td><b>{coloring_HTML_cards(log[1][2])}</b></td>"
+         cpsa = f"<td><b>{coloring_HTML_cards(cpsa)}</b></td>"
+         row = "<tr>" + number +  president + chancellor + cps + ccs + ccp + cpsa + '</tr>'
+         rows.append(row)
+     table += '\n'.join(rows)
+     table += "\n</table>"
+     body += table_roles + '\n' + table
+     body+="""
+     </body>
+     """
+     s = """
+    <!DOCTYPE html>
+    <html>""" 
+    
+     s += head+body
+     s += "</html>"
+     with open(full_path, 'w+', encoding = "UTF-8") as f:
+         print(s, file=f)
+         print(s)
 
 
 def weighted_random(a, weights):
@@ -342,6 +504,10 @@ class Player:
     base_name = "Player"
 
     def __init__(self, num, name="RANDOM", role=f"{DEBUG}ANARCHIST{END}"):
+        self.gov_pref = ''
+        self.gov_suff = ''
+        self.purge_pref = ''
+        self.purge_suff = ''
         self.num = num
         self.role = role
         self.color = get_color(self.role)
@@ -403,12 +569,90 @@ class Player:
         return (self.prefix + self.tablet_name + self.suffix).__format__(args)
 
     def degov(self):
-        for i in range(3):
-            if pres in self.prefix or chanc_color in self.prefix:
-                self.suffix = ''
-                self.prefix = ''
-
-
+        self.gov_suff = ''
+        self.gov_pref = ''
+    #def president(self, card, cnc):
+    def get_color(self):
+        return self.color
+    def free(self, ask=True):
+        x = (self.num == gulag) + (self.purge_pref == GULAG)
+        if x == 2:
+            print(f"{self.name} freed")
+            gulag = c
+            self.purge_pref = self.purge_suff = ''
+        elif x == 1:
+            print(f"Err: {self.purge_pref= }, {(self.purge_suff==GULAG) = }, but {(gulag == self.num) = }")
+            if yes_or_no("Free him?"):
+                gulag = c
+                self.purge_pref = self.purge_suff = ''
+        elif ask:
+            print(f"Err: {self.purge_pref= }, {(self.purge_suff==GULAG) = }, but {(gulag == self.num) = }")
+            print("And you tried to free him.")
+            if yes_or_no("Try to free all another?"):
+                for player in g:
+                    player.free(ask=False)
+    def chosen_gov(self, gov_type:'president' or 'chancellor'):
+        if gov_type == 'president':
+            self.gov_pref = pres  
+        elif gov_type == 'chancellor':
+            self.gov_pref = chanc_color
+        else:
+            self.gov_pref = BASE
+            print(f"Uncknown government type: {gov_type}")
+        self.gov_suff = WHITE
+    def purge(self, purge_type:'gulag' or 'kill'):
+        if purge_type == 'gulag':
+            self.purge_pref = GULAG
+            gulag = self.num
+        elif purge_type == 'kill':
+            killed = self.num
+            self.purge_pref = DEAD
+        
+        self.purge_suff = BLACK_FONT
+    def president(self, card, cnc):
+        show_only_to_one(f"Remember, your role is {self.role}, color is {self.color}.")
+        card1 = coloring(card)
+        print(card1)
+        phrase = f"You will say that here: "
+        words = input(phrase).strip().upper()
+        while len(words) != 3 or not set(words).issubset({'X', "B", "R"}):
+            words = input('\x1b[A' + phrase).strip().upper()
+        print(f'\x1b[A{phrase}{coloring(words)}')
+        phrase1 = f"You will give to chancellor ({g[cnc]}): "
+        to_cnc = input(phrase1).strip().upper()
+        while len(to_cnc) != 2 or not set(to_cnc).issubset(set(card)):
+            to_cnc = input('\x1b[A' + phrase1).strip().upper()
+        print('\x1b[A\x1b[A\x1b[A' + "⣿"*len(card))
+        print()
+        print(phrase1 + '⣿' * len(to_cnc))
+        return words, to_cnc, yes_or_no("Veto? ") if black == 5 else False
+        
+    def chancellor(self, card, prs, words, veto):
+        show_only_to_one(f"Remember, your role is {self.role}, color is {self.color}.")
+        card1 = coloring(card)
+        print(card1)
+        phrase = f"You will say that here: "
+        words = input(phrase).strip().upper()
+        while len(words) != 2 or not set(words).issubset({'X', "B", "R"}):
+            words = input('\x1b[A' + phrase).strip().upper()
+        print(f'\x1b[A{phrase}{coloring(words)}')
+        phrase1 = f"You will place: "
+        placed = input(phrase1).strip().upper()
+        while len(placed) != 1 or placed not in cards or (placed != "VETO" and veto):
+            placed = input('\x1b[A' + phrase1).strip().upper()
+        
+        print('\x1b[A\x1b[A\x1b[A' + "⣿"*len(card))
+        print()
+        if placed == "VETO":
+            return words, "X"
+        print(phrase + coloring(placed))
+        return words, placed
+        
+    def tablet(self):
+        return self.gov_pref + self.purge_pref + self.prefix + self.tablet_name + self.gov_suff + self.purge_suff + self.suffix 
+    def out(self):
+        return self.gov_pref + self.purge_pref + self.prefix + self.name + self.gov_suff + self.purge_suff + self.suffix 
+    
 class Bot(Player):
     base_name = "Bot"
 
@@ -419,6 +663,11 @@ class Bot(Player):
         self.bot_mind = get_color(self.role, out_type='Bot')
         self.risk = rnd.random()
         self.black = []
+        if self.color == 'BLK':
+            for i in range(c):
+                if g[i].color == 'BLK':
+                    self.black.append(i)
+            
 
     def __repr__(self):
         s = super().__repr__()
@@ -426,110 +675,110 @@ class Bot(Player):
         s += f"[BOT INFO: {self.bot_mind= }, {self.dark= }, {self.risk= }]"
         return s
 
-    def president(self, card, cnc) -> tuple[list[str], bool]:
+    def president(self, card, cnc) -> tuple[str, list[str], bool]:
         card = sorted(card)
         if self.bot_mind == 'HTLR':
             if card == ["R", "R", "R"]:
-                return ["R", "R"], black == 5
+                return "XXX", ["R", "R"], black == 5
             if card == ["B", "R", "R"]:
-                return ["B", "R"], False
+                return "XXX", ["B", "R"], False
             if card == ["B", "B", "R"]:
                 if rnd.random() < 0.9 or red == 4 or black == 5:
-                    return ["B", "B"], False
+                    return "XXX", ["B", "B"], False
                 else:
-                    return ["B", "R"], False
+                    return "XXX", ["B", "R"], False
             if card == ["B", "B", "B"]:
-                return ["B", "B"], False
+                return "XXX", ["B", "B"], False
         if self.bot_mind == "BLK":
             if card == ["B", "R", "R"]:
-                return ["B", "R"], False
+                return "XXX", ["B", "R"], False
             if card == ["B", "B", "R"]:
                 if rnd.random() < 0.96 or red == 4 or black == 5:
-                    return ["B", "B"], False
+                    return "XXX", ["B", "B"], False
                 else:
-                    return ["B", "R"], False
+                    return "XXX", ["B", "R"], False
             if card == ["B", "B", "B"]:
-                return ["B", "B"], False
+                return "XXX", ["B", "B"], False
             if card == ["R", "R", "R"]:
-                return ["R", "R"], black == 5
+                return "XXX", ["R", "R"], black == 5
             print("Unknown situation {card= }")
             return card[:2], black == 5
         if self.bot_mind == "RED":
             if card == ["B", "R", "R"]:
                 if red == 4 or black == 5:
-                    return ["R", "R"], False
+                    return "XXX", ["R", "R"], False
                 else:
                     if cnc in self.black:
-                        return ["R", "R"], False
-                    return ["B", "R"], False
+                        return "XXX", ["R", "R"], False
+                    return "XXX", ["B", "R"], False
             if card == ["B", "B", "R"]:
-                return ["B", "R"], False
+                return "XXX", ["B", "R"], False
             if card == ["R"] * 3:
-                return ["R"] * 2, False
+                return "XXX", ["R"] * 2, False
             if card == ["B"] * 3:
-                return ["B"] * 2, black == 5
+                return "XXX", ["B"] * 2, black == 5
             print("Unknown situation {card= }")
             return card[1:], black == 5
         if self.bot_mind == "NRH":
             if "B" in card and "R" in card:
-                return ["B", "R"], black == 5
+                return "XXX", ["B", "R"], black == 5
             else:
-                return card[1:], black == 5
+                return "XXX", card[1:], black == 5
         else:
             print(f"Unknown {self.bot_mind= }")
             if "B" in card and "R" in card:
-                return ["B", "R"], black == 5
+                return "XXX", ["B", "R"], black == 5
             else:
-                return card[1:], black == 5
+                return "XXX", card[1:], black == 5
 
-    def chancellor(self, card, prs, words, veto):
+    def chancellor(self, card, prs, words, veto) -> tuple[str, str]:
         card = sorted(card)
         if self.bot_mind == "RED":
             if "R" in card:
-                return "R"
+                return "XX", "R"
             elif veto:
-                return ""
+                return "XX", "X"
             else:
-                return 'B'
+                return "XX", 'B'
         if self.bot_mind == "HTLR":
             if red == 4 or black == 5:
                 if "B" in card:
-                    return "B"
+                    return "XX", "B"
                 if veto:
-                    return ''
-                return "R"
+                    return "XX", 'X'
+                return "XX", "R"
             if "B" in card and prs in self.black and (words == "BBB" or words == "XXX"):
-                return "B"
+                return "XX", "B"
             else:
-                return "R"
+                return "XX", "R"
         if self.bot_mind == "BLK":
             if card == ["B"] * 2:
-                return "B"
+                return "XX", "B"
             if card == ["R"]:
                 if veto:
-                    return ''
-                return "R"
+                    return "XX", 'X'
+                return "XX", "R"
             if red == 4 or black == 5:
-                return "B"
+                return "XX", "B"
             if prs in self.black and (words == "BBB" or words == "XXX"):
-                return "B"
+                return "XX", "B"
             if red == 3:
                 if rnd.random() < 0.69:
-                    return "R"
-                return "B"
+                    return "XX", "R"
+                return "XX", "B"
             if rnd.random() < 0.96:
-                return "R"
+                return "XX", "R"
         else:
             if self.bot_mind != "NRH":
                 print("Unknown role {self.bot_mind= }")
             if red <= black:
                 if "R" in card:
-                    return "R"
-                return "B"
+                    return "XX", "R"
+                return "XX", "B"
             else:
                 if "B" in card:
-                    return "B"
-                return "R"
+                    return "XX", "B"
+                return "XX", "R"
 
 
 #    def check_color(self):
@@ -603,7 +852,6 @@ while True:
             break
 pn -= 1
 pnc = pn
-
 while red < 5 and black < 6 and not Git_caput and not Git_cn:
     if pnc != pn:
         if vnf:
@@ -634,7 +882,7 @@ while red < 5 and black < 6 and not Git_caput and not Git_cn:
                 print(f"WTH?!!!! {ccp} isn't 'B' or 'R'")
             saved = 0
             if gulag < c:
-                logs.append(((f"{DEBUG + 'ANARCHY' + WHITE: <{LEN_FOR_TABLET}}", g[gulag]),
+                logs.append(((f"{DEBUG + 'ANARCHY' + WHITE: <{LEN_FOR_TABLET}}", g[gulag].tablet()),
                              (f'{DEBUG}FRE{WHITE}', f'{DEBUG}E!{WHITE}', f'{DEBUG}!{WHITE}', '   ')))
                 print(f"{DEBUG}{g[gulag]} was de-Gulag-ed{WHITE}")
                 g[gulag] = g[gulag][10:-10]
@@ -650,7 +898,7 @@ while red < 5 and black < 6 and not Git_caput and not Git_cn:
     if pn == gulag:
         print(f"{DEBUG}President can't be in gulag, next{WHITE}")
         pn = (pn + 1) % c
-    g[pn] = pres + g[pn] + WHITE
+    g[pn].chosen_gov('president')
     out()
     if not vnf:
         pnc = pn
@@ -665,40 +913,29 @@ while red < 5 and black < 6 and not Git_caput and not Git_cn:
         skips = 0
 
     cn = new_gov("Chancellor", chanc_color)
-    if black >= 3 and cn not in Git_not:
-        if cn == hitler:
-            if pn != stalin:
+    if black >= 3 and cn not in Git_not: 
+        if c == stalin:
+            if cn == hitler:
                 degov()
-                logs.append(((g[pn], g[cn]), (f'{BLACK}HIT{WHITE}', f'{BLACK}LE{WHITE}', f'{BLACK}R{WHITE}', '   ')))
+                logs.append(((g[pn].table(), g[cn].table()), (f'{BLACK}HIT{WHITE}', f'{BLACK}LE{WHITE}', f'{BLACK}R{WHITE}', '   ')))
                 Git_cn = True
+                break
             else:
-                degov()
-                logs.append(((g[pn], g[cn]), (f'{BLACK}HIT{WHITE}', f'{BLACK}vs{WHITE}', f'{BLACK}S{WHITE}', 'TAL')))
-                Git_caput = True
-            break
+                Git_not.add(cn)
         else:
-            Git_not.add(cn)
-    # show_only_to_one(coloring(take_random(3)))
-    show_only_to_one(coloring(cards := take_random(3), sort=False))
-    cps = input_cards(f"Cards {pres}president{WHITE} ({g[pn]}) said: ", q=3)
-    cps = coloring(cps)
-    cpd = input(f"Say NUMBER (1-3) of card to drop (in order that you saw) (chancellor won't get it): ")
-    while not cpd.isdigit() or (1 > int(cpd) or 3 < int(cpd)):
-        cpd = input(f"{DEBUG}New try: {END}")
-    cards.pop(int(cpd) - 1)
-
-    show_only_to_one(coloring(cards))
-    ccs = input_cards(f"Cards {chanc_color}chancellor{END} ({g[cn]}) said: ", q=2)
-    ccs = coloring(ccs)
-    ccp = input_cards(f"Card {chanc_color}chancellor{END} ({g[cn]}) placed: ", q=1, c_p=True)
-    while ccp not in cards:
-        ccp = input_cards(f"\x1b[ACard {chanc_color}chancellor{END} ({g[cn]}) placed: ", q=1, c_p=True)
+            if hitler == cn:
+                if yes_or_no("Is {g[cn].name} hitler "):
+                    degov()
+                    logs.append(((g[pn].table(), g[cn].table()), (f'{BLACK}HIT{WHITE}', f'{BLACK}vs{WHITE}', f'{BLACK}S{WHITE}', 'TAL')))
+                    Git_caput = True
+                    break
+            else:
+                yes_or_no("Is {g[cn].name} hitler? ", yes={})
+    g[cn].chosen_gov('chancellor')
+    cards = take_random(3)
+    cps, cards, veto = g[pn].president(cards, cn)
+    ccs, ccp = g[cn].chancellor(cards, pn, cps, veto)
     cpsa = input_cards(f"Cards {pres}president{WHITE} ({g[pn]}) said after chancellor: ", q={3, 0})
-    if cpsa:
-        cpsa = coloring(cpsa)
-    else:
-        cpsa = cps
-
     temp = input(f'Command: {DBG_B}').upper()
     print(END, end='')
     while not comm(temp):
@@ -709,25 +946,34 @@ while red < 5 and black < 6 and not Git_caput and not Git_cn:
         black += 1
     elif ccp == 'R' or ccp == RED + "R" + WHITE:
         red += 1
-    elif ccp == 'VETO' and black >= 5:
+    elif ccp == 'P':
+        red += 1
+        black += 1
+    elif (ccp == 'VETO'  or ccp == "X") and black >= 5:
         print(f"{DEBUG}Passing cuz VETO{WHITE}")
         degov()
         continue
     else:
         print(f"WTH?!!!! {ccp} isn't 'B' or 'R'")
         ccp = 'X'
+    cps = coloring(cps)
+    ccs = coloring(ccs)
     ccp = coloring(ccp)
+    if cpsa:
+        cpsa = coloring(cpsa)
+    else:
+        cpsa = cps
 
     degov()
     print("\n\n\n")
 
-    logs.append(((g[pn], g[cn]), (cps, ccs, ccp, cpsa)))
+    logs.append(((g[pn].table(), g[cn].table()), (cps, ccs, ccp, cpsa)))
     if black == 1 == checks:
         saved = take_random(3)
         show_only_to_one(coloring(saved))
         cpsc = input_cards(f"Cards {pres}president{END} said after checking: ", q=3)
         cpsc = coloring(cpsc)
-        logs.append(((g[pn], f"{DEBUG + 'CARD CHECK' + WHITE: <{LEN_FOR_TABLET}}"),
+        logs.append(((g[pn].table(), f"{DEBUG + 'CARD CHECK' + WHITE: <{LEN_FOR_TABLET}}"),
                      (cpsc, DEBUG + 'CH' + WHITE, DEBUG + 'K' + WHITE, '   ')))
         checks += 1
     elif black == 2 == checks:
@@ -760,7 +1006,7 @@ while red < 5 and black < 6 and not Git_caput and not Git_cn:
             print(f"WTH?!!!! {cpc} isn't 'B' or 'R'")
             cpc = DEBUG + "WTH" + WHITE
         logs.append(
-            ((g[pn], DEBUG + g[pc] + WHITE), (cpc, DEBUG + 'CH' + WHITE, DEBUG + 'K' + WHITE, f'{DEBUG}PLR{WHITE}')))
+            ((g[pn].table(), DEBUG + g[pc].table() + WHITE), (cpc, DEBUG + 'CH' + WHITE, DEBUG + 'K' + WHITE, f'{DEBUG}PLR{WHITE}')))
         checks += 1
     elif black == 3 == checks:
         while True:
@@ -776,7 +1022,7 @@ while red < 5 and black < 6 and not Git_caput and not Git_cn:
                 if not input(
                         f"ENTER if number {DBG_B}{gulag + 1}{END} is right (it's {DBG_B}[{g[gulag]}]{END}), else write something: "):
                     break
-        logs.append(((g[pn], DEBUG + GULAG + g[gulag] + BLACK_FONT + WHITE),
+        logs.append(((g[pn].table(), DEBUG + GULAG + g[gulag].table() + BLACK_FONT + WHITE),
                      (DEBUG + 'GUL' + WHITE, DEBUG + 'AG' + WHITE, DEBUG + '!' + WHITE, '   ')))
         g[gulag] = GULAG + DEBUG + g[gulag] + WHITE + BLACK_FONT
         checks += 1
@@ -789,7 +1035,7 @@ while red < 5 and black < 6 and not Git_caput and not Git_cn:
     elif black == 4 == checks:
         temp = pn
         pn = new_gov("President", pres) - 1
-        logs.append(((g[temp], g[pn]), (DEBUG + 'PLA' + WHITE, DEBUG + 'CE' + WHITE, DEBUG + 'D' + WHITE, '   ')))
+        logs.append(((g[temp].table(), g[pn].table()), (DEBUG + 'PLA' + WHITE, DEBUG + 'CE' + WHITE, DEBUG + 'D' + WHITE, '   ')))
         checks += 1
         vnf = True
     elif black == 5 == checks:
@@ -810,7 +1056,7 @@ while red < 5 and black < 6 and not Git_caput and not Git_cn:
             g[gulag] = g[gulag][10:-10]
             gulag = c
         g[killed] = DEAD + DEBUG + g[killed] + WHITE + BLACK_FONT
-        logs.append(((g[pn], g[killed]), (DEBUG + 'KIL' + WHITE, DEBUG + 'LE' + WHITE, DEBUG + 'D' + WHITE, '   ')))
+        logs.append(((g[pn].table(), g[killed].table()), (DEBUG + 'KIL' + WHITE, DEBUG + 'LE' + WHITE, DEBUG + 'D' + WHITE, '   ')))
         checks += 1
         if killed not in Git_not:
             if killed == hitler:
