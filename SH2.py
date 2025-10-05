@@ -4,7 +4,7 @@ import os
 import sys
 import random as rnd
 import platform
-
+from atexit import register as atexit
 release = platform.release()
 
 ff = __file__
@@ -26,7 +26,7 @@ GULAG = '\033[43m'  # YELLOW_FONT
 BLACK_FONT = '\033[40m'
 BLUE_FONT = BASE_FONT = '\033[34m'
 NAME_FOR_LOGS = "SH LOG_TEST "  # You can change it
-tp = '.txt'  # расширение
+tp = '.html'  # расширение
 path = os.path.dirname(ff) + '/'
 date = t.strftime("%d.%m.%y ")
 MAX_NAME_LEN = 15  # You can change it from 10 to infinity
@@ -37,6 +37,22 @@ MAX_NAME_LEN = 15  # You can change it from 10 to infinity
 #    WHITE = '\033[38m'
 WHITE = '\033[97m'
 LEN_FOR_TABLET = MAX_NAME_LEN + len(pres + WHITE)
+pr_c = 'cyan'
+ch_c = 'yellow'
+red_c = 'red'
+black_c = 'lime'
+nrh_c = 'DeepSkyBlue'
+purple_c = 'DarkViolet'
+num_c = "orange"
+norm_c_cut = 'white'
+font_c_cut = 'black'
+norm_c = '"' + norm_c_cut + '"'
+font_c = '"' + font_c_cut + '"'
+vnf = False
+skips = 0
+logs: list[tuple[tuple[str, str], tuple[str, str, str, str]]] = []
+Git_not = set()
+g = []  # GAYmers
 
 print(f"If 1 of this colors is blue say it to coder (DS: {PURPLE}@fluxxx1k{END}): {BLUE}{WHITE}ABC{BLUE}{GREY}ABC{END}")
 
@@ -63,6 +79,18 @@ else:
 deck = ['R'] * red_start + ['B'] * black_start
 check_logs = os.listdir(path)
 logs_nums = []
+gulag = c
+killed = c
+roles = [f"{BLACK}HITLER{END}"] + [f"{BLACK}BLACK{END}" * (1 if c < 7 else 2)]
+roles.extend([f"{RED}RED{END}"] * (c - len(roles)))
+rnd.shuffle(roles)
+hitler = roles.index(f"{BLACK}HITLER{END}")
+stalin = c
+try:
+    stalin = roles.index(f"{RED}STALIN{END}")
+except:
+    print("No Sosalin :_((")
+
 
 for i in check_logs:
     if i[:len(NAME_FOR_LOGS) + len(date)] == NAME_FOR_LOGS + date:
@@ -125,7 +153,7 @@ def dbg(s):
     else:
         print("{RED}Wrong parameters{WHITE}")
 
-
+@atexit
 def logs_out():
     create_HTML_logs()
     return
@@ -303,6 +331,8 @@ def yes_or_no(text='Input for something (If you see it, you should understand wh
 
 
 def full_clear(s):
+    if isinstance(s, Player):
+        return str(s)
     s1 = ''
     x = False
     for i in s:
@@ -331,7 +361,7 @@ def coloring_HTML_cards(s2):
             print(f"{i} should be 'X' or 'R' or 'B' or 'P'")
             errs += 1
             s1 += f"<font color='{norm_c_cut}'>" + i + "</font>"
-    return full_clear(s2) if errs == len(s) else s1
+    return full_clear(s2) if errs > 0 else s1
     
 def get_color(x, out_type=''):
     x = full_clear(x)
@@ -397,14 +427,14 @@ def create_HTML_roles():
     rows = []
     try:
         roles
-    except    NameError:
+    except NameError:
         print("Old version")
         try: 
-            roles=colors
+            roles = colors
         except BaseException as err:
             print(f"Too old version or smth else: {err}")
     except BaseException as err:
-        print("Too old version or smth else: {err}")
+        print(f"Too old version or smth else: {err}")
     try:
         for i in range(c):
             number = f"<td style=\"color: {num_c}\"><b>{i+1}</b></td>"
@@ -489,16 +519,6 @@ def weighted_random(a, weights):
     return rnd.choices(a, weights, k=1)[0]
 
 
-roles = [f"{BLACK}HITLER{END}"] + [f"{BLACK}BLACK{END}" * (1 if c < 7 else 2)]
-roles.extend([f"{RED}RED{END}"] * (c - len(roles)))
-rnd.shuffle(roles)
-hitler = roles.index(f"{BLACK}HITLER{END}")
-stalin = c
-try:
-    stalin = roles.index(f"{RED}STALIN{END}")
-except:
-    print("No Sosalin :_((")
-
 
 class Player:
     base_name = "Player"
@@ -566,7 +586,7 @@ class Player:
         return False
 
     def __format__(self, args):
-        return (self.prefix + self.tablet_name + self.suffix).__format__(args)
+        return str(self).format(*args)
 
     def degov(self):
         self.gov_suff = ''
@@ -600,11 +620,13 @@ class Player:
             self.gov_pref = BASE
             print(f"Uncknown government type: {gov_type}")
         self.gov_suff = WHITE
-    def purge(self, purge_type:'gulag' or 'kill'):
+    def purge(self, purge_type:'gulag' or 'killed'):
         if purge_type == 'gulag':
             self.purge_pref = GULAG
+            global gulag
             gulag = self.num
-        elif purge_type == 'kill':
+        elif purge_type == 'killed':
+            global killed
             killed = self.num
             self.purge_pref = DEAD
         
@@ -648,7 +670,7 @@ class Player:
         print(phrase + coloring(placed))
         return words, placed
         
-    def tablet(self):
+    def table(self):
         return self.gov_pref + self.purge_pref + self.prefix + self.tablet_name + self.gov_suff + self.purge_suff + self.suffix 
     def out(self):
         return self.gov_pref + self.purge_pref + self.prefix + self.name + self.gov_suff + self.purge_suff + self.suffix 
@@ -702,7 +724,7 @@ class Bot(Player):
             if card == ["R", "R", "R"]:
                 return "XXX", ["R", "R"], black == 5
             print("Unknown situation {card= }")
-            return card[:2], black == 5
+            return "XXX", card[:2], black == 5
         if self.bot_mind == "RED":
             if card == ["B", "R", "R"]:
                 if red == 4 or black == 5:
@@ -718,7 +740,7 @@ class Bot(Player):
             if card == ["B"] * 3:
                 return "XXX", ["B"] * 2, black == 5
             print("Unknown situation {card= }")
-            return card[1:], black == 5
+            return "XXX", card[1:], black == 5
         if self.bot_mind == "NRH":
             if "B" in card and "R" in card:
                 return "XXX", ["B", "R"], black == 5
@@ -768,6 +790,7 @@ class Bot(Player):
                 return "XX", "B"
             if rnd.random() < 0.96:
                 return "XX", "R"
+            return "XX", "B"
         else:
             if self.bot_mind != "NRH":
                 print("Unknown role {self.bot_mind= }")
@@ -791,13 +814,6 @@ class Bot(Player):
 #        print(coloring("BBB"))
 
 
-vnf = False
-skips = 0
-logs = []
-gulag = c
-killed = c
-Git_not = set()
-g = []  # GAYmers
 for i in range(c):
     name = input(f"GAYmer №{i + 1}) {DBG_B}")
     print(END, end='')
@@ -930,7 +946,7 @@ while red < 5 and black < 6 and not Git_caput and not Git_cn:
                     Git_caput = True
                     break
             else:
-                yes_or_no("Is {g[cn].name} hitler? ", yes={})
+                yes_or_no("Is {g[cn].name} hitler? ", yes=set())
     g[cn].chosen_gov('chancellor')
     cards = take_random(3)
     cps, cards, veto = g[pn].president(cards, cn)
