@@ -9,7 +9,7 @@ release = platform.release()
 ff = __file__
 print(ff)
 LIGHT_BLUE = pres = '\033[36m'  # WHITE_BLUE
-YELLOW = canc = '\033[33m'  # YELLOW
+YELLOW = chanc_color = '\033[33m'  # YELLOW
 BLUE = BASE = '\033[34m'  # BLUE
 PURPLE = DEBUG = '\033[35m'  # PURPLE
 RED = '\033[31m'
@@ -133,24 +133,24 @@ def logs_out():
         f = open(full_path, "w+", encoding="UTF-8")
         print(r, file=f)
         print('-'*20, file=f)
-        print(f"{END}{UNDERLINE}{BOLD_2}| {pres+'President'+WHITE: <{LEN_FOR_TABLET}} | {canc+'Cancler'+WHITE: <{LEN_FOR_TABLET}} | CPS | CCS | CCP | CPSA |{END}", file=f)
-        print(f"{END}{UNDERLINE}{BOLD_2}| {pres+'President'+WHITE: <{LEN_FOR_TABLET}} | {canc+'Cancler'+WHITE: <{LEN_FOR_TABLET}} | CPS | CCS | CCP | CPSA |{END}")
+        print(f"{END}{UNDERLINE}{BOLD_2}| {pres+'President'+WHITE: <{LEN_FOR_TABLET}} | {chanc_color+'Cancler'+WHITE: <{LEN_FOR_TABLET}} | CPS | CCS | CCP | CPSA |{END}", file=f)
+        print(f"{END}{UNDERLINE}{BOLD_2}| {pres+'President'+WHITE: <{LEN_FOR_TABLET}} | {chanc_color+'Cancler'+WHITE: <{LEN_FOR_TABLET}} | CPS | CCS | CCP | CPSA |{END}")
         for i in logs:
             log += 1
-            print(f"{END}{UNDERLINE}{BOLD_2}| {pres + i[0][0] + WHITE: <{LEN_FOR_TABLET}} | {canc + i[0][1] + WHITE: <{LEN_FOR_TABLET}} | {i[1][0]+WHITE: <8} | {i[1][1]+WHITE: <7}  | {i[1][2]+WHITE: <6}   | {(i[1][3] if len(i[1]) >= 4 else 'XXX')+WHITE: <8}  |{END}", file=f)
-            print(f"{END}{UNDERLINE}{BOLD_2}| {pres + i[0][0] + WHITE: <{LEN_FOR_TABLET}} | {canc + i[0][1] + WHITE: <{LEN_FOR_TABLET}} | {i[1][0]+WHITE: <8} | {i[1][1]+WHITE: <7}  | {i[1][2]+WHITE: <6}   | {(i[1][3] if len(i[1]) >= 4 else 'XXX')+WHITE: <8}  |{END}")
+            print(f"{END}{UNDERLINE}{BOLD_2}| {pres + i[0][0] + WHITE: <{LEN_FOR_TABLET}} | {chanc_color + i[0][1] + WHITE: <{LEN_FOR_TABLET}} | {i[1][0]+WHITE: <8} | {i[1][1]+WHITE: <7}  | {i[1][2]+WHITE: <6}   | {(i[1][3] if len(i[1]) >= 4 else 'XXX')+WHITE: <8}  |{END}", file=f)
+            print(f"{END}{UNDERLINE}{BOLD_2}| {pres + i[0][0] + WHITE: <{LEN_FOR_TABLET}} | {chanc_color + i[0][1] + WHITE: <{LEN_FOR_TABLET}} | {i[1][0]+WHITE: <8} | {i[1][1]+WHITE: <7}  | {i[1][2]+WHITE: <6}   | {(i[1][3] if len(i[1]) >= 4 else 'XXX')+WHITE: <8}  |{END}")
     except BaseException as r:
         f = open(full_path, "w+", encoding="UTF-8")
         print(r, file=f)
         print('-'*20, file=f)
         log -=1
-        print(f"{END}{UNDERLINE}{BOLD_2}| {pres+'President'+WHITE: <{LEN_FOR_TABLET}} | {canc+'Cancler'+WHITE: <{LEN_FOR_TABLET}} | CPS | CCS | CCP | CPSA |{END}", file=f)
-        print(f"{END}{UNDERLINE}{BOLD_2}| {pres+'President'+WHITE: <{LEN_FOR_TABLET}} | {canc+'Cancler'+WHITE: <{LEN_FOR_TABLET}} | CPS | CCS | CCP | CPSA |{END}")
+        print(f"{END}{UNDERLINE}{BOLD_2}| {pres+'President'+WHITE: <{LEN_FOR_TABLET}} | {chanc_color+'Cancler'+WHITE: <{LEN_FOR_TABLET}} | CPS | CCS | CCP | CPSA |{END}", file=f)
+        print(f"{END}{UNDERLINE}{BOLD_2}| {pres+'President'+WHITE: <{LEN_FOR_TABLET}} | {chanc_color+'Cancler'+WHITE: <{LEN_FOR_TABLET}} | CPS | CCS | CCP | CPSA |{END}")
         for i in logs:
             log -= 1
             if log:
-                print(f"{END}{UNDERLINE}{BOLD_2}| {pres + i[0][0] + WHITE: <{LEN_FOR_TABLET}} | {canc + i[0][1] + WHITE: <{LEN_FOR_TABLET}} | {i[1][0]+WHITE: <8} | {i[1][1]+WHITE: <7}  | {i[1][2]+WHITE: <6}   | {(i[1][3] if len(i[1]) >= 4 else 'XXX')+WHITE: <8}  |{END}", file=f)
-                print(f"{END}{UNDERLINE}{BOLD_2}| {pres + i[0][0] + WHITE: <{LEN_FOR_TABLET}} | {canc + i[0][1] + WHITE: <{LEN_FOR_TABLET}} | {i[1][0]+WHITE: <8} | {i[1][1]+WHITE: <7}  | {i[1][2]+WHITE: <6}   | {(i[1][3] if len(i[1]) >= 4 else 'XXX')+WHITE: <8}  |{END}")
+                print(f"{END}{UNDERLINE}{BOLD_2}| {pres + i[0][0] + WHITE: <{LEN_FOR_TABLET}} | {chanc_color + i[0][1] + WHITE: <{LEN_FOR_TABLET}} | {i[1][0]+WHITE: <8} | {i[1][1]+WHITE: <7}  | {i[1][2]+WHITE: <6}   | {(i[1][3] if len(i[1]) >= 4 else 'XXX')+WHITE: <8}  |{END}", file=f)
+                print(f"{END}{UNDERLINE}{BOLD_2}| {pres + i[0][0] + WHITE: <{LEN_FOR_TABLET}} | {chanc_color + i[0][1] + WHITE: <{LEN_FOR_TABLET}} | {i[1][0]+WHITE: <8} | {i[1][1]+WHITE: <7}  | {i[1][2]+WHITE: <6}   | {(i[1][3] if len(i[1]) >= 4 else 'XXX')+WHITE: <8}  |{END}")
             else:
                 print(*i, sep='{END} | ', file=f)
                 print(*i, sep='{END} | ')
@@ -159,7 +159,7 @@ def logs_out():
 
 def input_cards(text = "{RED}Some input: {WHITE}", q: int | set[int] = 0, c_p = False, veto=(black>=5)) -> str:
     """
-    c_p - cancler placing, don't laugh
+    c_p - chancellor placing, don't laugh
     """
     if not veto is True and not veto is False:
         print(f"{RED}{BOLD_2}{UNDERLINE}{veto = } | it's not good!{END}")
@@ -170,7 +170,7 @@ def input_cards(text = "{RED}Some input: {WHITE}", q: int | set[int] = 0, c_p = 
         q = {1, 2, 3}
     elif not isinstance(q, set):
         q = {q}
-    if c_p and not veto:  # cancler should place card if it wasn't veto
+    if c_p and not veto:  # chancellor should place card if it wasn't veto
         letters -= {'X'}
     if c_p:  # if president was skipped in game, but not in code 
         letters.add("SKIP")
@@ -202,7 +202,7 @@ def new_gov(gov_type=f"GOVERMENT", color=BASE):
 def degov():
     for i in range(3):
         for i in range(c):
-            if g[i][:5] in {pres, canc}:
+            if g[i][:5] in {pres, chanc_color}:
                 g[i] = g[i][5:-5]
 
     print(f"{DEBUG}  # GOVERMENT RESETED (dbg){END}")
@@ -369,6 +369,7 @@ class Bot(Player):
         super().__init__(num, role, name)
         self.bot_mind = get_color(self.role, out_type='Bot')
         self.risk = rnd.random()
+        self.black = []
 
     def __repr__(self):
         s = super().__repr__()
@@ -376,39 +377,93 @@ class Bot(Player):
         s += f"[BOT INFO: {self.bot_mind= }, {self.dark= }, {self.risk= }]"
         return s
 
-    def president(self, cards, canc):
-        cards = sorted(cards)
-        if self.bot_mind == "BLK" or self.bot_mind == "HTLR":
-            print(f"Bot [{self.name}] says that there was: ", end='')
-            if cards in (["B", "B", "R"], ["B", "B", "B"]):
-#                if rnd.random() < self.risk and canc != hitler:
-#                    print(coloring("BBR"))
-#                else:
-#                    print(coloring("BBB"))
-                return ["B", "B"]
-            elif cards in (["B", "R", "R"], ["R", "R", "R"]):
-                #if rnd.random() < self.risk:
-#                    print(coloring("BBR"))
-                return cards[:2]
-#    def cancler(self):
-#        if self.bot_mind == 'BLK':
-        elif self.bot_mind == "RED":
-            #print(coloring(cards))
-            if "B" in cards and "R" in cards and black < 5:
+
+    def president(self, card, cnc) -> tuple[list[str], bool]:
+        card = sorted(card)
+        if self.bot_mind == 'HTLR':
+            if card == ["R", "R", "R"]:
+                return ["R", "R"], black == 5
+            if card == ["B", "R", "R"]:
+                return ["B", "R"], False
+            if card == ["B", "B", "R"]:
+                if rnd.random() < 0.9 or red == 4 or black == 5:
+                    return ["B", "B"], False
+                else:
+                    return ["B", "R"], False
+            if card == ["B", "B", "B"]:
+                return ["B", "B"], False
+        if self.bot_mind == "BLK":
+            if card == ["B", "R", "R"]:
+                return ["B", "R"], False
+            if card == ["B", "B", "R"]:
+                if rnd.random() < 0.96 or red == 4 or black == 5:
+                    return ["B", "B"], False
+                else:
+                    return ["B", "R"], False
+            if card == ["B", "B", "B"]:
+                return ["B", "B"], False
+            if card == ["R", "R", "R"]:
+                return ["R", "R"], black == 5
+            return card[:2]
+        if self.bot_mind == "RED":
+            if card == ["B", "R", "R"]:
+                if red == 4 or black == 5:
+                    return ["R", "R"]
+                else:
+                    return ["B", "R"]
+            if card == ["B", "B", "R"]:
                 return ["B", "R"]
-            return cards[1:]
-#       elif self.bot_mind == "HTLR":
-#            if "B" in cards and "R" in cards and black < 5:
-#                return ["B", "R"]
-#            return cards[1:]    
-        elif self.bot_mind == "NRH":
-            return rnd.sample(cards, k=2)
-        else:
-            print("Unknown role, NRH")
-            return rnd.sample(cards, k=2)
-    
-    def cancler(self, cards, pres, words):
-        if self.bot_mind ==
+            return card[1:]
+        if self.bot_mind == "NRH":
+            if "B" in card and "R" in card:
+                return ["B", "R"]
+            else:
+                return card[1:]
+        else: 
+            print(f"Unknown {self.bot_mind= }")
+            if "B" in card and "R" in card:
+                return ["B", "R"]
+            else:
+                return card[1:]
+            
+
+    def chancellor(self, card, prs, words, veto):
+        card = sorted(card)
+        if card == ["B", "B"]:
+            return "B"
+        if card == ["R", "R"]:
+            return "R"
+        if self.bot_mind == "RED":
+            if "R" in card:
+                return "R"
+            elif black < 5 or not veto:
+                return "B"
+            else:
+                return ''
+        if self.bot_mind == "HTLR":
+            if red == 4 or black == 5:
+                if "B" in card:
+                    return "B"
+                if veto:
+                    return ''
+                return "R"
+            if "B" in card and prs in self.black and words == "BBB":
+                return "B"
+            else:
+                return "R"
+        if self.bot_mind == "BLK":
+            if red == 4 or black == 5:
+                if "B" in card:
+                    return "B"
+                if veto:
+                    return ''
+                return "R"
+            if "B" in card and prs in self.black and words == "BBB":
+                return "B"
+            else:
+                if "B" in
+                return "R"
+
 pn = c + 1
 #pn = int(input(f"{pres}President{END}'s number (not index): ")) - 1
 vnf = False
@@ -526,7 +581,7 @@ while red < 5 and black < 6 and not Git_caput and not Git_cn:
     else:
         skips = 0
 
-    cn = new_gov("Cancler", canc)
+    cn = new_gov("Cancler", chanc_color)
     if black >=3 and cn not in Git_not:
         if cn == hitler:
             if pn != stalin:
@@ -544,18 +599,18 @@ while red < 5 and black < 6 and not Git_caput and not Git_cn:
     show_only_to_one(coloring(cards:=take_random(3), sort=False))
     cps = input_cards(f"Cards {pres}president{WHITE} ({g[pn]}) said: ", q=3)
     cps = coloring(cps)
-    cpd = input(f"Say NUMBER (1-3) of card to drop (in order that you saw) (cancler won't get it): ")
+    cpd = input(f"Say NUMBER (1-3) of card to drop (in order that you saw) (chancellor won't get it): ")
     while not cpd.isdigit() or (1 > int(cpd) or 3 < int(cpd)):
         cpd = input(f"{DEBUG}New try: {END}")
     cards.pop(int(cpd) - 1)
 
     show_only_to_one(coloring(cards))
-    ccs = input_cards(f"Cards {canc}cancler{END} ({g[cn]}) said: ", q=2)
+    ccs = input_cards(f"Cards {chanc_color}chancellor{END} ({g[cn]}) said: ", q=2)
     ccs = coloring(ccs)
-    ccp = input_cards(f"Card {canc}cancler{END} ({g[cn]}) placed: ", q=1, c_p=True)
+    ccp = input_cards(f"Card {chanc_color}chancellor{END} ({g[cn]}) placed: ", q=1, c_p=True)
     while ccp not in cards:
-        ccp = input_cards(f"\x1b[ACard {canc}cancler{END} ({g[cn]}) placed: ", q=1, c_p=True)
-    cpsa = input_cards(f"Cards {pres}president{WHITE} ({g[pn]}) said after cancler: ", q={3, 0})
+        ccp = input_cards(f"\x1b[ACard {chanc_color}chancellor{END} ({g[cn]}) placed: ", q=1, c_p=True)
+    cpsa = input_cards(f"Cards {pres}president{WHITE} ({g[pn]}) said after chancellor: ", q={3, 0})
     if cpsa:
         cpsa = coloring(cpsa)
     else:
@@ -691,7 +746,7 @@ with open(full_path, "a+", encoding="UTF-8") as f:
         print(f"{BLACK}{BOLD_2}{UNDERLINE}BLACK    WON!!!{END}")
         print(f"{BLACK}{BOLD_2}{UNDERLINE}BLACK    WON!!!{END}", file=f)
         if Git_cn:
-            print(f"{BLACK}(Hitler is cancler){WHITE}", file=f)
+            print(f"{BLACK}(Hitler is chancellor){WHITE}", file=f)
     else:
         print(F"{DEBUG}{BOLD_2}{UNDERLINE}WHAT    THE    HELL?!!!!{END}")
         print(F"{DEBUG}{BOLD_2}{UNDERLINE}WHAT    THE    HELL?!!!!{END}", file=f)
