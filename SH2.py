@@ -285,8 +285,8 @@ def get_color(x, out_type=''):
     for i in ["BLACK", "HITLER", "REBBENTROP"]:
         if i in x:
             if out_type == "Bot":
-#                if i == "HITLER":
-#                    return "HTLR"
+                if i == "HITLER":
+                    return "HTLR"
                 return "BLK"
             return BLACK+BOLD_2+"BLACK"+END
     for i in ["RED", "MOLOTOV", "STALIN"]:
@@ -357,7 +357,8 @@ class Player:
         if self.dark >= other.dark:
             return True
         return False
-
+    def test(self):
+        print("TEST")
 
 
 class Bot(Player):
@@ -367,13 +368,47 @@ class Bot(Player):
     ):
         super().__init__(num, role, name)
         self.bot_mind = get_color(self.role, out_type='Bot')
+        self.risk = rnd.random()
 
     def __repr__(self):
         s = super().__repr__()
         s += " "
-        s += f"[BOT INFO: {self.bot_mind= }, {self.dark= }]"
+        s += f"[BOT INFO: {self.bot_mind= }, {self.dark= }, {self.risk= }]"
         return s
 
+    def president(self, cards, canc):
+        cards = sorted(cards)
+        if self.bot_mind == "BLK" or self.bot_mind == "HTLR":
+            print(f"Bot [{self.name}] says that there was: ", end='')
+            if cards in (["B", "B", "R"], ["B", "B", "B"]):
+#                if rnd.random() < self.risk and canc != hitler:
+#                    print(coloring("BBR"))
+#                else:
+#                    print(coloring("BBB"))
+                return ["B", "B"]
+            elif cards in (["B", "R", "R"], ["R", "R", "R"]):
+                #if rnd.random() < self.risk:
+#                    print(coloring("BBR"))
+                return cards[:2]
+#    def cancler(self):
+#        if self.bot_mind == 'BLK':
+        elif self.bot_mind == "RED":
+            #print(coloring(cards))
+            if "B" in cards and "R" in cards and black < 5:
+                return ["B", "R"]
+            return cards[1:]
+#       elif self.bot_mind == "HTLR":
+#            if "B" in cards and "R" in cards and black < 5:
+#                return ["B", "R"]
+#            return cards[1:]    
+        elif self.bot_mind == "NRH":
+            return rnd.sample(cards, k=2)
+        else:
+            print("Unknown role, NRH")
+            return rnd.sample(cards, k=2)
+    
+    def cancler(self, cards, pres, words):
+        if self.bot_mind ==
 pn = c + 1
 #pn = int(input(f"{pres}President{END}'s number (not index): ")) - 1
 vnf = False
