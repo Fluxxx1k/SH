@@ -6,7 +6,7 @@ import random as rnd
 import platform
 from atexit import register as atexit
 from standart_names import *
-from standart_functions import *
+#from standart_functions import *
 release = platform.release()
 
 ff = __file__
@@ -29,7 +29,7 @@ BLACK_FONT = '\033[40m'
 BLUE_FONT = BASE_FONT = '\033[34m'
 NAME_FOR_LOGS = "SH LOG_TEST "  # You can change it
 tp = '.html'  # расширение
-path = os.path.dirname(ff)
+path = os.path.dirname(ff) + "/LOGS/"
 date = t.strftime("%d.%m.%y ")
 MAX_NAME_LEN = 15  # You can change it from 10 to infinity
 # if 'android' in release.lower() or 'lineageos' in release.lower():
@@ -37,7 +37,7 @@ MAX_NAME_LEN = 15  # You can change it from 10 to infinity
 #    print(f"{YELLOW}Launched on Android{END}")
 # else:
 #    WHITE = '\033[38m'
-WHITE = '\033[38m'
+WHITE = '\033[37m'
 LEN_FOR_TABLET = MAX_NAME_LEN + len(pres + WHITE)
 pr_c = 'cyan'
 ch_c = 'yellow'
@@ -151,15 +151,16 @@ for i in check_logs:
     if i[:len(NAME_FOR_LOGS) + len(date)] == NAME_FOR_LOGS + date:
         logs_nums.append(i)
 max_log_num = len(logs_nums) + 1
-full_path = path + '/LOGS/' + NAME_FOR_LOGS + date + str(max_log_num) + tp
+full_path = path + NAME_FOR_LOGS + date + str(max_log_num) + tp
 while os.path.exists(full_path):
     max_log_num += 1
-    print(RED + BOLD + UNDERLINE + path + NAME_FOR_LOGS + date + str(max_log_num) + tp +
-          "    is already exists, trying {pres}{max_log_num}{END}")
+    print(RED + BOLD + UNDERLINE + full_path +
+          f"    is already exists, trying {pres}{max_log_num}{END}")
     full_path = path + NAME_FOR_LOGS + date + str(max_log_num) + tp
 print("Logs in:", full_path)
-start_time = t.strftime("Game start time:   %d.%m.%y %H:%M:%S")
-print(start_time)
+start_time = t.time()
+start_time_f = t.strftime("%d.%m.%y %H:%M:%S")
+print(start_time_f)
 logged = 0
 red = black = 0
 checks = 1
@@ -182,7 +183,7 @@ def full_clear(s):
     for i in s:
         if i == '\033':
             x = True
-        elif i == 'm':
+        elif i == 'm' and x:
             x = False
         elif not x:
             s1 += i
@@ -371,7 +372,7 @@ def show_only_to_one(text: str, hide_len: int = None) -> None:
     if yes_or_no("Show?", no=set()):
         print(text)
     if yes_or_no("Hide? ", no=set()):
-        print(f"{END}\x1b[A\x1b[A" + "⣿" * hide_len)
+        print(f"{END}\x1b[A\x1b[A" + "#" * hide_len) # ⣿
         print()
 
 
@@ -387,7 +388,7 @@ def take_random(count:int) -> list[str]:
     except ValueError:
         print("DECK RESET")
         logs.append(((DEBUG + f'{"DECK":<{MAX_NAME_LEN}}' + WHITE, DEBUG + f'{"RESET":<{MAX_NAME_LEN}}' + WHITE),
-                     ('   ', '  ', ' ', '   ')))
+                     (f'{BLACK}BLK{WHITE}', f'{BLACK}{black_start-black}{WHITE}', f'{RED}{red_start-red}{WHITE}', f'{RED}RED{WHITE}')))
         normal_logs.append(
             Log(special=f"Deck resetting<br>RED: {red_start - red}<br>BLACK: {black_start - black}", is_cards=False,))
         deck = ["R"] * (red_start - red) + ["B"] * (black_start - black)
@@ -517,6 +518,9 @@ def create_HTML_roles():
     return s
 
 
+def create_HTML_info():
+    return ''
+
 def create_HTML_logs(logs_local=None):
     if logs_local is None:
         logs_local = normal_logs
@@ -549,6 +553,7 @@ def create_HTML_logs(logs_local=None):
     table_roles = create_HTML_roles()
     table = """    <table>\n<caption><h1><strong>Таблица событий игры<br>Logs of the game </strong></h1></caption>
              """
+    table_info = create_HTML_info()
     table_header = (f"<thead>"
                     f"<tr>"
                         f"<th style=\"color: {num_c}\">N</th>"
@@ -572,7 +577,7 @@ def create_HTML_logs(logs_local=None):
         rows.append(row)
     table += '\n'.join(rows)
     table += '\n</tbody>\n</table>'
-    body += table_roles + '\n' + table
+    body += table_roles + '\n' + table + '\n' + table_info + '\n'
     body += """
      </body>
      """
@@ -706,6 +711,7 @@ class Player:
         self.gov_suff = WHITE
 
     def purge(self, purge_type: X.GULAG or X.KILLED):
+        self.degov()
         if purge_type == X.GULAG:
             self.purge_pref = GULAG
             global gulag
@@ -719,7 +725,7 @@ class Player:
 
     def president(self, card: str | list[str], cnc: int):
         card = ''.join(sorted(card)).upper()
-        show_only_to_one(f"Remember, your role is {naming(self.role)}, color is {self.color}.")
+        show_only_to_one(f"Remember, your role is {naming(self.role)}, color is {self.color}.", hide_len=60)
         card1 = coloring(card.upper())
         print(card1)
         phrase = f"You will say that here: "
@@ -733,13 +739,13 @@ class Player:
             to_cnc = "BR"
         while len(to_cnc) != 2 or ("B" + to_cnc != card and to_cnc + "R" != card):
             to_cnc = input('\x1b[A' + phrase1).strip().upper()
-        print('\x1b[A\x1b[A\x1b[A' + "⣿" * len(card))
+        print('\x1b[A\x1b[A\x1b[A' + "#" * len(card)) # ⣿
         print()
-        print(phrase1 + '⣿' * len(to_cnc))
+        print(phrase1 + '#' * len(to_cnc))
         return words, to_cnc, yes_or_no("Veto? ") if black == 5 else False
 
     def chancellor(self, card:str, prs, words, veto):
-        show_only_to_one(f"Remember, your role is {self.role}, color is {self.color}.")
+        show_only_to_one(f"Remember, your role is {naming(self.role)}, color is {self.color}.", hide_len=60)
         card1 = coloring(card)
         print(card1)
         phrase = f"You will say that here: "
@@ -754,11 +760,11 @@ class Player:
                 break
             placed = input('\x1b[A' + phrase1).strip().upper()
 
-        print('\x1b[A\x1b[A\x1b[A' + "⣿" * len(card))
+        print('\x1b[A\x1b[A\x1b[A' + "#" * len(card)) # ⣿
         print()
         if placed == "VETO":
             return words, "X"
-        print(phrase + coloring(placed))
+        print(phrase1 + coloring(placed))
         return words, placed
 
     def table(self):
@@ -937,9 +943,6 @@ for i in err:
     g[i - 1].name = name
 print(*list(map(repr, g)), sep='\n')
 
-with open(full_path, 'a+', encoding='UTF-8') as f:
-    print(start_time, file=f)
-
 for i in range(c):
     print(f"{PURPLE}{DBG_B}[{g[i]}]{END}, come here to get your role!")
     show_only_to_one(f"Your role is: {DBG_B}{naming(roles[i])}{END}", 25)
@@ -996,8 +999,8 @@ while red < 5 and black < 6 and not Git_caput and not Git_cn:
                 logs.append(((f"{DEBUG + 'ANARCHY' + WHITE: <{LEN_FOR_TABLET}}", g[gulag].table()),
                              (f'{DEBUG}FRE{WHITE}', f'{DEBUG}E!{WHITE}', f'{DEBUG}!{WHITE}', '   ')))
                 print(f"{DEBUG}{g[gulag]} was de-Gulag-ed{WHITE}")
-                g[gulag].free()
                 normal_logs.append(Log(special=f"Anarchy, {g[gulag]} freed"))
+                g[gulag].free()
                 gulag = c
             logs_out()
     pn = (pn + 1) % c
@@ -1131,7 +1134,7 @@ while red < 5 and black < 6 and not Git_caput and not Git_cn:
             ((g[pn].table(), DEBUG + g[pc].table() + WHITE),
              (cpc1, DEBUG + 'CH' + WHITE, DEBUG + 'K' + WHITE, f'{DEBUG}PLR{WHITE}')))
         normal_logs.append(
-            Log(prs_num=g[pn], cnc_num=g[cn], special=f"Color of {g[cn]} president said is {coloring_HTML_roles(cpc)}",
+            Log(prs_num=g[pn], cnc_num=g[cn], special=f"Color of <font color='{purple_c}'>{g[cn]}</font> <font color='{pr_c}'>{g[pn]}</font> said is {coloring_HTML_roles(cpc)}",
                 is_chancellor=False))
         checks += 1
     elif black == 3 == checks:
@@ -1150,7 +1153,7 @@ while red < 5 and black < 6 and not Git_caput and not Git_cn:
                     break
         logs.append(((g[pn].table(), DEBUG + GULAG + g[gulag].table() + BLACK_FONT + WHITE),
                      (DEBUG + 'GUL' + WHITE, DEBUG + 'AG' + WHITE, DEBUG + '!' + WHITE, '   ')))
-        normal_logs.append(Log(g[pn], g[gulag], special="In gulag", is_cards=False))
+        normal_logs.append(Log(g[pn], g[gulag], special="In gulag", is_cards=False, is_chancellor=False))
         g[gulag].purge(X.GULAG)
         checks += 1
         if gulag == hitler:
@@ -1207,8 +1210,12 @@ while red < 5 and black < 6 and not Git_caput and not Git_cn:
 logs_out()
 
 with open(full_path, "a+", encoding="UTF-8") as f:
-    print(t.strftime("Game  over time:   %d.%m.%y %H:%M:%S"))
-    print(t.strftime("Game  over time:   %d.%m.%y %H:%M:%S"), file=f)
+    end_time_f = t.strftime("%d.%m.%y %H:%M:%S")
+    end_time = t.time()
+    print("Game over time: " + end_time_f)
+    print("Game over time: " + end_time_f, file=f)
+    print("Game start time: " + start_time_f, file=f)
+
     if red >= 5 or Git_caput:
         print(f"{RED}{BOLD}{UNDERLINE}RED    WON!!!{END}")
         print(f"{RED}{BOLD}{UNDERLINE}RED    WON!!!{END}", file=f)
