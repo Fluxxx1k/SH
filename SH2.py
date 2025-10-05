@@ -122,6 +122,31 @@ def dbg(s):
         print("{RED}Wrong parameters{WHITE}")
 
 
+#def logs_out():
+#    r = ''
+#    with open(full_path, 'r', encoding='UTF-8') as f:
+#        r = f.read()
+#    r = r[:r.find('-'*20)] + '\n'
+#    log = 1
+#    try:
+#        f = open(full_path, "w+", encoding="UTF-8")
+#        print(r, file=f)
+#        print('-'*20, file=f)
+#        print(f"{END}{UNDERLINE}{BOLD_2}| {pres+'President'+WHITE: <{LEN_FOR_TABLET}} | {chanc_color+'Cancler'+WHITE: <{LEN_FOR_TABLET}} | CPS | CCS | CCP | CPSA |{END}", file=f)
+#        print(f"{END}{UNDERLINE}{BOLD_2}| {pres+'President'+WHITE: <{LEN_FOR_TABLET}} | {chanc_color+'Cancler'+WHITE: <{LEN_FOR_TABLET}} | CPS | CCS | CCP | CPSA |{END}")
+#        for log in logs:
+#            print()
+#    except BaseException as err:
+#        f = open(full_path, "w+", encoding="UTF-8")
+#        print(r, file=f)
+#        print(err, file=f)
+#        print(err)
+#        print('-'*20, file=f)
+#        print(f"{END}{UNDERLINE}{BOLD_2}| {pres+'President'+WHITE: <{LEN_FOR_TABLET}} | {chanc_color+'Cancler'+WHITE: <{LEN_FOR_TABLET}} | CPS | CCS | CCP | CPSA |{END}", file=f)
+#        print(f"{END}{UNDERLINE}{BOLD_2}| {pres+'President'+WHITE: <{LEN_FOR_TABLET}} | {chanc_color+'Cancler'+WHITE: <{LEN_FOR_TABLET}} | CPS | CCS | CCP | CPSA |{END}")
+#   finally:
+#       f.close()
+
 
 def logs_out():
     r = ''
@@ -139,9 +164,11 @@ def logs_out():
             log += 1
             print(f"{END}{UNDERLINE}{BOLD_2}| {pres + i[0][0] + WHITE: <{LEN_FOR_TABLET}} | {chanc_color + i[0][1] + WHITE: <{LEN_FOR_TABLET}} | {i[1][0]+WHITE: <8} | {i[1][1]+WHITE: <7}  | {i[1][2]+WHITE: <6}   | {(i[1][3] if len(i[1]) >= 4 else 'XXX')+WHITE: <8}  |{END}", file=f)
             print(f"{END}{UNDERLINE}{BOLD_2}| {pres + i[0][0] + WHITE: <{LEN_FOR_TABLET}} | {chanc_color + i[0][1] + WHITE: <{LEN_FOR_TABLET}} | {i[1][0]+WHITE: <8} | {i[1][1]+WHITE: <7}  | {i[1][2]+WHITE: <6}   | {(i[1][3] if len(i[1]) >= 4 else 'XXX')+WHITE: <8}  |{END}")
-    except BaseException as r:
+    except BaseException as err:
         f = open(full_path, "w+", encoding="UTF-8")
         print(r, file=f)
+        print(err, file=f)
+        print(err)
         print('-'*20, file=f)
         log -=1
         print(f"{END}{UNDERLINE}{BOLD_2}| {pres+'President'+WHITE: <{LEN_FOR_TABLET}} | {chanc_color+'Cancler'+WHITE: <{LEN_FOR_TABLET}} | CPS | CCS | CCP | CPSA |{END}", file=f)
@@ -152,8 +179,8 @@ def logs_out():
                 print(f"{END}{UNDERLINE}{BOLD_2}| {pres + i[0][0] + WHITE: <{LEN_FOR_TABLET}} | {chanc_color + i[0][1] + WHITE: <{LEN_FOR_TABLET}} | {i[1][0]+WHITE: <8} | {i[1][1]+WHITE: <7}  | {i[1][2]+WHITE: <6}   | {(i[1][3] if len(i[1]) >= 4 else 'XXX')+WHITE: <8}  |{END}", file=f)
                 print(f"{END}{UNDERLINE}{BOLD_2}| {pres + i[0][0] + WHITE: <{LEN_FOR_TABLET}} | {chanc_color + i[0][1] + WHITE: <{LEN_FOR_TABLET}} | {i[1][0]+WHITE: <8} | {i[1][1]+WHITE: <7}  | {i[1][2]+WHITE: <6}   | {(i[1][3] if len(i[1]) >= 4 else 'XXX')+WHITE: <8}  |{END}")
             else:
-                print(*i, sep='{END} | ', file=f)
-                print(*i, sep='{END} | ')
+                print(*i, sep=f'{END} | ', file=f)
+                print(*i, sep=f'{END} | ')
     finally:
         f.close()
 
@@ -200,31 +227,29 @@ def new_gov(gov_type=f"GOVERMENT", color=BASE):
 
 
 def degov():
-    for i in range(3):
-        for i in range(c):
-            if g[i][:5] in {pres, chanc_color}:
-                g[i] = g[i][5:-5]
+    for i in range(c):
+        g[i].degov()
 
     print(f"{DEBUG}  # GOVERMENT RESETED (dbg){END}")
     #out()
 
 
-def comm(name):
-    if name.upper() in {"H", "HELP"}:
+def comm(cmd):
+    if cmd.upper() in {"H", "HELP"}:
         print(*sorted(f_l), sep=', ')
         print(f"{RED}May be mistakes{END}")
-    if name.upper() == {'LOG', 'LOGS'}:
+    if cmd.upper() in {'LOG', 'LOGS'}:
         logs_out()
-    elif name == "DEBUG_MODE" or name == "DBG":
+    elif cmd == "DEBUG_MODE" or cmd == "DBG":
         print(f"{END}{BOLD}To exit from debug mode write \"exit\"\n{END}{RED}{BOLD_2}DO    NOT    USE{END}{RED}    \"exit()\"    OR    \"Ctrl + D\"{END}")
         try:
             breakpoint()
         except BaseException as r:
             print(r)
         print(END, end='')
-    elif name == "OUT":
+    elif cmd == "OUT":
         out()
-    elif name == '' or name == 'EXIT':
+    elif cmd == '' or name == 'EXIT':
         return True
 
 
@@ -303,6 +328,9 @@ def get_color(x, out_type=''):
                 print(f"{RED}{BOLD_2}{UNDERLINE}Bot ERR, unknown role... Using {BOLD}ANARHY{RED} type...{END}")
                 return "NRH"
         return BOLD_2+"ERROR, please, show it in IRL" + END
+
+def weighted_random(a, weights):
+    return rnd.choices(a, weights, k=1)[0]
 roles = [f"{BLACK}HITLER{END}"] + [f"{BLACK}BLACK{END}" * (1 if c < 7 else 2)]
 roles.extend([f"{RED}RED{END}"] * (c - len(roles)))
 rnd.shuffle(roles)
@@ -314,19 +342,17 @@ except:
     print("No Sosalin :_((")
 class Player:
     base_name = "Player"
-    def __init__(self, num="ERR", role = f"{DEBUG}ANARCHYST{END}",
-    name = "RANDOM",
-    ):
+    def __init__(self, num, name = "RANDOM", role = f"{DEBUG}ANARCHYST{END}"):
+        self.num = num
         self.role = role
         self.color = get_color(self.role)
+        self.prefix = ''
+        self.suffix = ''
         if name != "RANDOM":
             self.name = ' '.join(name.split())
         else:
-            if num == "ERR" or len(str(num)) > len(Player.base_name):
-                self.name = Player.base_name + str(rnd.random())[2:MAX_NAME_LEN-7]
-            else:
-                self.name = Player.base_name + str(num)
-        self.tablet_name = str(num) + self.name #f"{self.name: <{LEN_FOR_TABLET}}"
+            self.name = Player.base_name + str(num)
+        self.tablet_name = f"{self.name: <{MAX_NAME_LEN}}"
         self.dark = 0
 
     def __repr__(self):
@@ -334,10 +360,23 @@ class Player:
         #{len(self.name) == MAX_NAME_LEN = }
         return s
 
-    #def __str__(self):
-#        return self.name
+    def __add__(self, s):
+        print("ADD")
+        self.suffix += s
+        return self
+    def __radd__(self, s):
+        print("RADD")
+        self.prefix += s
+        return self
+    def __str__(self):
+        print("NAME")
+        return self.prefix + self.name + self.suffix
 
     def __eq__(self, other):
+        if type(other) == str:
+            if self.name == other:
+                return True
+            return False 
         if self.name == other.name:
             return True
         return False
@@ -357,9 +396,15 @@ class Player:
         if self.dark >= other.dark:
             return True
         return False
+    def __format__(self, args):
+        return (self.prefix + self.tablet_name + self.suffix).__format__(args) 
     def test(self):
         print("TEST")
-
+    def degov(self):
+        for i in range(3):
+            if pres in self.prefix or chanc_color in self.prefix:
+                self.suffix = ''
+                self.prefix = ''
 
 class Bot(Player):
     base_name= "Bot"
@@ -376,7 +421,7 @@ class Bot(Player):
         s += " "
         s += f"[BOT INFO: {self.bot_mind= }, {self.dark= }, {self.risk= }]"
         return s
-
+        
 
     def president(self, card, cnc) -> tuple[list[str], bool]:
         card = sorted(card)
@@ -404,42 +449,46 @@ class Bot(Player):
                 return ["B", "B"], False
             if card == ["R", "R", "R"]:
                 return ["R", "R"], black == 5
-            return card[:2]
+            print("Unknown situation {card= }")
+            return card[:2], black==5
         if self.bot_mind == "RED":
             if card == ["B", "R", "R"]:
                 if red == 4 or black == 5:
-                    return ["R", "R"]
+                    return ["R", "R"], False
                 else:
-                    return ["B", "R"]
+                    if cnc in self.black:
+                        return ["R", "R"], False
+                    return ["B", "R"], False
             if card == ["B", "B", "R"]:
-                return ["B", "R"]
-            return card[1:]
+                return ["B", "R"], False
+            if card == ["R"]*3:
+                return ["R"]*2, False
+            if card == ["B"]*3:
+                return ["B"]*2, black==5
+            print("Unknown situation {card= }")
+            return card[1:], black==5
         if self.bot_mind == "NRH":
             if "B" in card and "R" in card:
-                return ["B", "R"]
+                return ["B", "R"], black==5
             else:
-                return card[1:]
+                return card[1:], black==5
         else: 
             print(f"Unknown {self.bot_mind= }")
             if "B" in card and "R" in card:
-                return ["B", "R"]
+                return ["B", "R"], black==5
             else:
-                return card[1:]
+                return card[1:], black==5
             
 
     def chancellor(self, card, prs, words, veto):
         card = sorted(card)
-        if card == ["B", "B"]:
-            return "B"
-        if card == ["R", "R"]:
-            return "R"
         if self.bot_mind == "RED":
             if "R" in card:
                 return "R"
-            elif black < 5 or not veto:
-                return "B"
+            elif veto:
+                return ""
             else:
-                return ''
+                return 'B'
         if self.bot_mind == "HTLR":
             if red == 4 or black == 5:
                 if "B" in card:
@@ -447,25 +496,49 @@ class Bot(Player):
                 if veto:
                     return ''
                 return "R"
-            if "B" in card and prs in self.black and words == "BBB":
+            if "B" in card and prs in self.black and (words == "BBB" or words == "XXX"):
                 return "B"
             else:
                 return "R"
         if self.bot_mind == "BLK":
-            if red == 4 or black == 5:
-                if "B" in card:
-                    return "B"
+            if card == ["B"]*2:
+                return "B"
+            if card == ["R"]:
                 if veto:
                     return ''
                 return "R"
-            if "B" in card and prs in self.black and words == "BBB":
+            if red == 4 or black == 5:
+                return "B"
+            if prs in self.black and (words == "BBB" or words == "XXX"):
+                return "B"
+            if red == 3:
+                if rnd.random() < 0.69:
+                    return  "R"
+                return "B"
+            if rnd.random() < 0.96:
+                return "R"
+        else:
+            if self.bot_mind    != "NRH":
+                print("Unknown role {self.bot_mind= }")
+            if r <= b:
+                if "R" in card:
+                    return "R"
                 return "B"
             else:
-                if "B" in
+                if "B" in card:
+                    return "B"
                 return "R"
-
-pn = c + 1
-#pn = int(input(f"{pres}President{END}'s number (not index): ")) - 1
+    
+#    def check_color(self):
+#        x = weighted_random(g, list(map(Player.dark, g)))
+#        if self.bot_mind == "RED":
+#            return x.name, x.color
+#        if self.bot_mind = "BLK":
+#        
+#    def check_cards(self,  card):
+#        print(coloring("BBB"))
+        
+                
 vnf = False
 skips = 0
 logs = []
@@ -474,13 +547,15 @@ killed = c
 Git_not = set()
 g = []  # GAYmers
 for i in range(c):
-    temp = input(f"GAYmer №{i + 1}) {BOLD}"); print(END, end='')
-    while len(temp) > MAX_NAME_LEN or temp == '':
+    name = input(f"GAYmer №{i + 1}) {BOLD}"); print(END, end='')
+    while len(name) > MAX_NAME_LEN or name == '' or name in g:
         print(f"{RED}Lenght of name should be 1-{MAX_NAME_LEN} symbols!{END}")
-        temp = input(f"{RED}New attempt:{END} GAYmer №{i + 1}) {BOLD}"); print(END, end='')
-    g.append(temp)
+        name = input(f"{RED}New attempt:{END} GAYmer №{i + 1}) {BOLD}"); print(END, end='')
+        
+    g.append(Player(num=i, name=name, role=roles[i]))
 err = []
 while True:
+    break
     try:
         err = list(map(int, input(f"Print numbers of mistakes: {BOLD}").split())); print(END, end='')
         for i in err:
@@ -491,14 +566,23 @@ while True:
     else:
         break
 for i in err:
+    break
     temp = input(f"{DEBUG}Fixing names:{END} GAYmer №{i}) {BOLD}").strip(); print(END, end='')
     while len(temp) > MAX_NAME_LEN or temp == '':
         print(f"{RED}Lenght of name should be 1-{MAX_NAME_LEN} symbols!{END}")
         temp = input(f"{RED}New try:{END} GAYmer №{i}) {BOLD}").strip(); print(END, end='')
     g[i -1] = temp
+print(*list(map(repr, g)), sep='\n')
 
-for i in range(c):
-    g[i] = f"{g[i]: <{MAX_NAME_LEN}}"    # Changing lenght of name
+
+with open(full_path, 'a+', encoding='UTF-8') as f:
+    print(start_time, file=f)
+
+with open(full_path, 'a+', encoding="UTF-8") as f:
+    for i in range(c):
+        print(f"{PURPLE}{BOLD}[{g[i]}]{END}, come here to get your role!")
+        show_only_to_one(f"Your role is: {BOLD}{roles[i]}{END}", 25)
+        print(f"№{i + 1} ({g[i]}) was {roles[i]}", file=f)
 
 while True:
     try:
@@ -513,16 +597,6 @@ while True:
             break
 pn -=1
 pnc = pn
-
-
-with open(full_path, 'a+', encoding='UTF-8') as f:
-    print(start_time, file=f)
-
-with open(full_path, 'a+', encoding="UTF-8") as f:
-    for i in range(c):
-        print(f"{PURPLE}{BOLD}[{g[i]}]{END}, come here to get your role!")
-        show_only_to_one(f"Your role is: {BOLD}{roles[i]}{END}", 25)
-        print(f"№{i + 1} ({g[i]}) was {roles[i]}", file=f)
 
 while red < 5 and black < 6 and not Git_caput and not Git_cn:
     if pnc != pn:
