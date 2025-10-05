@@ -23,7 +23,7 @@ saved = []
 DEAD = '\033[41m'  # RED_FONT
 GULAG = '\033[43m'  # YELLOW_FONT
 BLACK_FONT = '\033[40m'
-NAME_FOR_LOGS  = "SH LOG_TEST "  # You can change it
+NAME_FOR_LOGS = "SH LOG_TEST "  # You can change it
 tp = '.txt'  # расширение
 path = os.path.dirname(ff) + '/'
 date = t.strftime("%d.%m.%y ")
@@ -35,7 +35,7 @@ else:
     WHITE = '\033[38m'
 LEN_FOR_TABLET = MAX_NAME_LEN + len(pres + WHITE)
 
-print(f"If 1 of this colors is blue say it to coder (DS: {PURPLE}@fluxxx1k{END}): {BLUE}{WHITE}ABC {BLUE}{GREY}ABC{END} ")
+print(f"If 1 of this colors is blue say it to coder (DS: {PURPLE}@fluxxx1k{END}): {BLUE}{WHITE}ABC{BLUE}{GREY}ABC{END}")
 
 # Number of players and their names
 while True:
@@ -59,7 +59,7 @@ else:
 deck = ['R']*red_start + ['B']*black_start
 check_logs = os.listdir(path)
 logs_nums = []
-    
+
 
 for i in check_logs:
     if i[:len(NAME_FOR_LOGS) + len(date)] == NAME_FOR_LOGS + date:
@@ -68,7 +68,8 @@ max_log_num = len(logs_nums) + 1
 full_path = path + NAME_FOR_LOGS + date + str(max_log_num) + tp
 while os.path.exists(full_path):
     max_log_num += 1
-    print(RED+BOLD_2+UNDERLINE+path + NAME_FOR_LOGS + date + str(max_log_num) + tp + "    is already exists, trying {pres}{max_log_num}{END}")
+    print(RED+BOLD_2+UNDERLINE+path + NAME_FOR_LOGS + date + str(max_log_num) + tp +
+          "    is already exists, trying {pres}{max_log_num}{END}")
     full_path = path + NAME_FOR_LOGS + date + str(max_log_num) + tp
 print("Logs in:", full_path)
 start_time = t.strftime("Game start time:   %d.%m.%y %H:%M:%S")
@@ -79,35 +80,18 @@ checks = 1
 Git_caput = False
 Git_cn = False
 f_l = {"OUT", "DEBUG_MODE", "EXIT"}
-def out(file = sys.stdout):
-    for i in range(c):
-        print(f"№{i+1}) {g[i]}",file=file)
 molotov_rebbentrop = True
 
-def naming(s):
-    if s in {"R", "RED"}:
-        return RED    +    "RED" +    WHITE
-    if s in {"H", "HITLER"}:
-        return BLACK + "HITLER" +  WHITE
-    if s in {"B", "BLACK"}:
-        return BLACK + "BLACK" + WHITE
-    if s in {"S", "STALIN"}:
-        return RED + "STALIN" + WHITE
-    if s in {"M", "MOLOTOV"}:
-        return RED    +    "MOLOTOV" +    WHITE
-    if s in {"REB", "REBBENTROP"}:
-        return BLACK    + "REBBENTROP" + WHITE
-    if s in {"A", "ANARHY", "ANARHYST"}:
-        return DEBUG + "ANARHYST" +    WHITE
-    if s in {"X", "UNKNOWN", "IDK"}:
-        return "UNKNOWN"
-    return False
-    
-    
-def coloring(s, sort = True):
+
+def out(file=sys.stdout):
+    for i in range(c):
+        print(f"№{i+1}) {g[i]}", file=file)
+
+
+def coloring(s, sort=True):
     if sort:
         s = sorted(s)
-    s1= ''
+    s1 = ''
     for i in s:
         if i in {"B", "H"}:
             s1 += BLACK + i + WHITE
@@ -116,11 +100,12 @@ def coloring(s, sort = True):
         elif i == 'X':
             s1 += i
         else:
-             print(f"{i} should be 'X' or 'R' or 'B'")
+            print(f"{i} should be 'X' or 'R' or 'B'")
     return s1
 
 #def add_2_logs(x, y, a, b, c):
 #    logs.append(((x,y)()))
+
 
 def dbg(s):
     s = s.split()
@@ -143,10 +128,10 @@ def logs_out():
     with open(full_path, 'r', encoding='UTF-8') as f:
         r = f.read()
     r = r[:r.find('-'*20)] + '\n'
+    log = 1
     try:
         f = open(full_path, "w+", encoding="UTF-8")
         print(r, file=f)
-        log =1
         print('-'*20, file=f)
         print(f"{END}{UNDERLINE}{BOLD_2}| {pres+'President'+WHITE: <{LEN_FOR_TABLET}} | {canc+'Cancler'+WHITE: <{LEN_FOR_TABLET}} | CPS | CCS | CCP | CPSA |{END}", file=f)
         print(f"{END}{UNDERLINE}{BOLD_2}| {pres+'President'+WHITE: <{LEN_FOR_TABLET}} | {canc+'Cancler'+WHITE: <{LEN_FOR_TABLET}} | CPS | CCS | CCP | CPSA |{END}")
@@ -170,7 +155,7 @@ def logs_out():
                 print(*i, sep='{END} | ', file=f)
                 print(*i, sep='{END} | ')
     finally:
-        f.close()  
+        f.close()
 
 def input_cards(text = "{RED}Some input: {WHITE}", q: int | set[int] = 0, c_p = False, veto=(black>=5)) -> str:
     """
@@ -189,21 +174,21 @@ def input_cards(text = "{RED}Some input: {WHITE}", q: int | set[int] = 0, c_p = 
         letters -= {'X'}
     if c_p:  # if president was skipped in game, but not in code 
         letters.add("SKIP")
-    inp = input(text+END+BOLD).strip().upper(); print(END, end='') 
+    inp = input(text+END+BOLD).strip().upper(); print(END, end='')
     while len(inp) not in q or (len(letters | set(inp)) > 3 and inp not in letters):
         print(f"{RED}WRONG    INPUT{END}")
         inp = input(DEBUG+"New try: " + WHITE +    text+END+BOLD).strip().upper(); print(END, end='')
     return inp
-    
-    
+
+
 
 def new_gov(gov_type=f"GOVERMENT", color=BASE):
-    gov = 0 
+    gov = 0
     while True:
         try:
             gov = int(input(f"{color}{gov_type}{WHITE}'s number (not index): {BOLD}")) - 1; print(END, end='')
             if gov >= c or gov < 0 or gov == pn or gov == gulag or gov == killed:
-                raise Excpeption
+                raise Exception
         except:
             print(f"{RED}Wrong syntaxis or too big/small nums{END}")
         else:
@@ -219,11 +204,11 @@ def degov():
         for i in range(c):
             if g[i][:5] in {pres, canc}:
                 g[i] = g[i][5:-5]
-    
+
     print(f"{DEBUG}  # GOVERMENT RESETED (dbg){END}")
     #out()
-    
-    
+
+
 def comm(name):
     if name.upper() in {"H", "HELP"}:
         print(*sorted(f_l), sep=', ')
@@ -240,7 +225,7 @@ def comm(name):
     elif name == "OUT":
         out()
     elif name == '' or name == 'EXIT':
-        return True        
+        return True
 
 
 def show_only_to_one(text, hide_len=0):
@@ -257,13 +242,13 @@ def show_only_to_one(text, hide_len=0):
         print("Are you ready to see info?")
         print("(Remember it. Don't show it to anybody)")
         print("Say \"y\" only if YOU should see them: ")
-        if yes_or_no("Show?", no={}):
+        if yes_or_no("Show?", no=set()):
             print(text)
-        if yes_or_no("Hide? ", no={}):
+        if yes_or_no("Hide? ", no=set()):
             print(f"{END}\x1b[A\x1b[A" +    "⣿" * hide_len)
             print()
 
-        
+
 def take_random(c):
     global saved
     if saved:
@@ -279,12 +264,12 @@ def take_random(c):
         deck = ["R"]*(red_start - red) + ["B"] * (black_start - black)
         chosen = rnd.sample(deck, k=c)
     for i in chosen:
-        deck.remove(i) 
+        deck.remove(i)
     rnd.shuffle(chosen)
     return chosen
 
-    
-def yes_or_no(text='Input for something (If you see it, you should understand what shoud be asked): ', yes = {'y', 'Y', 'Y|y', 'yes', 'Yes', 'YES'}, no = {'N', 'n', 'N|n', 'no', "No", "NO"}):
+
+def yes_or_no(text='Input for something (If you see it, you should understand what shoud be asked): ', yes:set|frozenset = frozenset({'y', 'Y', 'Y|y', 'yes', 'Yes', 'YES'}), no:set|frozenset = frozenset({'N', 'n', 'N|n', 'no', "No", "NO"})):
     inp = input(text + ' ').strip()
     while inp not in yes and inp not in no:
         inp=input('\x1b[A' + f"{DEBUG}{text} New try: {END}").strip()
@@ -324,12 +309,12 @@ rnd.shuffle(roles)
 hitler = roles.index(f"{BLACK}HITLER{END}")
 stalin = c
 try:
-    stalin = rols.index(f"{RED}STALIN{END}")
+    stalin = roles.index(f"{RED}STALIN{END}")
 except:
     print("No Sosalin :_((")
 class Player:
     base_name = "Player"
-    def __init__(self, num="ERR", role = f"{DEBUG}ANARCHYST{END}", 
+    def __init__(self, num="ERR", role = f"{DEBUG}ANARCHYST{END}",
     name = "RANDOM",
     ):
         self.role = role
@@ -343,15 +328,15 @@ class Player:
                 self.name = Player.base_name + str(num)
         self.tablet_name = str(num) + self.name #f"{self.name: <{LEN_FOR_TABLET}}"
         self.dark = 0
-    
+
     def __repr__(self):
         s = f"{self.name= } ({self.tablet_name= }): {self.role= } (mind_type: {self.color= }), {self.dark= }"
         #{len(self.name) == MAX_NAME_LEN = }
-        return s 
-    
+        return s
+
     #def __str__(self):
 #        return self.name
-    
+
     def __eq__(self, other):
         if self.name == other.name:
             return True
@@ -372,22 +357,22 @@ class Player:
         if self.dark >= other.dark:
             return True
         return False
-    
-    
-    
+
+
+
 class Bot(Player):
     base_name= "Bot"
-    def __init__(self, num="ERR", role = f"{DEBUG}ANARCHYST{END}", 
+    def __init__(self, num="ERR", role = f"{DEBUG}ANARCHYST{END}",
     name = "RANDOM",
     ):
         super().__init__(num, role, name)
         self.bot_mind = get_color(self.role, out_type='Bot')
-        
+
     def __repr__(self):
         s = super().__repr__()
         s += " "
         s += f"[BOT INFO: {self.bot_mind= }, {self.dark= }]"
-        return s 
+        return s
 
 pn = c + 1
 #pn = int(input(f"{pres}President{END}'s number (not index): ")) - 1
@@ -410,7 +395,7 @@ while True:
         err = list(map(int, input(f"Print numbers of mistakes: {BOLD}").split())); print(END, end='')
         for i in err:
             if i > c or i < 1:
-                raise Excpeption
+                raise Exception
     except:
         print(f"{RED}Wrong syntax or too big nums{END}")
     else:
@@ -432,7 +417,7 @@ while True:
             raise Exception
     except BaseException as r:
         #print(r)
-        print(f"{RED}Wrong syntaxis or too big/small nums{END}")            
+        print(f"{RED}Wrong syntaxis or too big/small nums{END}")
     else:
         if not input("ENTER if number is right, else write something: "):
             break
@@ -470,7 +455,7 @@ while red < 5 and black < 6 and not Git_caput and not Git_cn:
                     break
             elif ccp == 'R':
                 red += 1
-                               if red == 5:
+                if red == 5:
                     degov()
                     break
             else:
@@ -505,7 +490,7 @@ while red < 5 and black < 6 and not Git_caput and not Git_cn:
         continue
     else:
         skips = 0
-    
+
     cn = new_gov("Cancler", canc)
     if black >=3 and cn not in Git_not:
         if cn == hitler:
@@ -522,13 +507,13 @@ while red < 5 and black < 6 and not Git_caput and not Git_cn:
             Git_not.add(cn)
     #show_only_to_one(coloring(take_random(3)))
     show_only_to_one(coloring(cards:=take_random(3), sort=False))
-    cps = input_cards(f"Cards {pres}president{WHITE} ({g[pn]}) said: ", q=3)    
+    cps = input_cards(f"Cards {pres}president{WHITE} ({g[pn]}) said: ", q=3)
     cps = coloring(cps)
     cpd = input(f"Say NUMBER (1-3) of card to drop (in order that you saw) (cancler won't get it): ")
     while not cpd.isdigit() or (1 > int(cpd) or 3 < int(cpd)):
-        cpd = input(f"{DEBUG}New try: {END}") 
+        cpd = input(f"{DEBUG}New try: {END}")
     cards.pop(int(cpd) - 1)
-    
+
     show_only_to_one(coloring(cards))
     ccs = input_cards(f"Cards {canc}cancler{END} ({g[cn]}) said: ", q=2)
     ccs = coloring(ccs)
@@ -540,7 +525,7 @@ while red < 5 and black < 6 and not Git_caput and not Git_cn:
         cpsa = coloring(cpsa)
     else:
         cpsa = cps
-    
+
     temp = input(f'Comand: {BOLD}').upper(); print(END, end='')
     while not comm(temp):
         #print(f"{RED}Wrong syntaxis{END}")
@@ -557,7 +542,7 @@ while red < 5 and black < 6 and not Git_caput and not Git_cn:
         print(f"WTH?!!!! {ccp} isn't 'B' or 'R'")
         ccp = 'X'
     ccp = coloring(ccp)
-    
+
     degov()
     print("\n\n\n")
 
@@ -577,7 +562,7 @@ while red < 5 and black < 6 and not Git_caput and not Git_cn:
                     raise Exception
             except BaseException as r:
                 #print(r)
-                print(f"{RED}Wrong syntaxis or too big/small nums{END}")            
+                print(f"{RED}Wrong syntaxis or too big/small nums{END}")
             else:
                 if not input(f"ENTER if number {BOLD}{pc+1}{END} is right (it's {BOLD}[{g[pc]}]{END}), else write something: "):
                     break
@@ -604,9 +589,9 @@ while red < 5 and black < 6 and not Git_caput and not Git_cn:
                     raise Exception
             except BaseException as r:
                 #print(r)
-                print(f"{RED}Wrong syntaxis or too big/small nums{END}")            
+                print(f"{RED}Wrong syntaxis or too big/small nums{END}")
             else:
-                if not input(f"ENTER if number {BOLD}{gulag+1}{END} is right (it's {BOLD}[{g[pc]}]{END}), else write something: "):
+                if not input(f"ENTER if number {BOLD}{gulag+1}{END} is right (it's {BOLD}[{g[gulag]}]{END}), else write something: "):
                     break
         logs.append(((g[pn], DEBUG + GULAG + g[gulag] + BLACK_FONT + WHITE), (DEBUG + 'GUL' + WHITE, DEBUG + 'AG' + WHITE, DEBUG + '!' + WHITE, '   ')))
         g[gulag] = GULAG + DEBUG + g[gulag] + WHITE + BLACK_FONT
@@ -631,15 +616,13 @@ while red < 5 and black < 6 and not Git_caput and not Git_cn:
                     raise Exception
             except BaseException as r:
                 #print(r)
-                print(f"{RED}Wrong syntaxis or too big/small nums{END}")            
+                print(f"{RED}Wrong syntaxis or too big/small nums{END}")
             else:
-                if not input(f"ENTER if number {BOLD}{killed+1}{END} is right (it's {BOLD}[{g[pc]}]{END}), else write something: "):
+                if not input(f"ENTER if number {BOLD}{killed+1}{END} is right (it's {BOLD}[{g[killed]}]{END}), else write something: "):
                     break
         if gulag == killed:
-                g[gulag] = g[gulag][10:-10]
-                gulag = c
-        #if killed == cn:
-            #g[cn] = g[cn][5:-5]
+            g[gulag] = g[gulag][10:-10]
+            gulag = c
         g[killed] = DEAD + DEBUG + g[killed] + WHITE + BLACK_FONT
         logs.append(((g[pn], g[killed]), (DEBUG + 'KIL' + WHITE, DEBUG + 'LE' + WHITE, DEBUG + 'D' + WHITE, '   ')))
         checks += 1
@@ -658,7 +641,7 @@ while red < 5 and black < 6 and not Git_caput and not Git_cn:
         for i in sorted(Git_not):
             print(f'№{i + 1}) {g[i]}')
         print('\n')
-        
+
 logs_out()
 
 with open(full_path, "a+", encoding="UTF-8") as f:
@@ -679,4 +662,3 @@ with open(full_path, "a+", encoding="UTF-8") as f:
         print(F"{DEBUG}{BOLD_2}{UNDERLINE}WHAT    THE    HELL?!!!!{END}", file=f)
     print('\n\n\n', file=f)
     out()
-    
