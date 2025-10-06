@@ -1172,9 +1172,9 @@ while red < 5 and black < 6 and not Git_caput and not Git_cn:
     elif black == 4 == checks:
         temp = pn
         pn = new_gov("President", pres) - 1
-        logs.append(((g[temp].table(), g[pn].table()),
+        logs.append(((g[temp].table(), g[pn + 1].table()),
                      (DEBUG + 'PLA' + WHITE, DEBUG + 'CE' + WHITE, DEBUG + 'D' + WHITE, '   ')))
-        normal_logs.append(Log(g[temp], g[pn], special="Special placing", is_chancellor=False))
+        normal_logs.append(Log(g[temp], g[pn + 1], special="Special placing", is_chancellor=False))
         checks += 1
         special_election = True
     elif black == 5 == checks:
