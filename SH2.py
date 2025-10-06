@@ -37,7 +37,7 @@ MAX_NAME_LEN = 15  # You can change it from 10 to infinity
 #    print(f"{YELLOW}Launched on Android{END}")
 # else:
 #    WHITE = '\033[38m'
-WHITE = '\033[37m'
+WHITE = GREY + '\033[38m'
 LEN_FOR_TABLET = MAX_NAME_LEN + len(pres + WHITE)
 pr_c = 'cyan'
 ch_c = 'yellow'
@@ -615,7 +615,11 @@ class Player:
         self.purge_suff = ''
         self.num = num
         self.role = role
-        self.color = get_color(self.role)
+        self.color = get_color(self.role, out_type='Bot')
+        if self.color == X.HITLER:
+            self.color = X.BLACK
+        self.colored_color = get_color(self.role)
+        
         self.prefix = ''
         self.suffix = ''
         if name != "RANDOM":
@@ -626,7 +630,7 @@ class Player:
         self.dark = 0
 
     def __repr__(self):
-        s = f"{self.name= } ({self.tablet_name= }): {self.role= } (mind_type: {self.color= }), {self.dark= }"
+        s = f"{self.name= } ({self.tablet_name= }): {self.role= } (mind_type: {self.color} {self.colored_color= }), {self.dark= }"
         # {len(self.name) == MAX_NAME_LEN = }
         return s
 
@@ -678,8 +682,8 @@ class Player:
         self.gov_pref = ''
 
     # def president(self, card, cnc):
-    def get_color(self):
-        return self.color
+    #def get_color(self):
+    #    return self.colored_color
 
     def free(self, ask=True):
         global gulag
@@ -725,7 +729,7 @@ class Player:
 
     def president(self, card: str | list[str], cnc: int):
         card = ''.join(sorted(card)).upper()
-        show_only_to_one(f"Remember, your role is {naming(self.role)}, color is {self.color}.", hide_len=60)
+        show_only_to_one(f"Remember, your role is {naming(self.role)}, color is {self.colored_color}.", hide_len=60)
         card1 = coloring(card.upper())
         print(card1)
         phrase = f"You will say that here: "
@@ -745,7 +749,7 @@ class Player:
         return words, to_cnc, yes_or_no("Veto? ") if black == 5 else False
 
     def chancellor(self, card:str, prs, words, veto):
-        show_only_to_one(f"Remember, your role is {naming(self.role)}, color is {self.color}.", hide_len=60)
+        show_only_to_one(f"Remember, your role is {naming(self.role)}, color is {self.colored_color}.", hide_len=60)
         card1 = coloring(card)
         print(card1)
         phrase = f"You will say that here: "
@@ -785,7 +789,7 @@ class Bot(Player):
         self.bot_mind = get_color(self.role, out_type='Bot')
         self.risk = rnd.random()
         self.black = []
-        if self.color == X.BLACK:
+        if self.bot_mind == X.BLACK:
             for i in range(c):
                 if g[i].color == X.BLACK:
                     self.black.append(i)
@@ -906,12 +910,11 @@ class Bot(Player):
 #    def check_color(self):
 #        x = weighted_random(g, list(map(Player.dark, g)))
 #        if self.bot_mind == X.RED:
-#            return x.name, x.color
+#            return x.name, x.colored_color
 #        if self.bot_mind = X.BLACK:
 #
 #    def check_cards(self,  card):
 #        print(coloring("BBB"))
-
 for i in range(c):
     name = input(f"GAYmer №{i + 1}) {DBG_B}")
     print(END, end='')
@@ -1074,17 +1077,21 @@ while red < 5 and black < 6 and not Git_caput and not Git_cn:
         black += 1
     elif (ccp == 'VETO' or ccp == "X") and black >= 5:
         print(f"{DEBUG}Passing cuz VETO{WHITE}")
-        degov()
-        continue
+        ccp = "V"
     else:
         print(f"WTH?!!!! {ccp} isn't 'B' or 'R'")
         ccp = 'X'
     if not cpsa:
         cpsa = cps
-    normal_logs.append(Log(g[pn], g[cn], cps, ccs, ccp, cpsa))
+    
     cps = coloring(cps)
     ccs = coloring(ccs)
-    ccp = coloring(ccp)
+    if ccp != 'V':
+        ccp = coloring(ccp)
+        normal_logs.append(Log(g[pn], g[cn], cps, ccs, ccp, cpsa))
+    else:
+        normal_logs.append(Log(g[pn], g[cn], cps, ccs, "", cpsa, special="VETO"))
+        ccp = PURPLE + "V" + WHITE
     cpsa = coloring(cpsa)
     degov()
     print("\n\n\n")
