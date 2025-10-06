@@ -388,7 +388,7 @@ def take_random(count:int) -> list[str]:
     except ValueError:
         print("DECK RESET")
         logs.append(((DEBUG + f'{"DECK":<{MAX_NAME_LEN}}' + WHITE, DEBUG + f'{"RESET":<{MAX_NAME_LEN}}' + WHITE),
-                     (f'{BLACK}BLK{WHITE}', f'{BLACK}{black_start-black}{WHITE}', f'{RED}{red_start-red}{WHITE}', f'{RED}RED{WHITE}')))
+                     (f'{BLACK}BLK{WHITE}', f'{BLACK}{str(black_start-black):>2}{WHITE}', f'{RED}{red_start-red}{WHITE}', f'{RED}RED{WHITE}')))
         normal_logs.append(
             Log(special=f"Deck resetting<br>RED: {red_start - red}<br>BLACK: {black_start - black}", is_cards=False,))
         deck = ["R"] * (red_start - red) + ["B"] * (black_start - black)
