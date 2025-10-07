@@ -1,0 +1,13 @@
+def full_clear(s):
+    if not isinstance(s, str):
+        return str(s)
+    s1 = ''
+    x = False
+    for i in s:
+        if i == '\033':
+            x = True
+        elif i == 'm' and x:
+            x = False
+        elif not x:
+            s1 += i
+    return s1
