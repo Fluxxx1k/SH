@@ -6,7 +6,7 @@ import random as rnd
 import platform
 from atexit import register as atexit
 from standart_names import *
-#from standart_functions import *
+from standart_functions import color_clear, is_x_in_y as is_cards_in
 release = platform.release()
 
 ff = __file__
@@ -72,7 +72,7 @@ class Log:
                 self.prs = str(prs_num)
                 print(f"Strange president id ({type(prs_num)= }): {prs_num=}")
         elif isinstance(prs_num, str):
-            self.prs = full_clear(prs_num)
+            self.prs = color_clear(prs_num)
         else:
             self.prs = str(prs_num)
             print(f"Strange president name ({type(prs_num)= }): {prs_num=}")
@@ -86,7 +86,7 @@ class Log:
                 self.cnc = str(cnc_num)
                 print(f"Strange president id ({type(cnc_num)= }): {cnc_num=}")
         elif isinstance(cnc_num, str):
-            self.cnc = full_clear(cnc_num)
+            self.cnc = color_clear(cnc_num)
         else:
             self.cnc = str(cnc_num)
             print(f"Strange president name ({type(cnc_num)= }): {cnc_num=}")
@@ -173,21 +173,6 @@ molotov_ribbentrop = True
 def out(count = c, file=sys.stdout):
     for i in range(count):
         print(f"№{i + 1}) {g[i].out()}", file=file)
-
-
-def full_clear(s):
-    if isinstance(s, Player):
-        return str(s)
-    s1 = ''
-    x = False
-    for i in s:
-        if i == '\033':
-            x = True
-        elif i == 'm' and x:
-            x = False
-        elif not x:
-            s1 += i
-    return s1
 
 
 def coloring(s, sort=True):
@@ -365,7 +350,7 @@ def comm(cmd: str) -> bool | None:
 
 def show_only_to_one(text: str, hide_len: int = None) -> None:
     if hide_len is None:
-        hide_len = len(full_clear(text))
+        hide_len = len(color_clear(text))
     print("Are you ready to see info?")
     print("(Remember it. Don't show it to anybody)")
     print("Say \"y\" only if YOU should see them: ")
@@ -415,7 +400,7 @@ def yes_or_no(text='Input for something (If you see it, you should understand wh
 
 
 def coloring_HTML_cards(s2:str) -> str:
-    s = sorted(full_clear(s2))
+    s = sorted(color_clear(s2))
     errs = 0
     s1 = ''
     for i in s:
@@ -431,11 +416,11 @@ def coloring_HTML_cards(s2:str) -> str:
             print(f"{i} should be 'X' or 'R' or 'B' or 'P'")
             errs += 1
             s1 += f"<font color='{norm_c_cut}'>" + i + "</font>"
-    return full_clear(s2) if errs > 0 else s1
+    return color_clear(s2) if errs > 0 else s1
 
 
 def get_color(x, out_type=''):
-    x = full_clear(x)
+    x = color_clear(x)
     for i in [X.BLACK, X.HITLER, X.RIB]:
         if i in x:
             if out_type == "Bot":
@@ -468,7 +453,7 @@ def get_color(x, out_type=''):
 
 
 def coloring_HTML_roles(s):
-    s = full_clear(s)
+    s = color_clear(s)
     if s in {"R", X.RED}:
         return f"<font color='{red_c}'>" + X.RED + "</font>"
     if s in {"H", X.HITLER}:
@@ -506,8 +491,8 @@ def create_HTML_roles():
     try:
         for i in range(c):
             number = f"<td style=\"color: {num_c}\"><b>{i + 1}</b></td>"
-            player = f'<td style="color: {get_color(full_clear(rls[i]), out_type="HTML")}"><b>{g[i]}</b></td>'
-            role = f'<td><b>{coloring_HTML_roles(full_clear(rls[i]))}</b></td>'
+            player = f'<td style="color: {get_color(color_clear(rls[i]), out_type="HTML")}"><b>{g[i]}</b></td>'
+            role = f'<td><b>{coloring_HTML_roles(color_clear(rls[i]))}</b></td>'
             row = "<tr>" + number + player + role + "</tr>"
             rows.append(row)
         s += '\n'.join(rows)
@@ -594,15 +579,6 @@ def create_HTML_logs(logs_local=None):
 
 def weighted_random(a, weights):
     return rnd.choices(a, weights, k=1)[0]
-
-
-def is_cards_in(x: list | str, y: list | str) -> bool:
-    for i in set(x):
-        if i not in y:
-            return False
-        if y.count(i) < x.count(i):
-            return False
-    return True
 
 
 class Player:
