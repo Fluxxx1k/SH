@@ -18,7 +18,7 @@ def color_clear(s:str) -> str:
     return s1
 
 
-def is_cards_in(x: list | str, y: list | str) -> bool:
+def is_x_in_y(x: list | str, y: list | str) -> bool:
     """
     checks that all cards from x also in y
     """ 
