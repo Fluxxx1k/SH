@@ -5,8 +5,8 @@ import sys
 import random as rnd
 import platform
 from atexit import register as atexit
-from standart_names import *
-from standart_functions import color_clear, is_x_in_y as is_cards_in
+from standard_names_SH import *
+from standard_functions import color_clear, show_only_to_one, yes_or_no
 release = platform.release()
 
 ff = __file__
@@ -667,7 +667,7 @@ class Player:
                 for player in g:
                     player.free(ask=False)
 
-    def chosen_gov(self, gov_type: X.PRESIDENT or X.CHANCELLOR):
+    def chosen_gov(self, gov_type):
         if gov_type == X.PRESIDENT:
             self.gov_pref = pres
         elif gov_type == X.CHANCELLOR:
@@ -677,7 +677,7 @@ class Player:
             print(f"Uncknown government type: {gov_type}")
         self.gov_suff = WHITE
 
-    def purge(self, purge_type: X.GULAG or X.KILLED):
+    def purge(self, purge_type):
         self.degov()
         if purge_type == X.GULAG:
             self.purge_pref = GULAG
