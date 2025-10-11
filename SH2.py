@@ -3,12 +3,10 @@ import time as t
 import os
 import sys
 import random as rnd
-import platform
 from atexit import register as atexit
 from standard_names_SH import *
 from standard_functions import color_clear, show_only_to_one, yes_or_no
 from HTML_logs import create_HTML_logs, color_of_HTML_roles, Log
-release = platform.release()
 
 ff = __file__
 print(ff)
@@ -33,11 +31,6 @@ tp = '.html'  # расширение
 path = os.path.dirname(ff) + "/LOGS/"
 date = t.strftime("%d.%m.%y ")
 MAX_NAME_LEN = 15  # You can change it from 10 to infinity
-# if 'android' in release.lower() or 'lineageos' in release.lower():
-#    WHITE = '\033[37m'
-#    print(f"{YELLOW}Launched on Android{END}")
-# else:
-#    WHITE = '\033[38m'
 WHITE = GREY + '\033[38m'
 LEN_FOR_TABLET = MAX_NAME_LEN + len(pres + WHITE)
 pr_c = 'cyan'
