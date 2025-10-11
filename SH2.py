@@ -348,19 +348,6 @@ def comm(cmd: str) -> bool | None:
         return True
 
 
-def show_only_to_one(text: str, hide_len: int = None) -> None:
-    if hide_len is None:
-        hide_len = len(color_clear(text))
-    print("Are you ready to see info?")
-    print("(Remember it. Don't show it to anybody)")
-    print("Say \"y\" only if YOU should see them: ")
-    if yes_or_no("Show?", no=set()):
-        print(text)
-    if yes_or_no("Hide? ", no=set()):
-        print(f"{END}\x1b[A\x1b[A" + "#" * hide_len) # ⣿
-        print()
-
-
 def take_random(count:int) -> list[str]:
     global saved
     if saved:
