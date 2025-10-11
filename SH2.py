@@ -97,7 +97,7 @@ else:
         print(f"{CRITICAL}Something went wrong: {err}{END}")
 gulag = c
 killed = c
-roles = [X.HITLER] + [X.BLACK] * (1 if c < 7 else 2)
+roles = [X.HITLER] + [X.BLACK] * (0 if c < 5 else 1 if c < 7 else 2 if c < 9 else 3)
 roles.extend([X.RED] * (c - len(roles)))
 rnd.shuffle(roles)
 hitler = roles.index(X.HITLER)
@@ -112,7 +112,6 @@ except BaseException as err:
 start_time = t.time()
 start_time_f = t.strftime("%d.%m.%y %H:%M:%S")
 print(start_time_f)
-logged = 0
 red = black = 0
 checks = 1
 Git_caput = False
@@ -142,7 +141,7 @@ def coloring(s, sort=True):
     return s1
 
 
-def naming(s):
+def naming(s:str) -> str:
     if s in {"R", X.RED}:
         return RED + "RED" + END_T
     if s in {"H", X.HITLER}:
@@ -159,22 +158,37 @@ def naming(s):
         return PURPLE + "ANARCHIST" + END_T
     if s in {"X", "UNKNOWN", "IDK"}:
         return "UNKNOWN"
-    return False
+    return "ERROR"
 
 
-def dbg(s):
+def dbg(s:str) -> bool:
     s = s.split()
-    if s[0] == 'ccp':
-        global ccp
-        ccp = coloring(s[1])
-    elif s[0] == 'ccs':
-        global ccs
-        ccs = coloring(s[1])
-    elif s[0] == 'cps':
-        global cps
-        cps = coloring(s[1])
-    else:
-        print("{RED}Wrong parameters{END_T}")
+    if len(s) == 3:
+        if s[1] == '=':
+            s.pop(1)
+    if len(s) == 2:
+        if s[0] == 'ccp':
+            global ccp
+            ccp = coloring(s[1])
+            print(f"ccp: {ccp}")
+            return False
+        elif s[0] == 'ccs':
+            global ccs
+            ccs = coloring(s[1])
+            print(f"ccs: {ccs}")
+            return False
+        elif s[0] == 'cps':
+            global cps
+            cps = coloring(s[1])
+            print(f"cps: {cps}")
+            return False
+        elif s[0] == 'cpsa':
+            global cpsa
+            cpsa = coloring(s[1])
+            print(f"cpsa: {cpsa}")
+            return False
+    print(f"{WARNING}Wrong parameters: {s}{END}")
+    return True
 
 
 @atexit
@@ -205,10 +219,6 @@ def logs_out():
                     f"{END}{UNDERLINE}{BOLD}| {CYAN + log[0][0] + END_T: <{LEN_FOR_TABLET}} | {YELLOW + log[0][1] + END_T: <{LEN_FOR_TABLET}} | {log[1][0] + END_T: <8} | {log[1][1] + END_T: <7}  | {log[1][2] + END_T: <6}   | {(log[1][3] if len(log[1]) >= 4 else 'XXX') + END_T: <8}  |{END}")
             else:
                 print(*log, sep=f'{END} | ')
-
-
-#    finally:
-#        f.close()
 
 
 def input_cards(text="{RED}Some input: {END_T}", q: int | set[int] = 0, c_p:bool=False, veto=(black >= 5)) -> str:
@@ -256,7 +266,7 @@ def degov() -> None:
     for i in range(c):
         g[i].degov()
 
-    print(f"{PURPLE}  # GOVERNMENT RESETED (dbg){END}")
+    print(f"{PURPLE}  # GOVERNMENT RESET (dbg){END}")
     # out()
 
 
@@ -264,18 +274,24 @@ def comm(cmd: str) -> bool | None:
     if cmd.upper() in {"H", "HELP"}:
         print(*sorted(f_l), sep=', ')
         print(f"{RED}May be mistakes{END}")
-    if cmd.upper() in {'LOG', 'LOGS'}:
+        return True
+    elif cmd.upper() in {'LOG', 'LOGS'}:
         logs_out()
+        return False
     elif cmd == "DEBUG_MODE" or cmd == "DBG":
-        print(
-            f"{END}{INPUT_C}To exit from debug mode write \"exit\"\n{END}{RED}{BOLD}DO    NOT    USE{END}{RED}    \"exit()\"    OR    \"Ctrl + D\"{END}")
-        try:
-            breakpoint()
-        except BaseException as err:
-            print(err)
+        # print(
+        #     f"{END}{INPUT_C}To exit from debug mode write \"exit\"\n{END}{RED}{BOLD}DO    NOT    USE{END}{RED}    \"exit()\"    OR    \"Ctrl + D\"{END}")
+        # try:
+        #     breakpoint()
+        # except BaseException as err:
+        #     print(err)
+        while dbg(input(f"{END}DBG: ")):
+            pass
         print(END, end='')
+        return False
     elif cmd == "OUT":
         out()
+        return False
     elif cmd == '' or name == 'EXIT':
         return True
 
@@ -328,7 +344,7 @@ def get_color(x, out_type=''):
         return BOLD + X.NRH + END
     else:
         if out_type == "Bot":
-            print(f"{RED}{BOLD}{UNDERLINE}Bot ERR, unknown role... Using {PURPLE}ANARHY{RED} type...{END}")
+            print(f"{RED}{BOLD}{UNDERLINE}Bot error, unknown role... Using {PURPLE}ANARCHIST{RED} type...{END}")
             return X.NRH
         if out_type == "HTML":
             return norm_c
