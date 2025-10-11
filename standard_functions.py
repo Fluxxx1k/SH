@@ -1,3 +1,4 @@
+from colors import PURPLE_TEXT, WARNING, END
 def color_clear(s:str | list, print_errors=True) -> str:
     """
     Removes all colors and returns new string.
@@ -15,7 +16,7 @@ def color_clear(s:str | list, print_errors=True) -> str:
                 return color_clear(list(s), print_errors=print_errors)
             except BaseException as err:
                 if print_errors:
-                    print(f"Something went wrong: {err},", s, " can't be list")
+                    print(f"{WARNING}Something went wrong: {err},", s, f" also can't be list{END}")
                 return "Error"
     s1 = ''
     x = False
@@ -52,17 +53,25 @@ def is_x_in_y(x: set | list | str, y: set | list | str) -> bool:
 
 
 def yes_or_no(text='Input for something (If you see it, you should understand what should be asked): ',
-              yes: set = frozenset({'y', 'Y', 'Y|y', 'yes', 'Yes', 'YES'}),
-              no: set = frozenset({'N', 'n', 'N|n', 'no', "No", "NO"})) -> bool:
-    inp = input('\r' + text + ' ').strip()
+              yes: set = frozenset({'Y', 'YES'}),
+              no: set = frozenset({'N', "NO"})) -> bool:
+    text = str(text).strip()
+    if text == '':
+        print(f"{WARNING}No text!{END}")
+        text = 'Input for something (If you see it, you should understand what should be asked): '
+    elif text[-1] != ":":
+        text += ": "
+    else:
+        text += " "
+    inp = input(text).strip()
     while True:
-        if inp in no:
+        if inp in no or inp == "DEBUG_NO":
             print()
             return False
-        elif inp in yes:
+        elif inp in yes or inp == "DEBUG_YES":
             print()
             return True
-        inp = input('\r' + f"{PURPLE_TEXT}{text} New try: {END}").strip()
+        inp = input('\x1b[A' + f"{PURPLE_TEXT}New try: {text}{END}").strip()
 
 
 def show_only_to_one(text: str, hide_len: int = None) -> None:
