@@ -1,12 +1,22 @@
-def color_clear(s:str, print_errors=True) -> str:
+def color_clear(s:str | list, print_errors=True) -> str:
     """
     Removes all colors and returns new string.
     Do not use if another special symbols that starts on "\033" in s such as "\033[A"!!!
     """ 
-    if not isinstance(s, str):
+    if not isinstance(s, str) and not isinstance(s, list):
         if print_errors:
-            print(s, "isn't an str")
-        return color_clear(str(s))
+            print(s, "isn't an str or list")
+        try:
+            return color_clear(str(s), print_errors=print_errors)
+        except BaseException as err:
+            if print_errors:
+                print(f"Something went wrong: {err},", s, " can't be str")
+            try:
+                return color_clear(list(s), print_errors=print_errors)
+            except BaseException as err:
+                if print_errors:
+                    print(f"Something went wrong: {err},", s, " can't be list")
+                return "Error"
     s1 = ''
     x = False
     for i in s:
