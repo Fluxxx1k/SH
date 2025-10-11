@@ -14,8 +14,49 @@ norm_c = '"' + norm_c_cut + '"'
 font_c = '"' + font_c_cut + '"'
 special_c = "DeepPink"
 
+class Log:
+    def __init__(self, prs='', cnc='', c_prs_got = '', c_prs_said='', c_cnc_got='', c_cnc_said='', c_cnc_placed='', c_prs_said_after='', special='', reserve='',
+                 is_cards=True, is_president=True, is_chancellor=True):
+        if type(prs).__name__ == "Player":
+            self.prs = str(prs)
+        elif isinstance(prs, str):
+            self.prs = color_clear(prs)
+        else:
+            self.prs = str(prs)
+            print(f"Strange president name ({type(prs)= }): {prs=}")
 
-def coloring_HTML_cards(s: str, print_errors = True) -> str:
+        if type(cnc).__name__ == "Player":
+            self.cnc = str(cnc)
+        elif isinstance(cnc, str):
+            self.cnc = color_clear(cnc)
+        else:
+            self.cnc = str(cnc)
+            print(f"Strange president name ({type(cnc)= }): {cnc=}")
+        self.cpg = c_prs_got
+        self.cps = c_prs_said
+        self.ccg = c_cnc_got
+        self.ccs = c_cnc_said
+        self.ccp = c_cnc_placed
+        self.cpsa = c_prs_said_after
+        self.reserve = reserve
+        self.special = special
+        self.is_cards = is_cards
+        self.is_president = is_president
+        self.is_chancellor = is_chancellor
+    def to_HTML(self) -> str:
+        president = f'\t<td style="color: {pr_c if self.is_president else purple_c}"><b>{self.prs}</b></td>\n'
+        chancellor = f'\t<td style="color: {ch_c if self.is_chancellor else purple_c}"><b>{self.cnc}</b></td>\n'
+        c_prs_got = '' #  f"\t<td><b>{coloring_HTML_cards(self.cpg) if self.is_cards else self.cpg}</b></td>\n"
+        c_prs_said = f"\t<td><b>{coloring_HTML_cards(self.cps) if self.is_cards else self.cps}</b></td>\n"
+        c_cnc_got = '' #  f"\t<td><b>{coloring_HTML_cards(self.ccg) if self.is_cards else self.ccg}</b></td>\n"
+        c_cnc_said = f"\t<td><b>{coloring_HTML_cards(self.ccs) if self.is_cards else self.ccs}</b></td>\n"
+        c_cnc_placed = f"\t<td><b>{coloring_HTML_cards(self.ccp) if self.is_cards else self.ccp}</b></td>\n"
+        c_prs_said_after = f"\t<td><b>{coloring_HTML_cards(self.cpsa) if self.is_cards else self.cpsa}</b></td>\n"
+        special = f'\t<td style="color: {special_c}"><b>{self.special}</b></td>\n'
+        row = president + chancellor + c_prs_got + c_prs_said + c_cnc_got + c_cnc_said + c_cnc_placed + c_prs_said_after + special
+        return row
+
+def coloring_HTML_cards(s: str, print_errors = True, is_print=True) -> str:
     try:
         s = sorted(color_clear(s))
         errs = 0
@@ -30,17 +71,20 @@ def coloring_HTML_cards(s: str, print_errors = True) -> str:
             elif i == 'P':
                 s1 += f"<font color='{purple_c}'>" + i + "</font>"
             else:
-                print(f"{i} should be 'X' or 'R' or 'B' or 'P'")
+                if is_print:
+                    print(f"{i} should be 'X' or 'R' or 'B' or 'P'")
                 errs += 1
                 s1 += f"<font color='{norm_c_cut}'>" + i + "</font>"
         return color_clear(s) if errs > 0 else s1
     except BaseException as err:
         if print_errors:
             print(f"{WARNING}Error occurred while creating HTML cards: {err}{RESET}")
+        elif is_print:
+            print(f"{WARNING}Error occurred while creating HTML cards{RESET}")
         return s
 
 
-def color_of_HTML_roles(s: str, print_errors=True) -> str:
+def color_of_HTML_roles(s: str, print_errors=True, is_print = True) -> str:
     try:
         s = color_clear(s)
         if s in {X.RED, X.STALIN, X.MOLOTOV}:
@@ -49,8 +93,8 @@ def color_of_HTML_roles(s: str, print_errors=True) -> str:
             return black_c
         if s in {X.ANARCHIST}:
             return nrh_c
-        if s in '':
-            if print_errors:
+        if s.upper() in {'', "NO ROLE"}:
+            if is_print:
                 print("No role")
             return norm_c
         if print_errors:
@@ -64,17 +108,32 @@ def color_of_HTML_roles(s: str, print_errors=True) -> str:
 
 def create_HTML_roles(players: list["Player"] = None, roles: list[str] = None, print_errors = True, is_print = True) -> str:
     try:
+        table_caption = ('\t<caption><h1><b>'
+                         'Таблица ролей'
+                         '<br>'
+                         'Table of roles'
+                         '</b></h1></caption>\n')
+        table_head = (f"\t<thead>\n"
+                        f"\t\t<tr>\n"
+                        f"\t\t\t<th style='{num_c}'>Number</th>\n"
+                        f"\t\t\t<th>Player</th>\n"
+                        f"\t\t\t<th>Role</th>"
+                        f"\t\t</tr>\n"
+                        f"\t</thead>\n")
         if players is None:
             if is_print:
                 print("No players specified")
-            return ''
-        s = '<table>\n<caption><h1><b>Таблица ролей<br>Table of roles</b></h1></caption>'
-        table_header = f"<tr><th>Number</th><th>Player</th><th>Role</th></tr>\n"
-        s += table_header
-        rows = []
+            if roles is None:
+                if is_print:
+                    print("No roles specified")
+                if print_errors:
+                    print(f"{WARNING}No players or roles specified")
+                    return table_caption + table_head
+            else:
+                players = ['No name'] * len(roles)
         try:
             if roles is None:
-                rls = [''] * len(players)
+                rls = ['No role'] * len(players)
                 if is_print:
                     print(f"{WARNING}No roles specified{RESET}")
             else:
@@ -85,23 +144,43 @@ def create_HTML_roles(players: list["Player"] = None, roles: list[str] = None, p
             if is_print:
                 print(f"{WARNING}No roles{RESET}")
             rls = [''] * len(players)
+        rows = []
         try:
             for i in range(len(players)):
-                color = color_of_HTML_roles(color_clear(rls[i]))
-                number = f"<td style=\"color: {num_c}\"><b>{i + 1}</b></td>"
-                player = f'<td style="color: {color}"><b>{players[i]}</b></td>'
-                role = f'<td style="color: {color}"><b>{rls[i]}</b></td>'
-                row = "<tr>" + number + player + role + "</tr>"
-                rows.append(row)
-            s += '\n'.join(rows)
+                try:
+                    color = color_of_HTML_roles(color_clear(rls[i]))
+                    number = f"\t\t\t<td style=\"color: {num_c}\"><b>{i + 1}</b></td>\n"
+                    player = f'\t\t\t<td style="color: {color}"><b>{players[i]}</b></td>\n'
+                    role = f'\t\t\t<td style="color: {color}"><b>{rls[i]}</b></td>\n'
+                    row = "\t\t<tr>\n" + number + player + role + "\t\t</tr>\n"
+                    rows.append(row)
+                except BaseException as err:
+                    if print_errors:
+                        print(f"{WARNING}Error occurred while creating HTML roles in cycle: {err}{RESET}")
+                    rows.append(f'\t\t<td style="color: red">ERROR in row</td>\n'
+                                f'\t\t<td style="color: red">{err}</td>\n'
+                                f'\t\t<td style="color: red"></td>\n')
+            table_body = f"\t<tbody>\n{''.join(rows)}</tbody>\n"
         except BaseException as err:
+            try:
+                table_body = (f"\t<tbody>\n"
+                              f"{''.join(rows)}"
+                              f'\t\t<td style="color: red">ERROR</td>\n'
+                              f'\t\t<td style="color: red">{err}</td>\n'
+                              f'\t\t<td style="color: red"></td>\n'
+                              f"</tbody>\n")
+            except BaseException as err1:
+                table_body = ('\t<tbody>\n'
+                              f'\t\t<td style="color: red">ERRORS</td>\n'
+                              f'\t\t<td style="color: red">{err= }</td>\n'
+                              f'\t\t<td style="color: red">{err1= }</td>\n'
+                              '\t</tbody>')
             if print_errors:
                 print(f"{WARNING}No roles, old version or using cards: {err}{RESET}")
             elif is_print:
                 print(f"{WARNING}Error occurred while creating HTML roles{RESET}")
-            return ''
-        s += '\n</table>'
-        return s
+        table = "<table>\n" + table_caption + table_head + table_body + "</table>"
+        return table
     except BaseException as err:
         if print_errors:
             print(f"{WARNING}Error occurred while creating HTML roles: {err}{WARNING}")

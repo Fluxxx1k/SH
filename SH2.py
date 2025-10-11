@@ -7,6 +7,7 @@ import platform
 from atexit import register as atexit
 from standard_names_SH import *
 from standard_functions import color_clear, show_only_to_one, yes_or_no
+from HTML_logs import create_HTML_logs, color_of_HTML_roles, Log
 release = platform.release()
 
 ff = __file__
@@ -58,57 +59,6 @@ Git_not = set()
 g = []  # GAYmers
 
 print(f"If 1 of this colors is blue say it to coder (DS: {PURPLE}@fluxxx1k{END}): {BLUE}{WHITE}ABC{BLUE}{GREY}ABC{END}")
-
-
-class Log:
-    def __init__(self, prs_num='', cnc_num='', c_prs_said='', c_cnc_said='', c_cnc_placed='', c_prs_said_after='', special='', reserve='',
-                 is_cards=True, is_president=True, is_chancellor=True):
-        if isinstance(prs_num, Player):
-            self.prs = prs_num.name
-        elif isinstance(prs_num, int):
-            if 0 <= prs_num < c:
-                self.prs = g[prs_num].name
-            else:
-                self.prs = str(prs_num)
-                print(f"Strange president id ({type(prs_num)= }): {prs_num=}")
-        elif isinstance(prs_num, str):
-            self.prs = color_clear(prs_num)
-        else:
-            self.prs = str(prs_num)
-            print(f"Strange president name ({type(prs_num)= }): {prs_num=}")
-
-        if isinstance(cnc_num, Player):
-            self.cnc = cnc_num.name
-        elif isinstance(cnc_num, int):
-            if 0 <= cnc_num < c:
-                self.cnc = g[cnc_num].name
-            else:
-                self.cnc = str(cnc_num)
-                print(f"Strange president id ({type(cnc_num)= }): {cnc_num=}")
-        elif isinstance(cnc_num, str):
-            self.cnc = color_clear(cnc_num)
-        else:
-            self.cnc = str(cnc_num)
-            print(f"Strange president name ({type(cnc_num)= }): {cnc_num=}")
-        self.cps = c_prs_said
-        self.ccs = c_cnc_said
-        self.ccp = c_cnc_placed
-        self.cpsa = c_prs_said_after
-        self.reserve = reserve
-        self.special = special
-        self.is_cards = is_cards
-        self.is_president = is_president
-        self.is_chancellor = is_chancellor
-    def to_HTML(self) -> str:
-        president = f'\t<td style="color: {pr_c if self.is_president else purple_c}"><b>{self.prs}</b></td>\n'
-        chancellor = f'\t<td style="color: {ch_c if self.is_chancellor else purple_c}"><b>{self.cnc}</b></td>\n'
-        c_prs_said = f"\t<td><b>{coloring_HTML_cards(self.cps) if self.is_cards else self.cps}</b></td>\n"
-        c_cnc_said = f"\t<td><b>{coloring_HTML_cards(self.ccs) if self.is_cards else self.ccs}</b></td>\n"
-        c_cnc_placed = f"\t<td><b>{coloring_HTML_cards(self.ccp) if self.is_cards else self.ccp}</b></td>\n"
-        c_prs_said_after = f"\t<td><b>{coloring_HTML_cards(self.cpsa) if self.is_cards else self.cpsa}</b></td>\n"
-        special = f'\t<td style="color: {special_c}"><b>{self.special}</b></td>\n'
-        row = president + chancellor + c_prs_said + c_cnc_said + c_cnc_placed + c_prs_said_after + special
-        return row
 normal_logs: list[Log] = []
 
 
@@ -133,8 +83,28 @@ else:
     red_start = 6
     black_start = 11
 deck = ['R'] * red_start + ['B'] * black_start
-check_logs = os.listdir(path)
-logs_nums = []
+try:
+    os.makedirs(path, exist_ok=True)
+    check_logs = os.listdir(path)
+except BaseException as err:
+    print(f"{RED}Strange Error: {err}\nLogs won't be created{WHITE}")
+try:
+    logs_nums = []
+    for i in check_logs:
+        if i[:len(NAME_FOR_LOGS) + len(date)] == NAME_FOR_LOGS + date:
+            logs_nums.append(i)
+    max_log_num = len(logs_nums) + 1
+    full_path = path + NAME_FOR_LOGS + date + str(max_log_num) + tp
+    while os.path.exists(full_path):
+        max_log_num += 1
+        print(RED + BOLD + UNDERLINE + full_path +
+              f"    is already exists, trying {pres}{max_log_num}{END}")
+        full_path = path + NAME_FOR_LOGS + date + str(max_log_num) + tp
+    print("Logs in:", full_path)
+except NameError as err:
+    print(f"{RED}Name Error: {err}{WHITE}")
+except BaseException as err:
+    print(f"{RED}Something went wrong: {err}{WHITE}")
 gulag = c
 killed = c
 roles = [X.HITLER] + [X.BLACK] * (1 if c < 7 else 2)
@@ -147,17 +117,6 @@ try:
 except:
     print("No Sosalin :_((")
 
-for i in check_logs:
-    if i[:len(NAME_FOR_LOGS) + len(date)] == NAME_FOR_LOGS + date:
-        logs_nums.append(i)
-max_log_num = len(logs_nums) + 1
-full_path = path + NAME_FOR_LOGS + date + str(max_log_num) + tp
-while os.path.exists(full_path):
-    max_log_num += 1
-    print(RED + BOLD + UNDERLINE + full_path +
-          f"    is already exists, trying {pres}{max_log_num}{END}")
-    full_path = path + NAME_FOR_LOGS + date + str(max_log_num) + tp
-print("Logs in:", full_path)
 start_time = t.time()
 start_time_f = t.strftime("%d.%m.%y %H:%M:%S")
 print(start_time_f)
@@ -228,51 +187,32 @@ def dbg(s):
 
 @atexit
 def logs_out():
-    create_HTML_logs()
-
-    # with open(full_path, 'r', encoding='UTF-8') as f:
-    #     r = f.read()
-    # r = r[:r.find('-' * 20)] + '\n'
-    log = 1
+    create_HTML_logs(path=full_path, logs=normal_logs, players=g, roles=roles)
+    logged = 1
     try:
-        # f = open(full_path, "w+", encoding="UTF-8")
-        # print(r, file=f)
-        # print('-' * 20, file=f)
-        # print(
-        #     f"{END}{UNDERLINE}{BOLD}| {pres + 'President' + WHITE: <{LEN_FOR_TABLET}} | {chanc_color + 'Chancellor' + WHITE: <{LEN_FOR_TABLET}} | CPS | CCS | CCP | CPSA |{END}",
-        #     file=f)
         print(
             f"{END}{UNDERLINE}{BOLD}| {pres + 'President' + WHITE: <{LEN_FOR_TABLET}} | {chanc_color + 'Chancellor' + WHITE: <{LEN_FOR_TABLET}} | CPS | CCS | CCP | CPSA |{END}")
-        for i in logs:
-            log += 1
-            # print(
-            #     f"{END}{UNDERLINE}{BOLD}| {pres + i[0][0] + WHITE: <{LEN_FOR_TABLET}} | {chanc_color + i[0][1] + WHITE: <{LEN_FOR_TABLET}} | {i[1][0] + WHITE: <8} | {i[1][1] + WHITE: <7}  | {i[1][2] + WHITE: <6}   | {(i[1][3] if len(i[1]) >= 4 else 'XXX') + WHITE: <8}  |{END}",
-            #     file=f)
+        for log in logs:
+            logged += 1
             print(
-                f"{END}{UNDERLINE}{BOLD}| {pres + i[0][0] + WHITE: <{LEN_FOR_TABLET}} | {chanc_color + i[0][1] + WHITE: <{LEN_FOR_TABLET}} | {i[1][0] + WHITE: <8} | {i[1][1] + WHITE: <7}  | {i[1][2] + WHITE: <6}   | {(i[1][3] if len(i[1]) >= 4 else 'XXX') + WHITE: <8}  |{END}")
+                f"{END}{UNDERLINE}{BOLD}| {pres + log[0][0] + WHITE: <{LEN_FOR_TABLET}} | {chanc_color + log[0][1] + WHITE: <{LEN_FOR_TABLET}} | {log[1][0] + WHITE: <8} | {log[1][1] + WHITE: <7}  | {log[1][2] + WHITE: <6}   | {(log[1][3] if len(log[1]) >= 4 else 'XXX') + WHITE: <8}  |{END}")
     except BaseException as err:
-        # f = open(full_path, "w+", encoding="UTF-8")
-        # print(r, file=f)
-        # print(err, file=f)
         print(err)
-        # print('-' * 20, file=f)
-        log -= 1
-        # print(
-        #   f"{END}{UNDERLINE}{BOLD}| {pres + 'President' + WHITE: <{LEN_FOR_TABLET}} | {chanc_color + 'Chancellor' + WHITE: <{LEN_FOR_TABLET}} | CPS | CCS | CCP | CPSA |{END}",
-        #  file=f)
+        try:
+            normal_logs.append(
+                Log(prs=f"{logged= }", cnc=f"{len(logs)= }", special=err, is_president=False, is_chancellor=False))
+        except BaseException as err:
+            print(err)
+        logged -= 1
         print(
             f"{END}{UNDERLINE}{BOLD}| {pres + 'President' + WHITE: <{LEN_FOR_TABLET}} | {chanc_color + 'Chancellor' + WHITE: <{LEN_FOR_TABLET}} | CPS | CCS | CCP | CPSA |{END}")
-        for i in logs:
-            log -= 1
-            if log:
-                # print(
-                #   f"{END}{UNDERLINE}{BOLD}| {pres + i[0][0] + WHITE: <{LEN_FOR_TABLET}} | {chanc_color + i[0][1] + WHITE: <{LEN_FOR_TABLET}} | {i[1][0] + WHITE: <8} | {i[1][1] + WHITE: <7}  | {i[1][2] + WHITE: <6}   | {(i[1][3] if len(i[1]) >= 4 else 'XXX') + WHITE: <8}  |{END}",
-                #  file=f)
+        for log in logs:
+            logged -= 1
+            if logged:
                 print(
-                    f"{END}{UNDERLINE}{BOLD}| {pres + i[0][0] + WHITE: <{LEN_FOR_TABLET}} | {chanc_color + i[0][1] + WHITE: <{LEN_FOR_TABLET}} | {i[1][0] + WHITE: <8} | {i[1][1] + WHITE: <7}  | {i[1][2] + WHITE: <6}   | {(i[1][3] if len(i[1]) >= 4 else 'XXX') + WHITE: <8}  |{END}")
+                    f"{END}{UNDERLINE}{BOLD}| {pres + log[0][0] + WHITE: <{LEN_FOR_TABLET}} | {chanc_color + log[0][1] + WHITE: <{LEN_FOR_TABLET}} | {log[1][0] + WHITE: <8} | {log[1][1] + WHITE: <7}  | {log[1][2] + WHITE: <6}   | {(log[1][3] if len(log[1]) >= 4 else 'XXX') + WHITE: <8}  |{END}")
             else:
-                # print(*i, sep=f'{END} | ', file=f)
-                print(*i, sep=f'{END} | ')
+                print(*log, sep=f'{END} | ')
 
 
 #    finally:
@@ -362,48 +302,12 @@ def take_random(count:int) -> list[str]:
         logs.append(((DEBUG + f'{"DECK":<{MAX_NAME_LEN}}' + WHITE, DEBUG + f'{"RESET":<{MAX_NAME_LEN}}' + WHITE),
                      (f'{BLACK}BLK{WHITE}', f'{BLACK}{str(black_start-black):>2}{WHITE}', f'{RED}{red_start-red}{WHITE}', f'{RED}RED{WHITE}')))
         normal_logs.append(
-            Log(special=f"Deck resetting<br>RED: {red_start - red}<br>BLACK: {black_start - black}", is_cards=False,))
+            Log(special=f"Deck resetting<br>RED: {red_start - red}<br>BLACK: {black_start - black}", is_cards=False))
         deck = ["R"] * (red_start - red) + ["B"] * (black_start - black)
         chosen = rnd.sample(deck, k=count)
     for i in chosen:
         deck.remove(i)
     return chosen
-
-
-def yes_or_no(text='Input for something (If you see it, you should understand what should be asked): ',
-              yes: set = frozenset({'y', 'Y', 'Y|y', 'yes', 'Yes', 'YES'}),
-              no: set = frozenset({'N', 'n', 'N|n', 'no', "No", "NO"})) -> bool:
-    inp = input(text + ' ').strip()
-    while inp not in yes and inp not in no:
-        inp = input('\x1b[A' + f"{DEBUG}{text} New try: {END}").strip()
-    if inp in yes:
-        return True
-    if inp in no:
-        return False
-    print(f"WTF: {inp}")
-    return False
-
-
-
-
-def coloring_HTML_cards(s2:str) -> str:
-    s = sorted(color_clear(s2))
-    errs = 0
-    s1 = ''
-    for i in s:
-        if i == "B":
-            s1 += f"<font color='{black_c}'>" + i + "</font>"
-        elif i == 'R':
-            s1 += f"<font color='{red_c}'>" + i + "</font>"
-        elif i == 'X':
-            s1 += f"<font color='{norm_c_cut}'>" + i + "</font>"
-        elif i == 'P':
-            s1 += f"<font color='{nrh_c}'>" + i + "</font>"
-        else:
-            print(f"{i} should be 'X' or 'R' or 'B' or 'P'")
-            errs += 1
-            s1 += f"<font color='{norm_c_cut}'>" + i + "</font>"
-    return color_clear(s2) if errs > 0 else s1
 
 
 def get_color(x, out_type=''):
@@ -437,131 +341,6 @@ def get_color(x, out_type=''):
         if out_type == "HTML":
             return norm_c
         return BOLD + "ERROR, please, show it in IRL" + END
-
-
-def coloring_HTML_roles(s):
-    s = color_clear(s)
-    if s in {"R", X.RED}:
-        return f"<font color='{red_c}'>" + X.RED + "</font>"
-    if s in {"H", X.HITLER}:
-        return f"<font color='{black_c}'>" + X.HITLER + "</font>"
-    if s in {"B", X.BLACK}:
-        return f"<font color='{black_c}'>" + X.BLACK + "</font>"
-    if s in {"S", X.STALIN}:
-        return f"<font color='{red_c}'>" + X.STALIN + "</font>"
-    if s in {"M", X.MOLOTOV}:
-        return f"<font color='{red_c}'>" + X.MOLOTOV + "</font>"
-    if s in {"RIB", X.RIB}:
-        return f"<font color='{black_c}'>" + X.RIB + "</font>"
-    if s in {"A", "ANARCHY", X.NRH}:
-        return f"<font color='{nrh_c}'>" + X.NRH + "</font>"
-    if s in {"X", "UNKNOWN", "IDK"}:
-        return f"<font color='{norm_c}'>" + "UNKNOWN" + "</font>"
-    print("UNKNOWN    ROLE")
-    return "???"
-
-
-def create_HTML_roles():
-    s = '<table>\n<caption><h1><b>Таблица ролей<br>Table of roles</b></h1></caption>'
-    table_header = f"<tr><th>Number</th><th>Player</th><th>Role</th></tr>\n"
-    s += table_header
-    rows = []
-    try:
-        global roles
-        rls = roles.copy()
-    except NameError:
-        print("Old version")
-        return ''
-    except BaseException as err:
-        print(f"Too old version or smth else: {err}")
-        return ''
-    try:
-        for i in range(c):
-            number = f"<td style=\"color: {num_c}\"><b>{i + 1}</b></td>"
-            player = f'<td style="color: {get_color(color_clear(rls[i]), out_type="HTML")}"><b>{g[i]}</b></td>'
-            role = f'<td><b>{coloring_HTML_roles(color_clear(rls[i]))}</b></td>'
-            row = "<tr>" + number + player + role + "</tr>"
-            rows.append(row)
-        s += '\n'.join(rows)
-    except BaseException as r:
-        print(f"No roles, old version or using cards: {r}")
-        return ''
-    s += '\n</table>'
-    return s
-
-
-def create_HTML_info():
-    return ''
-
-def create_HTML_logs(logs_local=None):
-    if logs_local is None:
-        logs_local = normal_logs
-    head = """
-     <head>
-         <meta charset='UTF-8'>
-         <title>Secret Hitler logs</title>
-         <style>
-         body {
-         color:""" + norm_c_cut + """;
-         background-color: """ + font_c_cut + """;
-         }
-         table {
-         border:5px solid """ + norm_c_cut + """;
-         <!-- bgcolor: black; -->
-         padding: 10px;
-         cellpadding: 10px;
-         cellspacing: 2px;
-         border-collapse: collapse;
-         width: 100%;
-         margin-bottom: 20px;
-         }
-         th {border: 3px """ + norm_c_cut + """ solid;}
-         td {border: 2px """ + norm_c_cut + """ solid;}
-         </style>
-     </head>
-     """
-    body = """
-     <body>"""
-    table_roles = create_HTML_roles()
-    table = """    <table>\n<caption><h1><strong>Таблица событий игры<br>Logs of the game </strong></h1></caption>
-             """
-    table_info = create_HTML_info()
-    table_header = (f"<thead>"
-                    f"<tr>"
-                        f"<th style=\"color: {num_c}\">N</th>"
-                        f"<th style=\"color: {pr_c}\">President</th>"
-                        f"<th style=\"color: {ch_c}\">Chancellor</th>"
-                        f"<th>Cards <font color=\"{pr_c}\">President</font> Said</th>"
-                        f"<th>Cards <font color=\"{ch_c}\">Chancellor</font> Said</th>"
-                        f"<th>Card <font color=\"{ch_c}\">Chancellor</font> Placed</th>"
-                        f"<th>Cards <font color=\"{pr_c}\">President</font> Said After <font color=\"{ch_c}\">Chancellor</font></th>"
-                        f"<th><font color=\"{special_c}\">Special</font></th>"
-                    f"</tr>"
-                    f"</thead>")
-    table += table_header
-    table += "<tbody>"
-    rows = []
-    for i in range(len(logs_local)):
-        log = logs_local[i]
-        number = f'\t<td style="color: {num_c}">{i + 1}</td>\n'
-        cooked = log.to_HTML()
-        row = "<tr>" + number + cooked + '</tr>'
-        rows.append(row)
-    table += '\n'.join(rows)
-    table += '\n</tbody>\n</table>'
-    body += table_roles + '\n' + table + '\n' + table_info + '\n'
-    body += """
-     </body>
-     """
-    s = """
-    <!DOCTYPE html>
-    <html>"""
-
-    s += head + body
-    s += "</html>"
-    with open(full_path, 'w+', encoding="UTF-8") as f:
-        print(s, file=f)
-        print(s)
 
 
 def weighted_random(a, weights):
@@ -606,7 +385,7 @@ class Player:
     #     return self
 
     def __str__(self):
-        return self.prefix + self.name + self.suffix
+        return self.name
 
     def __eq__(self, other):
         if type(other) == str:
@@ -674,7 +453,7 @@ class Player:
             self.gov_pref = chanc_color
         else:
             self.gov_pref = BASE
-            print(f"Uncknown government type: {gov_type}")
+            print(f"Unknown government type: {gov_type}")
         self.gov_suff = WHITE
 
     def purge(self, purge_type):
@@ -1002,7 +781,7 @@ while red < 5 and black < 6 and not Git_caput and not Git_cn:
                 degov()
                 logs.append(((g[pn].table(), g[cn].table()),
                              (f'{BLACK}HIT{WHITE}', f'{BLACK}LE{WHITE}', f'{BLACK}R{WHITE}', '   ')))
-                normal_logs.append(Log(prs_num=g[pn], cnc_num=g[cn], special="Hitler is chancellor!"))
+                normal_logs.append(Log(prs=g[pn], cnc=g[cn], special="Hitler is chancellor!"))
                 Git_cn = True
                 break
             else:
@@ -1014,7 +793,7 @@ while red < 5 and black < 6 and not Git_caput and not Git_cn:
                     logs.append(((g[pn].table(), g[cn].table()),
                                  (f'{BLACK}HIT{WHITE}', f'{BLACK}vs{WHITE}', f'{BLACK}S{WHITE}', 'TAL')))
                     normal_logs.append(
-                        Log(prs_num=g[pn], cnc_num=g[cn], special="Hitler is chancellor!<br>But Stalin is president!"))
+                        Log(prs=g[pn], cnc=g[cn], special="Hitler is chancellor!<br>But Stalin is president!"))
                     Git_caput = True
                     break
             else:
@@ -1067,7 +846,7 @@ while red < 5 and black < 6 and not Git_caput and not Git_cn:
         cpsc = coloring(cpsc)
         logs.append(((g[pn].table(), f"{DEBUG + 'CARD CHECK' + WHITE: <{LEN_FOR_TABLET}}"),
                      (cpsc, DEBUG + 'CH' + WHITE, DEBUG + 'K' + WHITE, '   ')))
-        normal_logs.append(Log(prs_num=g[pn], c_prs_said=cpsc, special="Card check"))
+        normal_logs.append(Log(prs=g[pn], c_prs_said=cpsc, special="Card check"))
         checks += 1
     elif black == 2 == checks:
         while True:
@@ -1104,7 +883,8 @@ while red < 5 and black < 6 and not Git_caput and not Git_cn:
             ((g[pn].table(), DEBUG + g[pc].table() + WHITE),
              (cpc1, DEBUG + 'CH' + WHITE, DEBUG + 'K' + WHITE, f'{DEBUG}PLR{WHITE}')))
         normal_logs.append(
-            Log(prs_num=g[pn], cnc_num=g[cn], special=f"Color of <font color='{purple_c}'>{g[cn]}</font> <font color='{pr_c}'>{g[pn]}</font> said is {coloring_HTML_roles(cpc)}",
+            Log(prs=g[pn], cnc=g[cn],
+                special=f"Color of <font color='{purple_c}'>{g[cn]}</font> <font color='{pr_c}'>{g[pn]}</font> said is <font color='{color_of_HTML_roles(cpc)}'>{cpc}</font>",
                 is_chancellor=False))
         checks += 1
     elif black == 3 == checks:
@@ -1178,26 +958,30 @@ while red < 5 and black < 6 and not Git_caput and not Git_cn:
         print('\n')
 
 logs_out()
+try:
+    with open(full_path, "a+", encoding="UTF-8") as f:
+        end_time_f = t.strftime("%d.%m.%y %H:%M:%S")
+        end_time = t.time()
+        print("Game over time: " + end_time_f)
+        print("Game start time: " + start_time_f, file=f)
+        print("Game over time: " + end_time_f, file=f)
 
-with open(full_path, "a+", encoding="UTF-8") as f:
-    end_time_f = t.strftime("%d.%m.%y %H:%M:%S")
-    end_time = t.time()
-    print("Game over time: " + end_time_f)
-    print("Game over time: " + end_time_f, file=f)
-    print("Game start time: " + start_time_f, file=f)
-
-    if red >= 5 or Git_caput:
-        print(f"{RED}{BOLD}{UNDERLINE}RED    WON!!!{END}")
-        print(f"{RED}{BOLD}{UNDERLINE}RED    WON!!!{END}", file=f)
-        if Git_caput:
-            print(f"{RED}(Hitler caput){WHITE}", file=f)
-    elif black >= 6 or Git_cn:
-        print(f"{BLACK}{BOLD}{UNDERLINE}BLACK    WON!!!{END}")
-        print(f"{BLACK}{BOLD}{UNDERLINE}BLACK    WON!!!{END}", file=f)
-        if Git_cn:
-            print(f"{BLACK}(Hitler is chancellor){WHITE}", file=f)
-    else:
-        print(F"{DEBUG}{BOLD}{UNDERLINE}WHAT    THE    HELL?!!!!{END}")
-        print(F"{DEBUG}{BOLD}{UNDERLINE}WHAT    THE    HELL?!!!!{END}", file=f)
-    print('\n\n\n', file=f)
-    out()
+        if red >= 5 or Git_caput:
+            print(f"{RED}{BOLD}{UNDERLINE}RED    WON!!!{END}")
+            print(f"{RED}{BOLD}{UNDERLINE}RED    WON!!!{END}", file=f)
+            if Git_caput:
+                print(f"{RED}(Hitler caput){WHITE}", file=f)
+        elif black >= 6 or Git_cn:
+            print(f"{BLACK}{BOLD}{UNDERLINE}BLACK    WON!!!{END}")
+            print(f"{BLACK}{BOLD}{UNDERLINE}BLACK    WON!!!{END}", file=f)
+            if Git_cn:
+                print(f"{BLACK}(Hitler is chancellor){WHITE}", file=f)
+        else:
+            print(F"{DEBUG}{BOLD}{UNDERLINE}WHAT    THE    HELL?!!!!{END}")
+            print(F"{DEBUG}{BOLD}{UNDERLINE}WHAT    THE    HELL?!!!!{END}", file=f)
+        print('\n\n\n', file=f)
+        out()
+except FileNotFoundError:
+    print("Can't open file")
+except BaseException as err:
+    print(f"{RED}{BOLD}{UNDERLINE}Something went wrong: {err}{END}")
