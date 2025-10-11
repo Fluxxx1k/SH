@@ -19,3 +19,12 @@ class X:
     KILLED = "KILLED"
 # class HTML(str):
 #     pass
+
+class Player:
+    pass
+class Bot:
+    pass
+class Log:
+    pass
+class LogInfo:
+    pass
