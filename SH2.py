@@ -59,7 +59,7 @@ while True:
         c = int(input(f"Input number of players: {INPUT_C}"))
         print(END, end='')
         if c < 4 or c > 10:
-            raise Exception("Wrong size!")
+            raise ValueError(f"Wrong size! ({c})")
     except BaseException as err:
         print(f"{RED}Try again, wrong input: {err}{END_T}")
     else:
@@ -258,8 +258,12 @@ def new_gov(gov_type:str=f"GOVERNMENT", color:str=BLUE) -> int:
         try:
             gov = int(input(f"{color}{gov_type}{END_T}'s number (not index): {INPUT_C}")) - 1
             print(END, end='')
-            if gov >= c or gov < 0 or gov == pn or gov == gulag or gov == killed:
-                raise Exception("Wrong number")
+            if gov >= c or gov < 0:
+                raise ValueError(f"Wrong number: {gov + 1}")
+            if gov == pn:
+                raise ValueError(f"Can't choose president as a {gov_type}")
+            if  gov == gulag or gov == killed:
+                raise ValueError("Can't choose purged as s chancellor")
         except BaseException as err:
             print(f"{RED}{err}{END}")
         else:
@@ -674,7 +678,7 @@ while True:
         print(END, end='')
         for i in err:
             if i > c or i < 1:
-                raise Exception
+                raise ValueError(f"Wrong number: {i}")
     except BaseException as err:
         print(f"{RED}{err}{END}")
     else:
@@ -698,7 +702,7 @@ while True:
         pn = int(input(f"{CYAN}President{END}'s number (not index): {INPUT_C}")) - 1
         print(END, end='')
         if pn >= c or pn < 0:
-            raise Exception
+            raise ValueError(f"Wrong number: {pn + 1}")
     except BaseException as err:
         print(f"{RED}{err}{END}")
     else:
@@ -852,8 +856,10 @@ while red < 5 and black < 6 and not Git_caput and not Git_cn:
             try:
                 pc = int(input(f"{CYAN}President{END} will check number (not index): {INPUT_C}")) - 1
                 print(END, end='')
-                if pc >= c or pc < 0 or pc == pn:
-                    raise Exception
+                if pc >= c or pc < 0:
+                    raise ValueError(f"Wrong number: {pc + 1}")
+                if pc == pn:
+                    raise ValueError(f"Can't check yourself")
             except BaseException as err:
                 print(f"{RED}{err}{END}")
             else:
@@ -890,8 +896,10 @@ while red < 5 and black < 6 and not Git_caput and not Git_cn:
             try:
                 gulag = int(input(f"{CYAN}President{END} will place in gulag number (not index): {INPUT_C}")) - 1
                 print(END, end='')
-                if gulag >= c or gulag < 0 or gulag == pn:
-                    raise Exception
+                if gulag >= c or gulag < 0:
+                    raise ValueError(f"Wrong number: {gulag + 1}")
+                if gulag == pn:
+                    raise ValueError(f"Can't purge yourself")
             except BaseException as err:
                 print(f"{RED}{err}{END}")
             else:
@@ -923,7 +931,7 @@ while red < 5 and black < 6 and not Git_caput and not Git_cn:
                 killed = int(input(f"{CYAN}President{END} will kill number (not index): {INPUT_C}")) - 1
                 print(END, end='')
                 if killed >= c or killed < 0:
-                    raise ValueError("Wrong number")
+                    raise ValueError(f"Wrong number: {killed + 1}")
                 elif killed == pn:
                     raise ValueError("No suicide!!")
             except BaseException as err:
