@@ -100,12 +100,18 @@ killed = c
 roles = [X.HITLER] + [X.BLACK] * (0 if c < 5 else 1 if c < 7 else 2 if c < 9 else 3)
 roles.extend([X.RED] * (c - len(roles)))
 rnd.shuffle(roles)
-hitler = roles.index(X.HITLER)
+hitler = c
 stalin = c
 try:
     stalin = roles.index(X.STALIN)
 except ValueError:
     print("No Sosalin :_((")
+except BaseException as err:
+    print(f"Can't find {X.STALIN= }: {err}")
+try:
+    hitler = roles.index(X.HITLER)
+except ValueError:
+    print(f"{WARNING}WTH? No {X.HITLER} in roles...{END}")
 except BaseException as err:
     print(f"Can't find {X.STALIN= }: {err}")
 
@@ -271,29 +277,16 @@ def degov() -> None:
 
 
 def comm(cmd: str) -> bool | None:
-    if cmd.upper() in {"H", "HELP"}:
-        print(*sorted(f_l), sep=', ')
-        print(f"{RED}May be mistakes{END}")
-        return True
-    elif cmd.upper() in {'LOG', 'LOGS'}:
+    if cmd.upper() in {'LOG', 'LOGS'}:
         logs_out()
-        return False
     elif cmd == "DEBUG_MODE" or cmd == "DBG":
-        # print(
-        #     f"{END}{INPUT_C}To exit from debug mode write \"exit\"\n{END}{RED}{BOLD}DO    NOT    USE{END}{RED}    \"exit()\"    OR    \"Ctrl + D\"{END}")
-        # try:
-        #     breakpoint()
-        # except BaseException as err:
-        #     print(err)
         while dbg(input(f"{END}DBG: ")):
             pass
-        print(END, end='')
-        return False
     elif cmd == "OUT":
         out()
-        return False
     elif cmd == '' or name == 'EXIT':
-        return True
+        return False
+    return True
 
 
 def take_random(count:int) -> list[str]:
@@ -682,8 +675,8 @@ while True:
         for i in err:
             if i > c or i < 1:
                 raise Exception
-    except:
-        print(f"{RED}Wrong syntax or too big nums{END}")
+    except BaseException as err:
+        print(f"{RED}{err}{END}")
     else:
         break
 for i in err:
@@ -707,8 +700,7 @@ while True:
         if pn >= c or pn < 0:
             raise Exception
     except BaseException as err:
-        # print(err)
-        print(f"{RED}Wrong syntaxis or too big/small nums{END}")
+        print(f"{RED}{err}{END}")
     else:
         if not input("ENTER if number is right, else write something: "):
             break
@@ -814,15 +806,14 @@ while red < 5 and black < 6 and not Git_caput and not Git_cn:
     cpsa = input_cards(f"Cards {CYAN}president{END_T} ({g[pn]}) said after chancellor: ", q={3, 0})
     temp = input(f'Command: {INPUT_C}').upper()
     print(END, end='')
-    while not comm(temp):
-        # print(f"{RED}Wrong syntaxis{END}")
+    while comm(temp):
         temp = input(f'Command (new try): {INPUT_C}').upper()
         print(END, end='')
     if ccp == 'B' or ccp == BLACK + "B" + END_T:
         black += 1
     elif ccp == 'R' or ccp == RED + "R" + END_T:
         red += 1
-    elif ccp == 'P':
+    elif ccp == 'P' or ccp == PURPLE + "P" + END_T:
         red += 1
         black += 1
     elif (ccp == 'VETO' or ccp == "X") and black >= 5:
@@ -830,7 +821,7 @@ while red < 5 and black < 6 and not Git_caput and not Git_cn:
         ccp = "V"
     else:
         print(f"WTH?!!!! {ccp} isn't 'B' or 'R'")
-        ccp = 'X'
+        ccp = input_cards("New (last) try to input cards (debug version):", 1, c_p = True)
     if not cpsa:
         cpsa = cps
     
@@ -864,8 +855,7 @@ while red < 5 and black < 6 and not Git_caput and not Git_cn:
                 if pc >= c or pc < 0 or pc == pn:
                     raise Exception
             except BaseException as err:
-                # print(err)
-                print(f"{RED}Wrong syntaxis or too big/small nums{END}")
+                print(f"{RED}{err}{END}")
             else:
                 if not input(
                         f"ENTER if number {INPUT_C}{pc + 1}{END} is right (it's {INPUT_C}[{g[pc]}]{END}), else write something: "):
@@ -903,8 +893,7 @@ while red < 5 and black < 6 and not Git_caput and not Git_cn:
                 if gulag >= c or gulag < 0 or gulag == pn:
                     raise Exception
             except BaseException as err:
-                # print(err)
-                print(f"{RED}Wrong syntaxis or too big/small nums{END}")
+                print(f"{RED}{err}{END}")
             else:
                 if not input(
                         f"ENTER if number {INPUT_C}{gulag + 1}{END} is right (it's {INPUT_C}[{g[gulag]}]{END}), else write something: "):
@@ -933,11 +922,12 @@ while red < 5 and black < 6 and not Git_caput and not Git_cn:
             try:
                 killed = int(input(f"{CYAN}President{END} will kill number (not index): {INPUT_C}")) - 1
                 print(END, end='')
-                if killed >= c or killed < 0 or killed == pn:
-                    raise Exception
+                if killed >= c or killed < 0:
+                    raise ValueError("Wrong number")
+                elif killed == pn:
+                    raise ValueError("No suicide!!")
             except BaseException as err:
-                # print(err)
-                print(f"{RED}Wrong syntaxis or too big/small nums{END}")
+                print(f"{RED}{err}{END}")
             else:
                 if not input(
                         f"ENTER if number {INPUT_C}{killed + 1}{END} is right (it's {INPUT_C}[{g[killed]}]{END}), else write something: "):
