@@ -66,10 +66,8 @@ def yes_or_no(text='Input for something (If you see it, you should understand wh
     inp = input(text).strip().upper()
     while True:
         if inp in no or inp == "DEBUG_NO":
-            print()
             return False
         elif inp in yes or inp == "DEBUG_YES":
-            print()
             return True
         inp = input('\x1b[A' + f"{PURPLE_TEXT}New try: {text}{END}").strip().upper()
 
@@ -83,5 +81,5 @@ def show_only_to_one(text: str, hide_len: int = None) -> None:
     if yes_or_no("Show?", no=set()):
         print(text)
     if yes_or_no("Hide? ", no=set()):
-        print(f"{END}\x1b[2A" + "#" * hide_len) # ⣿
+        print(f"{END}\x1b[A\x1b[A" + "#" * hide_len) # ⣿
         print()
