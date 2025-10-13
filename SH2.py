@@ -362,7 +362,7 @@ class Player:
         if self.color == X.HITLER:
             self.color = X.BLACK
         self.colored_color = get_color(self.role)
-        
+
         self.prefix = ''
         self.suffix = ''
         if name != "RANDOM":
@@ -801,7 +801,9 @@ while red < 5 and black < 6 and not Git_caput and not Git_cn:
     g[cn].chosen_gov(X.CHANCELLOR)
     out()
     cards = take_random(3)
+    c_prs_got = ''.join(cards)
     cps, cards, veto = g[pn].president(cards, cn)
+    c_cnc_got = ''.join(cards)
     ccs, ccp = g[cn].chancellor(cards, pn, cps, veto)
     cpsa = input_cards(f"Cards {CYAN}president{END_T} ({g[pn]}) said after chancellor: ", q={3, 0})
     temp = input(f'Command: {INPUT_C}').upper()
@@ -824,14 +826,19 @@ while red < 5 and black < 6 and not Git_caput and not Git_cn:
         ccp = input_cards("New (last) try to input cards (debug version):", 1, c_p = True)
     if not cpsa:
         cpsa = cps
-    
+
     cps = coloring(cps)
     ccs = coloring(ccs)
     if ccp != 'V':
         ccp = coloring(ccp)
-        normal_logs.append(Log(prs=g[pn], cnc=g[cn], c_prs_said=cps, c_cnc_said=ccs, c_cnc_placed=ccp, c_prs_said_after=cpsa))
+        normal_logs.append(Log(prs=g[pn], cnc=g[cn], 
+                                                      c_prs_got=c_prs_got, c_prs_said=cps, c_prs_said_after=cpsa,
+                                                      c_cnc_got=c_cnc_got, c_cnc_said=ccs, c_cnc_placed=ccp))
     else:
-        normal_logs.append(Log(prs=g[pn], cnc=g[cn], c_prs_said=cps, c_cnc_said=ccs, c_cnc_placed="VETO", c_prs_said_after=cpsa, special="VETO"))
+        normal_logs.append(Log(prs=g[pn], cnc=g[cn], 
+                                                      c_prs_got=c_prs_got, c_prs_said=cps, c_prs_said_after=cpsa, 
+                                                      c_cnc_got=c_cnc_got, c_cnc_said=ccs, c_cnc_placed="VETO", 
+                                                      special="VETO"))
         ccp = PURPLE + "V" + END_T
     cpsa = coloring(cpsa)
     degov()
@@ -845,7 +852,7 @@ while red < 5 and black < 6 and not Git_caput and not Git_cn:
         cpsc = coloring(cpsc)
         logs.append(((g[pn].table(), f"{PURPLE + 'CARD CHECK' + END_T: <{LEN_FOR_TABLET}}"),
                      (cpsc, PURPLE + 'CH' + END_T, PURPLE + 'K' + END_T, '   ')))
-        normal_logs.append(Log(prs=g[pn], c_prs_said=cpsc, special="Card check"))
+        normal_logs.append(Log(prs=g[pn], c_prs_got=''.join(saved), c_prs_said=cpsc, special="Card check"))
         checks += 1
     elif black == 2 == checks:
         while True:

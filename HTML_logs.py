@@ -46,9 +46,9 @@ class Log:
     def to_HTML(self) -> str:
         president = f'\t<td style="color: {pr_c if self.is_president else purple_c}"><b>{self.prs}</b></td>\n'
         chancellor = f'\t<td style="color: {ch_c if self.is_chancellor else purple_c}"><b>{self.cnc}</b></td>\n'
-        c_prs_got = '' #  f"\t<td><b>{coloring_HTML_cards(self.cpg) if self.is_cards else self.cpg}</b></td>\n"
+        c_prs_got = f"\t<td><b>{coloring_HTML_cards(self.cpg) if self.is_cards else self.cpg}</b></td>\n"
         c_prs_said = f"\t<td><b>{coloring_HTML_cards(self.cps) if self.is_cards else self.cps}</b></td>\n"
-        c_cnc_got = '' #  f"\t<td><b>{coloring_HTML_cards(self.ccg) if self.is_cards else self.ccg}</b></td>\n"
+        c_cnc_got = f"\t<td><b>{coloring_HTML_cards(self.ccg) if self.is_cards else self.ccg}</b></td>\n"
         c_cnc_said = f"\t<td><b>{coloring_HTML_cards(self.ccs) if self.is_cards else self.ccs}</b></td>\n"
         c_cnc_placed = f"\t<td><b>{coloring_HTML_cards(self.ccp) if self.is_cards else self.ccp}</b></td>\n"
         c_prs_said_after = f"\t<td><b>{coloring_HTML_cards(self.cpsa) if self.is_cards else self.cpsa}</b></td>\n"
@@ -236,7 +236,9 @@ def create_HTML_logs_cards(logs, print_errors = True, is_print = True) -> str:
                         f"\t\t<th style=\"color: {num_c}\">N</th>"
                         f"\t\t<th style=\"color: {pr_c}\">President</th>"
                         f"\t\t<th style=\"color: {ch_c}\">Chancellor</th>"
+                        f"\t\t<th>Cards <font color=\"{pr_c}\">President</font> Got</th>"
                         f"\t\t<th>Cards <font color=\"{pr_c}\">President</font> Said</th>"
+                        f"\t\t<th>Cards <font color=\"{ch_c}\">Chancellor</font> Got</th>"
                         f"\t\t<th>Cards <font color=\"{ch_c}\">Chancellor</font> Said</th>"
                         f"\t\t<th>Card <font color=\"{ch_c}\">Chancellor</font> Placed</th>"
                         f"\t\t<th>Cards <font color=\"{pr_c}\">President</font> Said After <font color=\"{ch_c}\">Chancellor</font></th>"
