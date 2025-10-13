@@ -92,7 +92,7 @@ else:
             print(RED + BOLD + UNDERLINE + full_path +
                   f"    is already exists, trying {CYAN}{max_log_num}{END}")
             full_path = path + NAME_FOR_LOGS + date + str(max_log_num) + tp
-        print(f"{GOOD}Logs in: {full_path}")
+        print(f"{GOOD}Logs in: {full_path}{END}")
     except BaseException as err:
         print(f"{CRITICAL}Something went wrong: {err}{END}")
 gulag = c
@@ -829,9 +829,9 @@ while red < 5 and black < 6 and not Git_caput and not Git_cn:
     ccs = coloring(ccs)
     if ccp != 'V':
         ccp = coloring(ccp)
-        normal_logs.append(Log(g[pn], g[cn], cps, ccs, ccp, cpsa))
+        normal_logs.append(Log(prs=g[pn], cnc=g[cn], c_prs_said=cps, c_cnc_said=ccs, c_cnc_placed=ccp, c_prs_said_after=cpsa))
     else:
-        normal_logs.append(Log(g[pn], g[cn], cps, ccs, "", cpsa, special="VETO"))
+        normal_logs.append(Log(prs=g[pn], cnc=g[cn], c_prs_said=cps, c_cnc_said=ccs, c_cnc_placed="VETO", c_prs_said_after=cpsa, special="VETO"))
         ccp = PURPLE + "V" + END_T
     cpsa = coloring(cpsa)
     degov()
