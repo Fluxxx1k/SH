@@ -1,4 +1,5 @@
-from colors import PURPLE_TEXT, WARNING, END
+from colors import PURPLE_TEXT, WARNING, END, RESET_BACKGROUND, RESET_TEXT, UP
+from standard_names_SH import MyErr
 def color_clear(s:str | list, print_errors=True) -> str:
     """
     Removes all colors and returns new string.
@@ -55,21 +56,22 @@ def is_x_in_y(x: set | list | str, y: set | list | str) -> bool:
 def yes_or_no(text='Input for something (If you see it, you should understand what should be asked): ',
               yes: set = frozenset({'Y', 'YES'}),
               no: set = frozenset({'N', "NO"})) -> bool:
+    DBG_Y = "DEBUG_YES"
+    DBG_N = "DEBUG_NO"
     text = str(text).strip()
     if text == '':
-        print(f"{WARNING}No text!{END}")
-        text = 'Input for something (If you see it, you should understand what should be asked): '
+        pass
+        #print(f"{WARNING}No text!{END}")
+        #text = 'Input for something (If you see it, you should understand what should be asked): '
     elif text[-1] != ":":
         text += ": "
     else:
         text += " "
-    inp = input(text).strip().upper()
-    while True:
-        if inp in no or inp == "DEBUG_NO":
-            return False
-        elif inp in yes or inp == "DEBUG_YES":
-            return True
-        inp = input('\x1b[A' + f"{PURPLE_TEXT}New try: {text}{END}").strip().upper()
+    inp = my_input(text, upper=True, possible=yes|no|{DBG_N, DBG_Y})
+    if inp in no or inp == "DEBUG_NO":
+        return False
+    elif inp in yes or inp == "DEBUG_YES":
+        return True
 
 
 def show_only_to_one(text: str, hide_len: int = None) -> None:
@@ -85,7 +87,32 @@ def show_only_to_one(text: str, hide_len: int = None) -> None:
         print()
 
 
-# def my_input(prompt: str, *, possible=set(),strip=True, upper=False, lower=False, decimal=False) -> str:
-#     while True:
-
-
+def my_input(promt, color:str=RESET_TEXT+RESET_BACKGROUND, input_color=PURPLE_TEXT,*, 
+possible:set[str]|range=set(),strip=True, upper=False, lower=False, integer: bool=False) -> str|int:
+    x = input('\b'+color+promt+input_color)
+    print('\r' + END, end='')    
+    while True:
+        try:
+            if strip:
+                x = x.strip()
+            if upper:
+                x = x.upper()
+            if lower:
+                x = x.lower()
+            if possible:
+                if x not in possible:
+                    raise MyErr("Impossible")
+            if integer:
+                if not x.isdigit():
+                    raise MyErr("Not a digit")
+                return int(x)
+            return x
+        except MyErr as err:
+            x = input('\b'+UP+color+promt+input_color)
+            print('\r' + END, end='')
+        except KeyboardInterrupt as err:
+            raise err
+        except EOFError as err:
+            return ''
+        except BaseException as err:
+            print(f"{UP*2}Error occured while inputing: {WARNING}{err}{END}")
