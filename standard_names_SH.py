@@ -28,3 +28,5 @@ class Log:
     pass
 class LogInfo:
     pass
+class MyErr(BaseException):
+    pass
