@@ -5,7 +5,7 @@ import sys
 import random as rnd
 from atexit import register as atexit
 from standard_names_SH import *
-from standard_functions import color_clear, show_only_to_one, yes_or_no
+from standard_functions import color_clear, show_only_to_one, yes_or_no, is_x_in_y
 from HTML_logs import create_HTML_logs, color_of_HTML_roles, Log
 from colors import (RED_TEXT as RED,
                     GREEN_TEXT as BLACK,
@@ -17,7 +17,7 @@ from colors import (RED_TEXT as RED,
                     YELLOW_BACKGROUND as GULAG,
                     RESET_BACKGROUND as END_BG,
                     RESET_TEXT as END_T, 
-                    BOLD, END, UNDERLINE,
+                    BOLD, END, UNDERLINE, UP,
                     CRITICAL, WARNING, GOOD,
                     )
 
@@ -319,7 +319,7 @@ def get_color(x, out_type=''):
     x = color_clear(x)
     for i in [X.BLACK, X.HITLER, X.RIB]:
         if i in x:
-            if out_type == "Bot":
+            if out_type == X.BOT:
                 if i == X.HITLER:
                     return X.HTLR
                 return X.BLACK
@@ -328,19 +328,19 @@ def get_color(x, out_type=''):
             return BLACK + BOLD + X.BLACK + END
     for i in [X.RED, X.MOLOTOV, X.STALIN]:
         if i in x:
-            if out_type == "Bot":
+            if out_type == X.BOT:
                 return X.RED
             if out_type == "HTML":
                 return red_c
             return RED + BOLD + X.RED + END
     if X.NRH in x:
-        if out_type == "Bot":
+        if out_type == X.BOT:
             return X.NRH
         if out_type == "HTML":
             return nrh_c
         return BOLD + X.NRH + END
     else:
-        if out_type == "Bot":
+        if out_type == X.BOT:
             print(f"{RED}{BOLD}{UNDERLINE}Bot error, unknown role... Using {PURPLE}ANARCHIST{RED} type...{END}")
             return X.NRH
         if out_type == "HTML":
@@ -362,7 +362,7 @@ class Player:
         self.purge_suff = ''
         self.num = num
         self.role = role
-        self.color = get_color(self.role, out_type='Bot')
+        self.color = get_color(self.role, out_type=X.BOT)
         if self.color == X.HITLER:
             self.color = X.BLACK
         self.colored_color = get_color(self.role)
@@ -474,44 +474,44 @@ class Player:
 
         self.purge_suff = END_BG
 
-    def president(self, card: str | list[str], cnc: int):
+    def president(self, card: str | list[str], cnc: "Player"):
         card = ''.join(sorted(card)).upper()
         show_only_to_one(f"Remember, your role is {naming(self.role)}, color is {self.colored_color}.", hide_len=60)
         card1 = coloring(card.upper())
         print(card1)
-        phrase = f"You will say that here: "
+        phrase = f"{CYAN}You{END_T} will say that here: "
         words = input(phrase).strip().upper()
         while len(words) != 3 or not set(words).issubset({'X', "B", "R"}):
-            words = input('\x1b[A' + phrase).strip().upper()
-        print(f'\x1b[A{phrase}{coloring(words)}')
-        phrase1 = f"You will give to chancellor ({g[cnc]}): "
+            words = input(f'{UP}' + phrase).strip().upper()
+        print(f'{UP}{phrase}{coloring(words)}')
+        phrase1 = f"{CYAN}You{END_T} will give to {YELLOW}chancellor{END_T} ({g[cnc]}): "
         to_cnc = input(phrase1).strip().upper()
         if to_cnc == "RB":
             to_cnc = "BR"
-        while len(to_cnc) != 2 or ("B" + to_cnc != card and to_cnc + "R" != card):
-            to_cnc = input('\x1b[A' + phrase1).strip().upper()
-        print('\x1b[A\x1b[A\x1b[A' + "#" * len(card)) # ⣿
+        while len(to_cnc) != 2 or not is_x_in_y(to_cnc, card):
+            to_cnc = input(f'{UP}' + phrase1).strip().upper()
+        print(f'{UP * 3}' + "#" * len(card)) # ⣿
         print()
         print(phrase1 + '#' * len(to_cnc))
         return words, to_cnc, yes_or_no("Veto? ") if black == 5 else False
 
-    def chancellor(self, card:str, prs, words, veto):
+    def chancellor(self, card:str, prs:"Player", words, veto):
         show_only_to_one(f"Remember, your role is {naming(self.role)}, color is {self.colored_color}.", hide_len=60)
         card1 = coloring(card)
         print(card1)
         phrase = f"You will say that here: "
         words = input(phrase).strip().upper()
         while len(words) != 2 or not set(words).issubset({'X', "B", "R"}):
-            words = input('\x1b[A' + phrase).strip().upper()
-        print(f'\x1b[A{phrase}{coloring(words)}')
+            words = input(f'{UP}' + phrase).strip().upper()
+        print(f'{UP}{phrase}{coloring(words)}')
         phrase1 = f"You will place: "
         placed = input(phrase1).strip().upper()
         while len(placed) != 1 or placed not in cards:
             if placed == "VETO" and veto:
                 break
-            placed = input('\x1b[A' + phrase1).strip().upper()
+            placed = input(f'{UP}' + phrase1).strip().upper()
 
-        print('\x1b[A\x1b[A\x1b[A' + "#" * len(card)) # ⣿
+        print(f'{UP * 3}' + "#" * len(card)) # ⣿
         print()
         if placed == "VETO":
             return words, "X"
@@ -527,13 +527,13 @@ class Player:
 
 
 class Bot(Player):
-    base_name = "Bot"
+    base_name = X.BOT
 
     def __init__(self, num="ERR", role=f"{PURPLE}ANARCHIST{END}",
                  name="RANDOM",
                  ):
         super().__init__(num, role, name)
-        self.bot_mind = get_color(self.role, out_type='Bot')
+        self.bot_mind = get_color(self.role, out_type=X.BOT)
         self.risk = rnd.random()
         self.black = []
         if self.bot_mind == X.BLACK:
