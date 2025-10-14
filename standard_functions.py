@@ -83,3 +83,9 @@ def show_only_to_one(text: str, hide_len: int = None) -> None:
     if yes_or_no("Hide? ", no=set()):
         print(f"{END}\x1b[A\x1b[A" + "#" * hide_len) # ⣿
         print()
+
+
+# def my_input(prompt: str, *, possible=set(),strip=True, upper=False, lower=False, decimal=False) -> str:
+#     while True:
+
+
