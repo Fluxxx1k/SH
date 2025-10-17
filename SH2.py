@@ -15,13 +15,11 @@ from colors import (YELLOW_TEXT as YELLOW,
                     CRITICAL, WARNING, GOOD, UP,
                     )
 from utils import *
-
+from user_settings import *
 INPUT_C = BOLD + PURPLE
 ff = __file__
 print(ff)
 saved = []
-NAME_FOR_LOGS = "SH LOG_TEST "  # You can change it
-tp = '.html'  # расширение
 path = os.path.dirname(ff) + "/LOGS/"
 date = t.strftime("%d.%m.%y ")
 MAX_NAME_LEN = 15  # You can change it from 10 to infinity
@@ -41,7 +39,7 @@ while True:
     try:
         c = int(input(f"Input number of players: {INPUT_C}"))
         print(END, end='')
-        if c < 4 or c > 10:
+        if c < MIN_PLAYER_NUM or c > MAX_PLAYER_NUM:
             raise ValueError(f"Wrong size! ({c})")
     except BaseException as err:
         print(f"{RED}Try again, wrong input: {err}{END_T}")
@@ -82,11 +80,10 @@ else:
         full_path = None
 gulag = c
 killed = c
-roles = [X.HITLER] + [X.BLACK] * (0 if c < 5 else 1 if c < 7 else 2 if c < 9 else 3)
-roles.extend([X.RED] * (c - len(roles)))
-rnd.shuffle(roles)
 hitler = c
 stalin = c
+roles, molotov_ribbentrop = get_roles(c)
+
 try:
     stalin = roles.index(X.STALIN)
 except ValueError:
@@ -98,7 +95,7 @@ try:
 except ValueError:
     print(f"{WARNING}WTH? No {X.HITLER} in roles...{END}")
 except BaseException as err:
-    print(f"Can't find {X.STALIN= }: {err}")
+    print(f"Can't find {X.HITLER= }: {err}")
 
 start_time = t.time()
 start_time_f = t.strftime("%d.%m.%y %H:%M:%S")
@@ -108,7 +105,7 @@ checks = 1
 Git_caput = False
 Git_cn = False
 f_l = {"OUT", "DEBUG_MODE", "EXIT"}
-molotov_ribbentrop = True
+
 
 
 def out(count = c, file=sys.stdout):
@@ -427,6 +424,7 @@ class Player:
         print(f'{UP * 3}' + "#" * len(card)) # ⣿
         print()
         if placed == "VETO":
+            print(phrase1 + "Nothing (Veto)")
             return words, "X"
         print(phrase1 + coloring(placed))
         return words, placed
@@ -623,7 +621,7 @@ while True:
             break
 pn -= 1
 pnc = pn
-while red < 5 and black < 6 and not Git_caput and not Git_cn:
+while red < RED_WIN_NUM and black < BLACK_WIN_NUM and not Git_caput and not Git_cn:
     if pnc != pn:
         if special_election:
             print(f"{PURPLE}{pnc = } != {pn = } => Внеоф{END_T}")
@@ -631,7 +629,7 @@ while red < 5 and black < 6 and not Git_caput and not Git_cn:
             # print(f"{PURPLE}WTF?!! (Line 160)")
             print(f"{PURPLE}{pnc = } != {pn = } but {special_election = }{END_T}")
             pn = pnc
-    if skips > 2:
+    if skips >= ANARCHY_SKIP_NUM:
         if yes_or_no(f"Anarchy? (Skips: {skips}): "):
             if saved:
                 logs.append(((f"{PURPLE + 'SHUFFLED' + END_T: <{LEN_FOR_TABLET}}",
@@ -736,7 +734,7 @@ while red < 5 and black < 6 and not Git_caput and not Git_cn:
         red += 1
         black += 1
     elif (ccp == 'VETO' or ccp == "X") and black >= 5:
-        print(f"{PURPLE}Passing cuz VETO{END_T}")
+        print(f"{GOOD}{PURPLE}VETO{END_T}")
         ccp = "V"
     else:
         print(f"WTH?!!!! {ccp} isn't 'B' or 'R'")
@@ -754,7 +752,7 @@ while red < 5 and black < 6 and not Git_caput and not Git_cn:
     else:
         normal_logs.append(Log(prs=g[pn], cnc=g[cn], 
                                                       c_prs_got=c_prs_got, c_prs_said=cps, c_prs_said_after=cpsa, 
-                                                      c_cnc_got=c_cnc_got, c_cnc_said=ccs, c_cnc_placed="VETO", 
+                                                      c_cnc_got=c_cnc_got, c_cnc_said=ccs, c_cnc_placed="",
                                                       special="VETO"))
         ccp = PURPLE + "V" + END_T
     cpsa = coloring(cpsa)
@@ -892,12 +890,12 @@ try:
         print("Game start time: " + start_time_f, file=f)
         print("Game over time: " + end_time_f, file=f)
 
-        if red >= 5 or Git_caput:
+        if red >= RED_WIN_NUM or Git_caput:
             print(f"{RED}{BOLD}{UNDERLINE}RED    WON!!!{END}")
             print(f"{RED}{BOLD}{UNDERLINE}RED    WON!!!{END}", file=f)
             if Git_caput:
                 print(f"{RED}(Hitler caput){END_T}", file=f)
-        elif black >= 6 or Git_cn:
+        elif black >= BLACK_WIN_NUM or Git_cn:
             print(f"{BLACK}{BOLD}{UNDERLINE}BLACK    WON!!!{END}")
             print(f"{BLACK}{BOLD}{UNDERLINE}BLACK    WON!!!{END}", file=f)
             if Git_cn:
