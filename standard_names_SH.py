@@ -17,6 +17,7 @@ class X:
     GULAG = "GULAG"
     SHOUT = "SHOUT"
     KILLED = "KILLED"
+    BOT = "Bot"
 # class HTML(str):
 #     pass
 
