@@ -1,18 +1,8 @@
 from standard_functions import color_clear
 from standard_names_SH import *
 from colors import CRITICAL, WARNING, RESET
-pr_c = 'cyan'
-ch_c = 'yellow'
-red_c = 'red'
-black_c = 'lime'
-nrh_c = 'DeepSkyBlue'
-purple_c = 'DarkViolet'
-num_c = "orange"
-norm_c_cut = 'white'
-font_c_cut = 'black'
-norm_c = '"' + norm_c_cut + '"'
-font_c = '"' + font_c_cut + '"'
-special_c = "DeepPink"
+from HTML_colors import *
+
 
 class Log:
     def __init__(self, prs='', cnc='', c_prs_got = '', c_prs_said='', c_cnc_got='', c_cnc_said='', c_cnc_placed='', c_prs_said_after='', special='', reserve='',

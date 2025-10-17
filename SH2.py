@@ -1,25 +1,20 @@
-# logging ТГ
 import time as t
 import os
 import sys
 import random as rnd
 from atexit import register as atexit
 from standard_names_SH import *
-from standard_functions import color_clear, show_only_to_one, yes_or_no, is_x_in_y
+from standard_functions import show_only_to_one, yes_or_no, is_x_in_y
 from HTML_logs import create_HTML_logs, color_of_HTML_roles, Log
-from colors import (RED_TEXT as RED,
-                    GREEN_TEXT as BLACK,
-                    YELLOW_TEXT as YELLOW,
+from colors import (YELLOW_TEXT as YELLOW,
                     BLUE_TEXT as BLUE,
-                    PURPLE_TEXT as PURPLE,
                     CYAN_TEXT as CYAN,
                     RED_BACKGROUND as DEAD,
                     YELLOW_BACKGROUND as GULAG,
                     RESET_BACKGROUND as END_BG,
-                    RESET_TEXT as END_T, 
-                    BOLD, END, UNDERLINE, UP,
-                    CRITICAL, WARNING, GOOD,
+                    CRITICAL, WARNING, GOOD, UP,
                     )
+from utils import *
 
 INPUT_C = BOLD + PURPLE
 ff = __file__
@@ -31,18 +26,6 @@ path = os.path.dirname(ff) + "/LOGS/"
 date = t.strftime("%d.%m.%y ")
 MAX_NAME_LEN = 15  # You can change it from 10 to infinity
 LEN_FOR_TABLET = MAX_NAME_LEN + max(len(CYAN), len(YELLOW)) + len(END_T)
-pr_c = 'cyan'
-ch_c = 'yellow'
-red_c = 'red'
-black_c = 'lime'
-nrh_c = 'DeepSkyBlue'
-purple_c = 'DarkViolet'
-num_c = "orange"
-norm_c_cut = 'white'
-font_c_cut = 'black'
-norm_c = '"' + norm_c_cut + '"'
-font_c = '"' + font_c_cut + '"'
-special_c = "DeepPink"
 special_election = False
 skips = 0
 logs: list[tuple[tuple[str, str], tuple[str, str, str, str]]] = []
@@ -132,41 +115,6 @@ def out(count = c, file=sys.stdout):
     for player_num in range(count):
         print(f"№{player_num + 1}) {g[player_num].out()}", file=file)
 
-
-def coloring(s, sort=True):
-    if sort:
-        s = sorted(s)
-    s1 = ''
-    for i in s:
-        if i in {"B", "H"}:
-            s1 += BLACK + i + END_T
-        elif i in {'R', 'S'}:
-            s1 += RED + i + END_T
-        elif i == 'X':
-            s1 += i
-        else:
-            print(f"{i} should be 'X' or 'R' or 'B'")
-    return s1
-
-
-def naming(s:str) -> str:
-    if s in {"R", X.RED}:
-        return RED + "RED" + END_T
-    if s in {"H", X.HITLER}:
-        return BLACK + "HITLER" + END_T
-    if s in {"B", "BLACK"}:
-        return BLACK + "BLACK" + END_T
-    if s in {"S", "STALIN"}:
-        return RED + "STALIN" + END_T
-    if s in {"M", "MOLOTOV"}:
-        return RED + "MOLOTOV" + END_T
-    if s in {"REB", "RIBBENTROP"}:
-        return BLACK + "RIBBENTROP" + END_T
-    if s in {"A", "ANARCHY", "ANARCHIST"}:
-        return PURPLE + "ANARCHIST" + END_T
-    if s in {"X", "UNKNOWN", "IDK"}:
-        return "UNKNOWN"
-    return "ERROR"
 
 
 def dbg(s:str) -> bool:
@@ -315,43 +263,6 @@ def take_random(count:int) -> list[str]:
     for i in chosen:
         deck.remove(i)
     return chosen
-
-
-def get_color(x, out_type=''):
-    x = color_clear(x)
-    for i in [X.BLACK, X.HITLER, X.RIB]:
-        if i in x:
-            if out_type == X.BOT:
-                if i == X.HITLER:
-                    return X.HTLR
-                return X.BLACK
-            if out_type == "HTML":
-                return black_c
-            return BLACK + BOLD + X.BLACK + END
-    for i in [X.RED, X.MOLOTOV, X.STALIN]:
-        if i in x:
-            if out_type == X.BOT:
-                return X.RED
-            if out_type == "HTML":
-                return red_c
-            return RED + BOLD + X.RED + END
-    if X.NRH in x:
-        if out_type == X.BOT:
-            return X.NRH
-        if out_type == "HTML":
-            return nrh_c
-        return BOLD + X.NRH + END
-    else:
-        if out_type == X.BOT:
-            print(f"{RED}{BOLD}{UNDERLINE}Bot error, unknown role... Using {PURPLE}ANARCHIST{RED} type...{END}")
-            return X.NRH
-        if out_type == "HTML":
-            return norm_c
-        return BOLD + "ERROR, please, show it in IRL" + END
-
-
-def weighted_random(a, weights):
-    return rnd.choices(a, weights, k=1)[0]
 
 
 class Player:
