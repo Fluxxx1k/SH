@@ -79,6 +79,7 @@ try:
     check_logs = os.listdir(path)
 except BaseException as err:
     print(f"{CRITICAL}Strange Error: {err}\nLogs won't be created{END}")
+    full_path = None
 else:
     try:
         logs_nums = []
@@ -94,7 +95,8 @@ else:
             full_path = path + NAME_FOR_LOGS + date + str(max_log_num) + tp
         print(f"{GOOD}Logs in: {full_path}{END}")
     except BaseException as err:
-        print(f"{CRITICAL}Something went wrong: {err}{END}")
+        print(f"{CRITICAL}Something went wrong, no logs avaible: {err}{END}")
+        full_path = None
 gulag = c
 killed = c
 roles = [X.HITLER] + [X.BLACK] * (0 if c < 5 else 1 if c < 7 else 2 if c < 9 else 3)
@@ -127,8 +129,8 @@ molotov_ribbentrop = True
 
 
 def out(count = c, file=sys.stdout):
-    for i in range(count):
-        print(f"№{i + 1}) {g[i].out()}", file=file)
+    for player_num in range(count):
+        print(f"№{player_num + 1}) {g[player_num].out()}", file=file)
 
 
 def coloring(s, sort=True):
@@ -484,7 +486,7 @@ class Player:
         while len(words) != 3 or not set(words).issubset({'X', "B", "R"}):
             words = input(f'{UP}' + phrase).strip().upper()
         print(f'{UP}{phrase}{coloring(words)}')
-        phrase1 = f"{CYAN}You{END_T} will give to {YELLOW}chancellor{END_T} ({g[cnc]}): "
+        phrase1 = f"{CYAN}You{END_T} will give to {YELLOW}chancellor{END_T} ({cnc}): "
         to_cnc = input(phrase1).strip().upper()
         if to_cnc == "RB":
             to_cnc = "BR"
