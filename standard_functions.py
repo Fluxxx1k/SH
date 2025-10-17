@@ -56,8 +56,8 @@ def is_x_in_y(x: set | list | str, y: set | list | str) -> bool:
 def yes_or_no(text='Input for something (If you see it, you should understand what should be asked): ',
               yes: set = frozenset({'Y', 'YES'}),
               no: set = frozenset({'N', "NO"})) -> bool:
-    DBG_Y = "DEBUG_YES"
-    DBG_N = "DEBUG_NO"
+    dbg_y = "DEBUG_YES"
+    dbg_n = "DEBUG_NO"
     text = str(text).strip()
     if text == '':
         pass
@@ -67,11 +67,21 @@ def yes_or_no(text='Input for something (If you see it, you should understand wh
         text += ": "
     else:
         text += " "
-    inp = my_input(text, upper=True, possible=yes|no|{DBG_N, DBG_Y})
+    inp = my_input(text, upper=True, possible=yes|no|{dbg_n, dbg_y})
     if inp in no or inp == "DEBUG_NO":
         return False
     elif inp in yes or inp == "DEBUG_YES":
         return True
+    else:
+        inp = my_input("ERROR" + text, upper=True, possible={"YES", "NO", dbg_n, dbg_y})
+        if inp == "YES":
+            return True
+        elif inp == "NO":
+            return False
+        else:
+            print(f"{UP}FUCK, IDK")
+            return False
+
 
 
 def show_only_to_one(text: str, hide_len: int = None) -> None:
@@ -87,9 +97,11 @@ def show_only_to_one(text: str, hide_len: int = None) -> None:
         print()
 
 
-def my_input(promt, color:str=RESET_TEXT+RESET_BACKGROUND, input_color=PURPLE_TEXT,*, 
-possible:set[str]|range=set(),strip=True, upper=False, lower=False, integer: bool=False) -> str|int:
-    x = input('\b'+color+promt+input_color)
+def my_input(prompt, color:str= RESET_TEXT + RESET_BACKGROUND, input_color=PURPLE_TEXT, *,
+             possible:set[str]=None, strip=True, upper=False, lower=False, integer: bool=False) -> str|int:
+    if possible is None:
+        possible = set()
+    x = input('\b' + color + prompt + input_color)
     print('\r' + END, end='')    
     while True:
         try:
@@ -108,11 +120,11 @@ possible:set[str]|range=set(),strip=True, upper=False, lower=False, integer: boo
                 return int(x)
             return x
         except MyErr as err:
-            x = input('\b'+UP+color+promt+input_color)
+            x = input('\b' + UP + str(err.args[0]) + ": " + color + prompt + input_color)
             print('\r' + END, end='')
         except KeyboardInterrupt as err:
             raise err
         except EOFError as err:
-            return ''
+            return str(err)
         except BaseException as err:
-            print(f"{UP*2}Error occured while inputing: {WARNING}{err}{END}")
+            print(f"{UP*2}Error occurred while inputting: {WARNING}{err}{END}")

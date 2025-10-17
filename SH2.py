@@ -95,7 +95,7 @@ else:
             full_path = path + NAME_FOR_LOGS + date + str(max_log_num) + tp
         print(f"{GOOD}Logs in: {full_path}{END}")
     except BaseException as err:
-        print(f"{CRITICAL}Something went wrong, no logs avaible: {err}{END}")
+        print(f"{CRITICAL}Something went wrong, no logs available: {err}{END}")
         full_path = None
 gulag = c
 killed = c
