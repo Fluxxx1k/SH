@@ -1,8 +1,10 @@
 from standard_functions import color_clear
 from standard_names_SH import X, LogInfo
-from colors import CRITICAL, WARNING, RESET
+from colors import RESET
+from user_color_settings import WARNING, CRITICAL
 from HTML_colors import *
 from player import Player
+from user_settings import IS_PRINT_SMALL_INFO, IS_PRINT_FULL_INFO
 
 
 class Log:
@@ -47,7 +49,7 @@ class Log:
         row = president + chancellor + c_prs_got + c_prs_said + c_cnc_got + c_cnc_said + c_cnc_placed + c_prs_said_after + special
         return row
 
-def coloring_HTML_cards(s: str, print_errors = True, is_print=True) -> str:
+def coloring_HTML_cards(s: str, print_errors = IS_PRINT_FULL_INFO, is_print=IS_PRINT_SMALL_INFO) -> str:
     try:
         s = sorted(color_clear(s))
         errs = 0
@@ -75,7 +77,7 @@ def coloring_HTML_cards(s: str, print_errors = True, is_print=True) -> str:
         return s
 
 
-def color_of_HTML_roles(s: str, print_errors=True, is_print = True) -> str:
+def color_of_HTML_roles(s: str, print_errors=IS_PRINT_FULL_INFO, is_print = IS_PRINT_SMALL_INFO) -> str:
     try:
         s = color_clear(s)
         if s in {X.RED, X.STALIN, X.MOLOTOV}:
@@ -97,7 +99,7 @@ def color_of_HTML_roles(s: str, print_errors=True, is_print = True) -> str:
         return norm_c
 
 
-def create_HTML_roles(players: list["Player"] = None, roles: list[str] = None, print_errors = True, is_print = True) -> str:
+def create_HTML_roles(players: list["Player"] = None, roles: list[str] = None, print_errors = IS_PRINT_FULL_INFO, is_print = IS_PRINT_SMALL_INFO) -> str:
     try:
         table_caption = ('\t<caption><h1><b>'
                          'Таблица ролей'
@@ -180,7 +182,7 @@ def create_HTML_roles(players: list["Player"] = None, roles: list[str] = None, p
         return ''
 
 
-def create_HTML_info(logs: list["LogInfo"] = None, print_errors = True) -> str:
+def create_HTML_info(logs: list["LogInfo"] = None, print_errors = IS_PRINT_FULL_INFO) -> str:
     table_caption = ("\t<caption><h1><strong>"
                      "Таблица с информацией об игре"
                      "<br>"
@@ -215,7 +217,7 @@ def create_HTML_info(logs: list["LogInfo"] = None, print_errors = True) -> str:
     return table
 
 
-def create_HTML_logs_cards(logs, print_errors = True, is_print = True) -> str:
+def create_HTML_logs_cards(logs, print_errors = IS_PRINT_FULL_INFO, is_print = IS_PRINT_SMALL_INFO) -> str:
     try:
         table_caption = ("<caption><h1><strong>"
                          "Таблица событий игры"

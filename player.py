@@ -3,22 +3,21 @@ from colors import (YELLOW_BACKGROUND_BRIGHT as GULAG,
                     RED_BACKGROUND_BRIGHT as DEAD,
                     RESET_BACKGROUND as END_BG,
                     )
-import random as rnd
-from utils import get_color, coloring, naming
+from utils import get_color, coloring, naming, input_cards
 from standard_names_SH import X
-from standard_functions import show_only_to_one, yes_or_no, is_x_in_y
-from colors import (PURPLE_TEXT_BRIGHT as PURPLE,
-                    BLUE_TEXT_BRIGHT as BLUE,
+from standard_functions import show_only_to_one, yes_or_no, is_x_in_y, my_input
+from colors import (BLUE_TEXT_BRIGHT as BLUE,
                     CYAN_TEXT_BRIGHT as CYAN,
                     YELLOW_TEXT_BRIGHT as YELLOW,
                     RESET_TEXT as END_T,
                     END, UP,
                     )
 
+
 class Player:
     base_name = "Player"
 
-    def __init__(self, num, name="RANDOM", role=f"{PURPLE}ANARCHIST{END}"):
+    def __init__(self, num: int, name: str, role: str):
         self.gov_pref = ''
         self.gov_suff = ''
         self.purge_pref = ''
@@ -51,11 +50,13 @@ class Player:
     # def __radd__(self, s):
     #     self.prefix += s
     #     return self
+    def __or__(self, other):
+        return None
 
     def __str__(self):
         return self.name
 
-    def __eq__(self, other):
+    def __eq__(self, other: "Player str"):
         if type(other) == str:
             if self.name == other:
                 return True
@@ -84,8 +85,8 @@ class Player:
             return True
         return False
 
-    def __format__(self, args):
-        return str(self).format(*args)
+    def __format__(self, *args, **kwargs):
+        return str(self).format(*args, **kwargs)
 
     def degov(self):
         self.gov_suff = ''
@@ -124,10 +125,10 @@ class Player:
             self.purge_pref = BLUE
         self.purge_suff = END_BG
 
-    def president(self, card: str | list[str], cnc: "Player", *, black, red):
-        card = ''.join(sorted(card)).upper()
+    def president(self, cards: str | list[str], cnc: "Player", *, black, red):
+        cards = ''.join(sorted(cards)).upper()
         show_only_to_one(f"Remember, your role is {naming(self.role)}, color is {self.colored_color}.", hide_len=60)
-        card1 = coloring(card.upper())
+        card1 = coloring(cards.upper())
         print(card1)
         phrase = f"{CYAN}You{END_T} will say that here: "
         words = input(phrase).strip().upper()
@@ -138,172 +139,47 @@ class Player:
         to_cnc = input(phrase1).strip().upper()
         if to_cnc == "RB":
             to_cnc = "BR"
-        while len(to_cnc) != 2 or not is_x_in_y(to_cnc, card):
+        while len(to_cnc) != 2 or not is_x_in_y(to_cnc, cards):
             to_cnc = input(f'{UP}' + phrase1).strip().upper()
-        print(f'{UP * 3}' + "#" * len(card)) # ⣿
+        print(f'{UP * 3}' + "#" * len(cards))  # ⣿
         print()
         print(phrase1 + '#' * len(to_cnc))
         return words, to_cnc, yes_or_no("Veto? ") if black == 5 else False
 
-    def chancellor(self, card:str, prs:"Player", words, veto, *, black, red):
+    def chancellor(self, cards: str, prs: "Player", words, veto, *, black, red):
         show_only_to_one(f"Remember, your role is {naming(self.role)}, color is {self.colored_color}.", hide_len=60)
-        card1 = coloring(card)
+        card1 = coloring(cards)
         print(card1)
         phrase = f"You will say that here: "
-        words = input(phrase).strip().upper()
-        while len(words) != 2 or not set(words).issubset({'X', "B", "R"}):
-            words = input(f'{UP}' + phrase).strip().upper()
-        print(f'{UP}{phrase}{coloring(words)}')
+        words_ch = input(phrase).strip().upper()
+        while len(words_ch) != 2 or not set(words_ch).issubset({'X', "B", "R"}):
+            words_ch = input(f'{UP}' + phrase).strip().upper()
+        print(f'{UP}{phrase}{coloring(words_ch)}')
         phrase1 = f"You will place: "
-        placed = input(phrase1).strip().upper()
-        while len(placed) != 1 or placed not in card:
-            if placed == "VETO" and veto:
-                break
-            placed = input(f'{UP}' + phrase1).strip().upper()
-
-        print(f'{UP * 3}' + "#" * len(card)) # ⣿
+        placed = my_input(phrase1, upper=True, possible=set(cards))
+        print(f'{UP * 3}' + "#" * len(cards))  # ⣿
         print()
         if placed == "VETO":
             print(phrase1 + "Nothing (Veto)")
-            return words, "X"
+            return words_ch, "X"
         print(phrase1 + coloring(placed))
-        return words, placed
+        return words_ch, placed
+
+    def president_said_after_chancellor(self, *, cards: str, cnc: "Player", ccg: str, cps: str, ccs: str,
+                                        ccp: str) -> str:
+        phrase = f"Cards {CYAN}president{END_T} ({self}) said after chancellor ({cnc}): "
+        cpsa = input_cards(phrase, q={3, 0})
+        print(UP + phrase + coloring(cpsa))
+        return cpsa
+
+    def check_cards(self):
+        ...
 
     def table(self):
         return self.gov_pref + self.purge_pref + self.prefix + self.tablet_name + self.gov_suff + self.purge_suff + self.suffix
 
     def out(self):
         return self.gov_pref + self.purge_pref + self.prefix + self.name + self.gov_suff + self.purge_suff + self.suffix
-
-
-
-class Bot(Player):
-    base_name = X.BOT
-
-    def __init__(self, num="ERR", role=f"{PURPLE}ANARCHIST{END}",
-                 name="RANDOM",
-                 ):
-        super().__init__(num, role, name)
-        self.bot_mind = get_color(self.role, out_type=X.BOT)
-        self.risk = rnd.random()
-        self.black = []
-        # if self.bot_mind == X.BLACK:
-        #     for player_num in range(c):
-        #         if g[player_num].color == X.BLACK:
-        #             self.black.append(player_num)
-
-    def __repr__(self):
-        s = super().__repr__()
-        s += " "
-        s += f"[BOT INFO: {self.bot_mind= }, {self.dark= }, {self.risk= }]"
-        return s
-
-    def president(self, card, cnc, *, black, red) -> tuple[str, list[str], bool]:
-        card = sorted(card)
-        if self.bot_mind == X.HTLR:
-            if card == ["R", "R", "R"]:
-                return "XXX", ["R", "R"], black == 5
-            if card == ["B", "R", "R"]:
-                return "XXX", ["B", "R"], False
-            if card == ["B", "B", "R"]:
-                if rnd.random() < 0.9 or red == 4 or black == 5:
-                    return "XXX", ["B", "B"], False
-                else:
-                    return "XXX", ["B", "R"], False
-            if card == ["B", "B", "B"]:
-                return "XXX", ["B", "B"], False
-        if self.bot_mind == X.BLACK:
-            if card == ["B", "R", "R"]:
-                return "XXX", ["B", "R"], False
-            if card == ["B", "B", "R"]:
-                if rnd.random() < 0.96 or red == 4 or black == 5:
-                    return "XXX", ["B", "B"], False
-                else:
-                    return "XXX", ["B", "R"], False
-            if card == ["B", "B", "B"]:
-                return "XXX", ["B", "B"], False
-            if card == ["R", "R", "R"]:
-                return "XXX", ["R", "R"], black == 5
-            print("Unknown situation {card= }")
-            return "XXX", card[:2], black == 5
-        if self.bot_mind == X.RED:
-            if card == ["B", "R", "R"]:
-                if red == 4 or black == 5:
-                    return "XXX", ["R", "R"], False
-                else:
-                    if cnc in self.black:
-                        return "XXX", ["R", "R"], False
-                    return "XXX", ["B", "R"], False
-            if card == ["B", "B", "R"]:
-                return "XXX", ["B", "R"], False
-            if card == ["R"] * 3:
-                return "XXX", ["R"] * 2, False
-            if card == ["B"] * 3:
-                return "XXX", ["B"] * 2, black == 5
-            print("Unknown situation {card= }")
-            return "XXX", card[1:], black == 5
-        if self.bot_mind == X.NRH:
-            if "B" in card and "R" in card:
-                return "XXX", ["B", "R"], black == 5
-            else:
-                return "XXX", card[1:], black == 5
-        else:
-            print(f"Unknown {self.bot_mind= }")
-            if "B" in card and "R" in card:
-                return "XXX", ["B", "R"], black == 5
-            else:
-                return "XXX", card[1:], black == 5
-
-    def chancellor(self, card, prs, words, veto, *, black, red) -> tuple[str, str]:
-        card = sorted(card)
-        if self.bot_mind == X.RED:
-            if "R" in card:
-                return "XX", "R"
-            elif veto:
-                return "XX", "X"
-            else:
-                return "XX", 'B'
-        if self.bot_mind == X.HTLR:
-            if red == 4 or black == 5:
-                if "B" in card:
-                    return "XX", "B"
-                if veto:
-                    return "XX", 'X'
-                return "XX", "R"
-            if "B" in card and prs in self.black and (words == "BBB" or words == "XXX"):
-                return "XX", "B"
-            else:
-                return "XX", "R"
-        if self.bot_mind == X.BLACK:
-            if card == ["B"] * 2:
-                return "XX", "B"
-            if card == ["R"]:
-                if veto:
-                    return "XX", 'X'
-                return "XX", "R"
-            if red == 4 or black == 5:
-                return "XX", "B"
-            if prs in self.black and (words == "BBB" or words == "XXX"):
-                return "XX", "B"
-            if red == 3:
-                if rnd.random() < 0.69:
-                    return "XX", "R"
-                return "XX", "B"
-            if rnd.random() < 0.96:
-                return "XX", "R"
-            return "XX", "B"
-        else:
-            if self.bot_mind != X.NRH:
-                print("Unknown role {self.bot_mind= }")
-            if red <= black:
-                if "R" in card:
-                    return "XX", "R"
-                return "XX", "B"
-            else:
-                if "B" in card:
-                    return "XX", "B"
-                return "XX", "R"
-
 
 #    def check_color(self):
 #        x = weighted_random(g, list(map(Player.dark, g)))

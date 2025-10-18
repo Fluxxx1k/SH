@@ -11,6 +11,8 @@ BLACK_WIN_NUM = 6
 
 ANARCHY_SKIP_NUM = 3
 
+IS_PRINT_FULL_INFO = True
+IS_PRINT_SMALL_INFO = True
 def get_roles(c: int) -> tuple[list[str], bool]:
     import random
     from standard_names_SH import X

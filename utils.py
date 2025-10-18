@@ -5,8 +5,10 @@ from colors import (GREEN_TEXT_BRIGHT as BLACK,
                     RESET_TEXT as END_T,
                     RED_TEXT as RED,
                     PURPLE_TEXT as PURPLE,
-                    BOLD, END, UNDERLINE,
+                    BOLD, END, UNDERLINE
                     )
+from user_color_settings import INPUT_COLOR, WARNING
+
 
 def coloring(s, sort=True, is_print=True):
     if sort:
@@ -81,10 +83,36 @@ def get_color(x, out_type=''):
             return X.NRH
         if out_type == "HTML":
             return norm_c
-        return BOLD + "ERROR, please, show it in IRL" + END
+        return WARNING + "ERROR, please, show it in IRL" + END
 
 
 def weighted_random(a, weights):
     import random
     return random.choices(a, weights, k=1)[0]
+
+
+def input_cards(text=f"{WARNING}Some input: {END_T}", q: int | set[int] = 0, c_p:bool=False, veto=False) -> str:
+    """
+    c_p - chancellor placing, don't laugh
+    """
+    if not isinstance(veto, bool):
+        print(f"{RED}{BOLD}{UNDERLINE}{veto = } | it's not good!{END}")
+        veto = True
+    letters = {'X', 'R', 'B'}
+    if q == 0:  # quality didn't change
+        print(f"{RED}{BOLD}{UNDERLINE}Input length is {q = }, it will be 1-3 now")
+        q = {1, 2, 3}
+    elif not isinstance(q, set):
+        q = {q}
+    if c_p and not veto:  # chancellor should place card if it wasn't veto
+        letters -= {'X'}
+    if c_p:  # if president was skipped in game, but not in code
+        letters.add("SKIP")
+    inp = input(text + END + INPUT_COLOR).strip().upper()
+    print(END, end='')
+    while len(inp) not in q or (len(letters | set(inp)) > 3 and inp not in letters):
+        print(f"{RED}WRONG    INPUT{END}")
+        inp = input(PURPLE + "New try: " + END_T + text + END + INPUT_COLOR).strip().upper()
+        print(END, end='')
+    return inp
 
