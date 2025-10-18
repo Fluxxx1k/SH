@@ -3,18 +3,23 @@ import os
 import sys
 import random as rnd
 from atexit import register as atexit
-from standard_names_SH import *
+from standard_names_SH import X
 from standard_functions import show_only_to_one, yes_or_no, is_x_in_y
-from HTML_logs import create_HTML_logs, color_of_HTML_roles, Log
-from colors import (YELLOW_TEXT as YELLOW,
-                    BLUE_TEXT as BLUE,
-                    CYAN_TEXT as CYAN,
+from HTML_logs import create_HTML_logs, color_of_HTML_roles, Log, pr_c, purple_c
+from colors import (YELLOW_TEXT_BRIGHT as YELLOW,
+                    BLUE_TEXT_BRIGHT as BLUE,
+                    CYAN_TEXT_BRIGHT as CYAN,
+                    PURPLE_TEXT_BRIGHT as PURPLE,
+                    RED_TEXT_BRIGHT as RED,
+                    GREEN_TEXT_BRIGHT as BLACK,
+                    RESET_TEXT as END_T,
+                    RESET_BACKGROUND as END_BG,
                     RED_BACKGROUND as DEAD,
                     YELLOW_BACKGROUND as GULAG,
-                    RESET_BACKGROUND as END_BG,
                     CRITICAL, WARNING, GOOD, UP,
+                    END, BOLD, UNDERLINE,
                     )
-from utils import *
+from utils import coloring, naming, get_color
 from user_settings import *
 INPUT_C = BOLD + PURPLE
 ff = __file__
@@ -250,13 +255,14 @@ def take_random(count:int) -> list[str]:
     try:
         chosen = rnd.sample(deck, k=count)
     except ValueError:
-        print("DECK RESET")
+        print(f"{PURPLE+BOLD}DECK RESET!!!{END}")
         logs.append(((PURPLE + f'{"DECK":<{MAX_NAME_LEN}}' + END_T, PURPLE + f'{"RESET":<{MAX_NAME_LEN}}' + END_T),
                      (f'{BLACK}BLK{END_T}', f'{BLACK}{str(black_start-black):>2}{END_T}', f'{RED}{red_start-red}{END_T}', f'{RED}RED{END_T}')))
         normal_logs.append(
             Log(special=f"Deck resetting<br>RED: {red_start - red}<br>BLACK: {black_start - black}", is_cards=False))
         deck = ["R"] * (red_start - red) + ["B"] * (black_start - black)
         chosen = rnd.sample(deck, k=count)
+        logs_out()
     for card in chosen:
         deck.remove(card)
     return chosen

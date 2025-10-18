@@ -1,6 +1,3 @@
-from standard_functions import my_input
-from standard_names_SH import X
-
 NAME_FOR_LOGS = "SH LOG_TEST "  # You can change it
 tp = '.html'  # расширение
 MAX_NAME_LEN = 15  # You can change it from 10 to infinity
@@ -16,6 +13,7 @@ ANARCHY_SKIP_NUM = 3
 
 def get_roles(c: int) -> tuple[list[str], bool]:
     import random
+    from standard_names_SH import X
     hitler = [X.HITLER]
     black = [X.BLACK]
     if c <= 4:
@@ -27,6 +25,7 @@ def get_roles(c: int) -> tuple[list[str], bool]:
     elif c <= 10:
         black *= 3
     else:
+        from standard_functions import my_input
         black *= my_input("Too many players, input q",
                           integer=True)
     molotov = []

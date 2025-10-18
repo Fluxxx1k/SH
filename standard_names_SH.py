@@ -18,6 +18,8 @@ class X:
     SHOUT = "SHOUT"
     KILLED = "KILLED"
     BOT = "Bot"
+    ERROR = "ERROR"
+
 # class HTML(str):
 #     pass
 
