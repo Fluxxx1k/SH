@@ -41,8 +41,8 @@ while True:
         print(END, end='')
         if c < MIN_PLAYER_NUM or c > MAX_PLAYER_NUM:
             raise ValueError(f"Wrong size! ({c})")
-    except BaseException as err:
-        print(f"{RED}Try again, wrong input: {err}{END_T}")
+    except BaseException as fixes:
+        print(f"{RED}Try again, wrong input: {fixes}{END_T}")
     else:
         if not input(f"If you are sure that here will be {c} gamers press ENTER else write anything: "):
             break
@@ -58,8 +58,8 @@ deck = ['R'] * red_start + ['B'] * black_start
 try:
     os.makedirs(path, exist_ok=True)
     check_logs = os.listdir(path)
-except BaseException as err:
-    print(f"{CRITICAL}Strange Error: {err}\nLogs won't be created{END}")
+except BaseException as fixes:
+    print(f"{CRITICAL}Strange Error: {fixes}\nLogs won't be created{END}")
     full_path = None
 else:
     try:
@@ -75,8 +75,8 @@ else:
                   f"    is already exists, trying {CYAN}{max_log_num}{END}")
             full_path = path + NAME_FOR_LOGS + date + str(max_log_num) + tp
         print(f"{GOOD}Logs in: {full_path}{END}")
-    except BaseException as err:
-        print(f"{CRITICAL}Something went wrong, no logs available: {err}{END}")
+    except BaseException as fixes:
+        print(f"{CRITICAL}Something went wrong, no logs available: {fixes}{END}")
         full_path = None
 gulag = c
 killed = c
@@ -88,14 +88,14 @@ try:
     stalin = roles.index(X.STALIN)
 except ValueError:
     print("No Sosalin :_((")
-except BaseException as err:
-    print(f"Can't find {X.STALIN= }: {err}")
+except BaseException as fixes:
+    print(f"Can't find {X.STALIN= }: {fixes}")
 try:
     hitler = roles.index(X.HITLER)
 except ValueError:
     print(f"{WARNING}WTH? No {X.HITLER} in roles...{END}")
-except BaseException as err:
-    print(f"Can't find {X.HITLER= }: {err}")
+except BaseException as fixes:
+    print(f"Can't find {X.HITLER= }: {fixes}")
 
 start_time = t.time()
 start_time_f = t.strftime("%d.%m.%y %H:%M:%S")
@@ -220,8 +220,8 @@ def new_gov(gov_type:str=f"GOVERNMENT", color:str=BLUE) -> int:
 
 
 def degov() -> None:
-    for i in range(c):
-        g[i].degov()
+    for player_num in range(c):
+        g[player_num].degov()
 
     print(f"{PURPLE}  # GOVERNMENT RESET (dbg){END}")
     # out()
@@ -235,7 +235,7 @@ def comm(cmd: str) -> bool | None:
             pass
     elif cmd == "OUT":
         out()
-    elif cmd == '' or name == 'EXIT':
+    elif cmd == '' or cmd == 'EXIT':
         return False
     return True
 
@@ -257,8 +257,8 @@ def take_random(count:int) -> list[str]:
             Log(special=f"Deck resetting<br>RED: {red_start - red}<br>BLACK: {black_start - black}", is_cards=False))
         deck = ["R"] * (red_start - red) + ["B"] * (black_start - black)
         chosen = rnd.sample(deck, k=count)
-    for i in chosen:
-        deck.remove(i)
+    for card in chosen:
+        deck.remove(card)
     return chosen
 
 
@@ -448,9 +448,9 @@ class Bot(Player):
         self.risk = rnd.random()
         self.black = []
         if self.bot_mind == X.BLACK:
-            for i in range(c):
-                if g[i].color == X.BLACK:
-                    self.black.append(i)
+            for player_num in range(c):
+                if g[player_num].color == X.BLACK:
+                    self.black.append(player_num)
 
     def __repr__(self):
         s = super().__repr__()
@@ -574,34 +574,34 @@ class Bot(Player):
 #    def check_cards(self,  card):
 #        print(coloring("BBB"))
 for i in range(c):
-    name = input(f"GAYmer №{i + 1}) {INPUT_C}")
+    pl_name = input(f"GAYmer №{i + 1}) {INPUT_C}")
     print(END, end='')
-    while len(name) > MAX_NAME_LEN or name == '' or name in g:
+    while len(pl_name) > MAX_NAME_LEN or pl_name == '' or pl_name in g:
         print(f"{RED}Length of name should be 1-{MAX_NAME_LEN} symbols!{END}")
-        name = input(f"{RED}New attempt:{END} GAYmer №{i + 1}) {INPUT_C}")
+        pl_name = input(f"{RED}New attempt:{END} GAYmer №{i + 1}) {INPUT_C}")
         print(END, end='')
 
-    g.append(Player(num=i, name=name, role=roles[i]))
-err = []
+    g.append(Player(num=i, name=pl_name, role=roles[i]))
+fixes = []
 while True:
     try:
-        err = list(map(int, input(f"Print numbers of mistakes: {INPUT_C}").split()))
+        fixes = list(map(int, input(f"Print numbers of mistakes: {INPUT_C}").split()))
         print(END, end='')
-        for i in err:
+        for i in fixes:
             if i > c or i < 1:
                 raise ValueError(f"Wrong number: {i}")
-    except BaseException as err:
-        print(f"{RED}{err}{END}")
+    except BaseException as fixes:
+        print(f"{RED}{fixes}{END}")
     else:
         break
-for i in err:
-    name = input(f"{PURPLE}Fixing names:{END} GAYmer №{i}) {INPUT_C}").strip()
+for i in fixes:
+    pl_name = input(f"{PURPLE}Fixing names:{END} GAYmer №{i}) {INPUT_C}").strip()
     print(END, end='')
-    while len(name) > MAX_NAME_LEN or name == '' or name in g:
+    while len(pl_name) > MAX_NAME_LEN or pl_name == '' or pl_name in g:
         print(f"{RED}Length of name should be 1-{MAX_NAME_LEN} symbols!{END}")
-        name = input(f"{RED}New try:{END} GAYmer №{i}) {INPUT_C}").strip()
+        pl_name = input(f"{RED}New try:{END} GAYmer №{i}) {INPUT_C}").strip()
         print(END, end='')
-    g[i - 1].name = name
+    g[i - 1] = Player(num=i-1, name=pl_name, role=roles[i])
 print(*list(map(repr, g)), sep='\n')
 
 for i in range(c):
@@ -614,8 +614,8 @@ while True:
         print(END, end='')
         if pn >= c or pn < 0:
             raise ValueError(f"Wrong number: {pn + 1}")
-    except BaseException as err:
-        print(f"{RED}{err}{END}")
+    except BaseException as fixes:
+        print(f"{RED}{fixes}{END}")
     else:
         if not input("ENTER if number is right, else write something: "):
             break
@@ -703,7 +703,7 @@ while red < RED_WIN_NUM and black < BLACK_WIN_NUM and not Git_caput and not Git_
                 Git_not.add(cn)
         else:
             if hitler == cn:
-                if yes_or_no(f"Is {g[cn].name} hitler "):
+                if yes_or_no(f"Is {g[cn]} hitler "):
                     degov()
                     logs.append(((g[pn].table(), g[cn].table()),
                                  (f'{BLACK}HIT{END_T}', f'{BLACK}vs{END_T}', f'{BLACK}S{END_T}', 'TAL')))
@@ -712,14 +712,14 @@ while red < RED_WIN_NUM and black < BLACK_WIN_NUM and not Git_caput and not Git_
                     Git_caput = True
                     break
             else:
-                yes_or_no(f"Is {g[cn].name} hitler? ", yes=set())
+                yes_or_no(f"Is {g[cn]} hitler? ", yes=set())
     g[cn].chosen_gov(X.CHANCELLOR)
     out()
     cards = take_random(3)
     c_prs_got = ''.join(cards)
-    cps, cards, veto = g[pn].president(cards, cn)
+    cps, cards, is_veto = g[pn].president(cards, cn)
     c_cnc_got = ''.join(cards)
-    ccs, ccp = g[cn].chancellor(cards, pn, cps, veto)
+    ccs, ccp = g[cn].chancellor(cards, pn, cps, is_veto)
     cpsa = input_cards(f"Cards {CYAN}president{END_T} ({g[pn]}) said after chancellor: ", q={3, 0})
     temp = input(f'Command: {INPUT_C}').upper()
     print(END, end='')
@@ -778,8 +778,8 @@ while red < RED_WIN_NUM and black < BLACK_WIN_NUM and not Git_caput and not Git_
                     raise ValueError(f"Wrong number: {pc + 1}")
                 if pc == pn:
                     raise ValueError(f"Can't check yourself")
-            except BaseException as err:
-                print(f"{RED}{err}{END}")
+            except BaseException as fixes:
+                print(f"{RED}{fixes}{END}")
             else:
                 if not input(
                         f"ENTER if number {INPUT_C}{pc + 1}{END} is right (it's {INPUT_C}[{g[pc]}]{END}), else write something: "):
@@ -818,8 +818,8 @@ while red < RED_WIN_NUM and black < BLACK_WIN_NUM and not Git_caput and not Git_
                     raise ValueError(f"Wrong number: {gulag + 1}")
                 if gulag == pn:
                     raise ValueError(f"Can't purge yourself")
-            except BaseException as err:
-                print(f"{RED}{err}{END}")
+            except BaseException as fixes:
+                print(f"{RED}{fixes}{END}")
             else:
                 if not input(
                         f"ENTER if number {INPUT_C}{gulag + 1}{END} is right (it's {INPUT_C}[{g[gulag]}]{END}), else write something: "):
@@ -852,8 +852,8 @@ while red < RED_WIN_NUM and black < BLACK_WIN_NUM and not Git_caput and not Git_
                     raise ValueError(f"Wrong number: {killed + 1}")
                 elif killed == pn:
                     raise ValueError("No suicide!!")
-            except BaseException as err:
-                print(f"{RED}{err}{END}")
+            except BaseException as fixes:
+                print(f"{RED}{fixes}{END}")
             else:
                 if not input(
                         f"ENTER if number {INPUT_C}{killed + 1}{END} is right (it's {INPUT_C}[{g[killed]}]{END}), else write something: "):
@@ -907,5 +907,5 @@ try:
         out()
 except FileNotFoundError:
     print("Can't open file")
-except BaseException as err:
-    print(f"{RED}{BOLD}{UNDERLINE}Something went wrong: {err}{END}")
+except BaseException as fixes:
+    print(f"{RED}{BOLD}{UNDERLINE}Something went wrong: {fixes}{END}")
