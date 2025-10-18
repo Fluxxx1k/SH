@@ -1,22 +1,23 @@
 from standard_functions import color_clear
-from standard_names_SH import *
+from standard_names_SH import X, LogInfo
 from colors import CRITICAL, WARNING, RESET
 from HTML_colors import *
+from player import Player
 
 
 class Log:
     def __init__(self, prs='', cnc='', c_prs_got = '', c_prs_said='', c_cnc_got='', c_cnc_said='', c_cnc_placed='', c_prs_said_after='', special='', reserve='',
                  is_cards=True, is_president=True, is_chancellor=True):
-        if type(prs).__name__ == "Player":
-            self.prs = str(prs)
+        if isinstance(prs, Player):
+            self.prs = prs.name
         elif isinstance(prs, str):
             self.prs = color_clear(prs)
         else:
             self.prs = str(prs)
             print(f"Strange president name ({type(prs)= }): {prs=}")
 
-        if type(cnc).__name__ == "Player":
-            self.cnc = str(cnc)
+        if isinstance(cnc, Player):
+            self.cnc = cnc.name
         elif isinstance(cnc, str):
             self.cnc = color_clear(cnc)
         else:
