@@ -1,4 +1,7 @@
-from standard_functions import color_clear
+import os
+
+from standard_classes import Cards
+from standard_functions import color_clear, yes_or_no
 from standard_names_SH import X, LogInfo
 from colors import RESET
 from user_color_settings import WARNING, CRITICAL
@@ -8,8 +11,8 @@ from user_settings import IS_PRINT_SMALL_INFO, IS_PRINT_FULL_INFO
 
 
 class Log:
-    def __init__(self, prs='', cnc='', c_prs_got = '', c_prs_said='', c_cnc_got='', c_cnc_said='', c_cnc_placed='', c_prs_said_after='', special='', reserve='',
-                 is_cards=True, is_president=True, is_chancellor=True):
+    def __init__(self, prs: str | Player = '', cnc: str | Player = '', c_prs_got: str | Cards = '', c_prs_said: str | Cards = '', c_cnc_got: str | Cards = '', c_cnc_said: str | Cards = '', c_cnc_placed: str | Cards = '', c_prs_said_after: str | Cards = '', special: str = '', reserve: str = '',
+                 is_cards: bool = True, is_president: bool = True, is_chancellor: bool = True):
         if isinstance(prs, Player):
             self.prs = prs.name
         elif isinstance(prs, str):
@@ -262,7 +265,17 @@ def create_HTML_logs_cards(logs, print_errors = IS_PRINT_FULL_INFO, is_print = I
             print(f"{CRITICAL}Error occurred while creating HTML logs about cards{RESET}")
         return ''
 
-def create_HTML_logs(path: str, logs: list["Log"], players: list["Player"] = None, roles: list[str] = None, logs_info = None) -> str:
+def create_HTML_logs(path: str, logs: list[Log], players: list[Player] = None, roles: list[str] = None, logs_info = None) -> str:
+    if not os.path.exists(path):
+        print(f"{CRITICAL}Path is wrong!{RESET}")
+        if yes_or_no(f"Create path ({path}) to file? "):
+            try:
+                os.makedirs(path)
+            except PermissionError as err:
+                print(f"{CRITICAL}Error occurred while creating path: {type(err)}({err}){RESET}")
+            except Exception as err:
+                print(f"{CRITICAL}Error occurred while creating path: {type(err)}({err}){RESET}")
+                return ''
     try:
         head = """
          <head>
@@ -275,7 +288,7 @@ def create_HTML_logs(path: str, logs: list["Log"], players: list["Player"] = Non
                  }
                  table {
                      border:5px solid """ + norm_c_cut + """;
-                     <!-- bgcolor: black; -->
+                     bgcolor: #222;
                      padding: 10px;
                      cellpadding: 10px;
                      cellspacing: 2px;
@@ -332,3 +345,7 @@ def create_HTML_logs(path: str, logs: list["Log"], players: list["Player"] = Non
         print(f"Oops, something went wrong: {err}")
         print(f"{CRITICAL}HTML Table of logs could not be created!!!{RESET}")
         return ''
+
+
+if __name__ == '__main__':
+    create_HTML_logs('', [Log(Player(1,'123', 'RED'))])

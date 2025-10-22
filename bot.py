@@ -21,7 +21,7 @@ class Bot(Player):
 
     def president(self, cards, cnc, *, black, red) -> tuple[str, list[str], bool]:
         cards = sorted(cards)
-        if self.bot_mind == X.HTLR:
+        if self.bot_mind == X.HITLER:
             if cards == ["R", "R", "R"]:
                 return "XXX", ["R", "R"], black == 5
             if cards == ["B", "R", "R"]:
@@ -84,7 +84,7 @@ class Bot(Player):
                 return "XX", "X"
             else:
                 return "XX", 'B'
-        if self.bot_mind == X.HTLR:
+        if self.bot_mind == X.HITLER:
             if red == 4 or black == 5:
                 if "B" in cards:
                     return "XX", "B"

@@ -164,7 +164,7 @@ def logs_out():
         print(err)
         try:
             normal_logs.append(
-                Log(prs=f"{logged= }", cnc=f"{len(logs)= }", special=err, is_president=False, is_chancellor=False))
+                Log(prs=f"{logged= }", cnc=f"{len(logs)= }", special=f"{type(err)}({err})", is_president=False, is_chancellor=False))
         except BaseException as err:
             print(err)
         logged -= 1
