@@ -2,33 +2,22 @@ import random as rnd
 from colors import PURPLE_TEXT_BRIGHT as PURPLE, END
 from player import Player
 from standard_names_SH import X
+from user_color_settings import CRITICAL
 from utils import get_color
 
 
 class Bot(Player):
     base_name = X.BOT
 
-    def __init__(self, num: int, role: str,
-                 name=X.BOT, *, hitler: int):
+    def __init__(self, num: int, name:str, role: str, *, hitler: int = None):
         super().__init__(num=num, role=role, name=name)
         self.bot_mind = get_color(self.role, out_type=X.BOT)
         if self.bot_mind == X.BLACK:
-            self.hitler = hitler
+            if hitler is None:
+                print(f"{CRITICAL}Bot won't know who is hitler{END}")
+        self.hitler = hitler
         self.risk = rnd.random()
         self.black = []
-        # if self.bot_mind == X.BLACK:
-        #     for player_num in range(c):
-        #         if g[player_num].color == X.BLACK:
-        #             self.black.append(player_num)
-
-    def __repr__(self):
-        s = super().__repr__()
-        s += " "
-        s += f"[BOT INFO: {self.bot_mind= }, {self.dark= }, {self.risk= }]"
-        return s
-
-    def __hash__(self):
-        return hash(self.name)
 
     def president(self, cards, cnc, *, black, red) -> tuple[str, list[str], bool]:
         cards = sorted(cards)
@@ -56,7 +45,7 @@ class Bot(Player):
                 return "XXX", ["B", "B"], False
             if cards == ["R", "R", "R"]:
                 return "XXX", ["R", "R"], black == 5
-            print("Unknown situation {card= }")
+            print(f"Unknown situation {cards= }")
             return "XXX", cards[:2], black == 5
         if self.bot_mind == X.RED:
             if cards == ["B", "R", "R"]:
@@ -86,7 +75,7 @@ class Bot(Player):
             else:
                 return "XXX", cards[1:], black == 5
 
-    def chancellor(self, cards, prs, words, veto, *, black, red) -> tuple[str, str]:
+    def chancellor(self, cards:str|list[str], prs:int, words:str, veto:bool, *, black:int, red:int) -> tuple[str, str]:
         cards = sorted(cards)
         if self.bot_mind == X.RED:
             if "R" in cards:
@@ -136,19 +125,28 @@ class Bot(Player):
                     return "XX", "B"
                 return "XX", "R"
 
-    def president_said_after_chancellor(self, *, cards: str, cnc: "Player", ccg: str, cps: str, ccs: str,
+    def president_said_after_chancellor(self, *, cards: str, cnc: "Player int", ccg: str, cps: str, ccs: str,
                                         ccp: str) -> str:
         return 'XXX'
 
-    def check_cards(self):
+    def check_cards(self) -> str:
         return "XXX"
 
-    def check_player(self, g, votes: dict["Player": int] = None):
+    def check_player(self, votes: dict[int, int] = None) -> tuple[int, str]:
+        chosen:int = None
+        if votes is not None:
+            print("Sorry, \"votes\" isn't available")
         if self.bot_mind == X.BLACK:
             if rnd.random() < 0.25:
-                return self.hitler, X.RED
+                chosen = self.hitler
             if rnd.random() < 0.25:
                 if self.black:
-                    return self.black[rnd.randint(0, len(self.black) - 1)], X.RED
-        print(votes)
-        return rnd.randint(0, len(self.black) - 1)
+                    chosen = self.black[rnd.randint(0, len(self.black) - 1)]
+            if chosen is not None:
+                return chosen, X.RED
+        chosen = rnd.randint(0, len(self.black) - 1)
+        if self.bot_mind == X.BLACK:
+            if chosen in self.black:
+                return chosen, X.RED
+        from globs import PLAYERS
+        return chosen, PLAYERS[chosen].color

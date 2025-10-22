@@ -53,13 +53,18 @@ def naming(s:str) -> str:
     return X.ERROR
 
 
-def get_color(x, out_type=''):
+def get_color(x:str, out_type=''):
+    """
+    :param x: role
+    :param out_type: can be
+    :return: returns colored string with role or color in HTML or bot_mind
+    """
     x = color_clear(x)
     for i in [X.BLACK, X.HITLER, X.RIB]:
         if i in x:
             if out_type == X.BOT:
                 if i == X.HITLER:
-                    return X.HTLR
+                    return X.HITLER
                 return X.BLACK
             if out_type == "HTML":
                 return black_c

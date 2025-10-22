@@ -99,7 +99,7 @@ def color_of_HTML_roles(s: str, print_errors=IS_PRINT_FULL_INFO, is_print = IS_P
         return norm_c
 
 
-def create_HTML_roles(players: list["Player"] = None, roles: list[str] = None, print_errors = IS_PRINT_FULL_INFO, is_print = IS_PRINT_SMALL_INFO) -> str:
+def create_HTML_roles(players: list[Player] = None, roles: list[str] = None, print_errors = IS_PRINT_FULL_INFO, is_print = IS_PRINT_SMALL_INFO) -> str:
     try:
         table_caption = ('\t<caption><h1><b>'
                          'Таблица ролей'
@@ -150,9 +150,13 @@ def create_HTML_roles(players: list["Player"] = None, roles: list[str] = None, p
                 except BaseException as err:
                     if print_errors:
                         print(f"{WARNING}Error occurred while creating HTML roles in cycle: {err}{RESET}")
-                    rows.append(f'\t\t<td style="color: red">ERROR in row</td>\n'
-                                f'\t\t<td style="color: red">{err}</td>\n'
-                                f'\t\t<td style="color: red"></td>\n')
+                        print(rls)
+                        print(players)
+                    rows.append(f'\t\t<tr>'
+                                f'\t\t\t<td style="color: red">{i + 1}</td>\n'
+                                f'\t\t\t<td style="color: red">ERROR in row</td>\n'
+                                f'\t\t\t<td style="color: red">{err}</td>\n'
+                                f' \t\t</tr>\n')
             table_body = f"\t<tbody>\n{''.join(rows)}</tbody>\n"
         except BaseException as err:
             try:

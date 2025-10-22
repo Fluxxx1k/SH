@@ -28,20 +28,23 @@ class Player:
         if self.color == X.HITLER:
             self.color = X.BLACK
         self.colored_color = get_color(self.role)
-
         self.prefix = ''
         self.suffix = ''
-        if name != "RANDOM":
-            self.name = ' '.join(name.split())
-        else:
+        if name == '' or not isinstance(name, str):
             self.name = Player.base_name + str(num)
+        else:
+            self.name = name
         self.tablet_name = f"{self.name: <{MAX_NAME_LEN}}"
         self.dark = 0
 
     def __repr__(self):
-        s = f"{self.name= } ({self.tablet_name= }): {self.role= } (mind_type: {self.color} {self.colored_color= }), {self.dark= }"
-        # {len(self.name) == MAX_NAME_LEN = }
+        s = '[Info: '
+        for name, value in self.__dict__.items():
+            s += f"({name}: {repr(value)}) "
+        s = s[:-1] + ']'
         return s
+    def __hash__(self):
+        return hash(self.name)
 
     # def __add__(self, s):
     #     self.suffix += s
