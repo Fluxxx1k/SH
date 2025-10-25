@@ -16,20 +16,20 @@ from colors import (YELLOW_TEXT_BRIGHT as YELLOW,
                     YELLOW_BACKGROUND as GULAG,
                     END, BOLD, UNDERLINE,
                     )
-from player import Player  # , Bot
+from player import Player
 from globs import PLAYERS, ROLES
+import globs
 from standard_functions import show_only_to_one, yes_or_no
 from standard_names_SH import X
 from user_color_settings import INPUT_COLOR, CRITICAL, WARNING, GOOD
-from user_settings import *
 from utils import coloring, naming, get_color, input_cards
+from user_settings import *
 
 ff = __file__
 print(ff)
 saved = []
-path = os.path.dirname(ff) + "/LOGS/"
+path = os.getcwd() + "/LOGS/"
 date = t.strftime("%d.%m.%y ")
-MAX_NAME_LEN = 15  # You can change it from 10 to infinity
 LEN_FOR_TABLET = MAX_NAME_LEN + max(len(CYAN), len(YELLOW)) + len(END_T)
 special_election = False
 skips = 0
@@ -42,16 +42,16 @@ normal_logs: list[Log] = []
 # Number of players and their names
 while True:
     try:
-        c = int(input(f"Input number of players: {INPUT_COLOR}"))
+        count = int(input(f"Input number of players: {INPUT_COLOR}"))
         print(END, end='')
-        if c < MIN_PLAYER_NUM or c > MAX_PLAYER_NUM:
-            raise ValueError(f"Wrong size! ({c})")
+        if count < MIN_PLAYER_NUM or count > MAX_PLAYER_NUM:
+            raise ValueError(f"Wrong size! ({count})")
     except BaseException as fixes:
         print(f"{RED}Try again, wrong input: {fixes}{END_T}")
     else:
-        if not input(f"If you are sure that here will be {c} gamers press ENTER else write anything: "):
+        if yes_or_no(f"Are you sure that here will be {INPUT_COLOR}{count}{END} gamers: "):
             break
-if c == 6:
+if count == 6:
     print(f"{INPUT_COLOR}5 {RED}RED{PURPLE} cards, 11 {BLACK}BLACK{PURPLE} cards{END}")
     red_start = 5
     black_start = 11
@@ -70,7 +70,7 @@ else:
     try:
         logs_nums = []
         for i in check_logs:
-            if i[:len(NAME_FOR_LOGS) + len(date)] == NAME_FOR_LOGS + date:
+            if i.startswith(NAME_FOR_LOGS + date):
                 logs_nums.append(i)
         max_log_num = len(logs_nums) + 1
         full_path = path + NAME_FOR_LOGS + date + str(max_log_num) + tp
@@ -79,29 +79,34 @@ else:
             print(RED + BOLD + UNDERLINE + full_path +
                   f"    is already exists, trying {CYAN}{max_log_num}{END}")
             full_path = path + NAME_FOR_LOGS + date + str(max_log_num) + tp
+        open(full_path, 'w+').close()
         print(f"{GOOD}Logs in: {full_path}{END}")
     except BaseException as fixes:
         print(f"{CRITICAL}Something went wrong, no logs available: {fixes}{END}")
         full_path = None
-gulag = MAX_PLAYER_NUM
-killed = MAX_PLAYER_NUM
-hitler = MAX_PLAYER_NUM
-stalin = MAX_PLAYER_NUM
-ROLES, molotov_ribbentrop = get_roles(c)
+gulag  = None
+killed = None
+HITLER = None
+STALIN = None
+temp, molotov_ribbentrop = get_roles(count)
+ROLES.extend(temp)
 
 try:
-    stalin = ROLES.index(X.STALIN)
+    STALIN = ROLES.index(X.STALIN)
 except ValueError:
     print("No Sosalin :_((")
 except BaseException as fixes:
     print(f"Can't find {X.STALIN= }: {fixes}")
 try:
-    hitler = ROLES.index(X.HITLER)
+    HITLER = ROLES.index(X.HITLER)
 except ValueError:
     print(f"{WARNING}WTH? No {X.HITLER} in ROLES...{END}")
 except BaseException as fixes:
     print(f"Can't find {X.HITLER= }: {fixes}")
 
+globs.HITLER = HITLER
+globs.STALIN = STALIN
+globs.COUNT_PLAYERS = count
 start_time = t.time()
 start_time_f = t.strftime("%d.%m.%y %H:%M:%S")
 print(start_time_f)
@@ -113,8 +118,8 @@ f_l = {"OUT", "DEBUG_MODE", "EXIT"}
 
 
 
-def out(count = c, file=sys.stdout):
-    for player_num in range(count):
+def out(c = count, file=sys.stdout):
+    for player_num in range(c):
         print(f"№{player_num + 1}) {PLAYERS[player_num].out()}", file=file)
 
 
@@ -184,22 +189,22 @@ def new_gov(gov_type:str=f"GOVERNMENT", color:str=BLUE) -> int:
         try:
             gov = int(input(f"{color}{gov_type}{END_T}'s number (not index): {INPUT_COLOR}")) - 1
             print(END, end='')
-            if gov >= c or gov < 0:
+            if gov >= count or gov < 0:
                 raise ValueError(f"Wrong number: {gov + 1}")
             if gov == pn:
-                raise ValueError(f"Can't choose president as a {gov_type}")
+                raise ValueError(f"Can't choose {CYAN}president{END_T} as a {gov_type}")
             if  gov == gulag or gov == killed:
-                raise ValueError("Can't choose purged as s chancellor")
+                raise ValueError(f"Can't choose purged as a {YELLOW}chancellor{END_T}")
         except BaseException as err:
             print(f"{RED}{err}{END}")
         else:
-            if not input("ENTER if number is right, else write something: "):
+            if yes_or_no(f"Are you sure that number ({INPUT_COLOR}{gov + 1}{END}) is right (it's [{INPUT_COLOR}{PLAYERS[gov]}{END}]): "):
                 break
     return gov
 
 
 def degov() -> None:
-    for player_num in range(c):
+    for player_num in range(count):
         PLAYERS[player_num].degov()
 
     print(f"{PURPLE}  # GOVERNMENT RESET (dbg){END}")
@@ -219,7 +224,7 @@ def comm(cmd: str) -> bool | None:
     return True
 
 
-def take_random(count:int) -> list[str]:
+def take_random(c:int) -> list[str]:
     global saved
     if saved:
         x = saved.copy()
@@ -227,7 +232,7 @@ def take_random(count:int) -> list[str]:
         return x
     global deck
     try:
-        chosen = rnd.sample(deck, k=count)
+        chosen = rnd.sample(deck, k=c)
     except ValueError:
         print(f"{PURPLE+BOLD}DECK RESET!!!{END}")
         logs.append(((PURPLE + f'{"DECK":<{MAX_NAME_LEN}}' + END_T, PURPLE + f'{"RESET":<{MAX_NAME_LEN}}' + END_T),
@@ -235,7 +240,7 @@ def take_random(count:int) -> list[str]:
         normal_logs.append(
             Log(special=f"Deck resetting<br>RED: {red_start - red}<br>BLACK: {black_start - black}", is_cards=False))
         deck = ["R"] * (red_start - red) + ["B"] * (black_start - black)
-        chosen = rnd.sample(deck, k=count)
+        chosen = rnd.sample(deck, k=c)
         logs_out()
     for card in chosen:
         deck.remove(card)
@@ -243,7 +248,7 @@ def take_random(count:int) -> list[str]:
 
 
 
-for i in range(c):
+for i in range(count):
     pl_name = input(f"GAYmer №{i + 1}) {INPUT_COLOR}")
     print(END, end='')
     while len(pl_name) > MAX_NAME_LEN or len(pl_name) < MIN_NAME_LEN or pl_name in PLAYERS:
@@ -258,7 +263,7 @@ while True:
         fixes = list(map(int, input(f"Print numbers of mistakes: {INPUT_COLOR}").split()))
         print(END, end='')
         for i in fixes:
-            if i > c or i < 1:
+            if i > count or i < 1:
                 raise ValueError(f"Wrong number: {i}")
     except BaseException as fixes:
         print(f"{RED}{fixes}{END}")
@@ -272,32 +277,41 @@ for i in fixes:
         pl_name = input(f"{RED}New try:{END} GAYmer №{i}) {INPUT_COLOR}").strip()
         print(END, end='')
     PLAYERS[i - 1] = Player(num=i - 1, name=pl_name, role=ROLES[i - 1])
-print(*list(map(repr, PLAYERS)), sep='\n')
+if DEBUG_MODE:
+    print(*list(map(repr, PLAYERS)), sep='\n')
 
-for i in range(c):
-    print(f"{PURPLE}{INPUT_COLOR}[{PLAYERS[i]}]{END}, come here to get your role!")
+for i in range(count):
+    print(f"[{INPUT_COLOR}{PLAYERS[i]}{END}], come here to get your role!")
     show_only_to_one(f"Your role is: {INPUT_COLOR}{naming(ROLES[i])}{END}", 25)
 
 while True:
     try:
         pn = int(input(f"{CYAN}President{END}'s number (not index): {INPUT_COLOR}")) - 1
         print(END, end='')
-        if pn >= c or pn < 0:
+        if pn >= count or pn < 0:
             raise ValueError(f"Wrong number: {pn + 1}")
     except BaseException as fixes:
         print(f"{RED}{fixes}{END}")
     else:
-        if not input("ENTER if number is right, else write something: "):
+        if yes_or_no(f"Are you sure that number ({INPUT_COLOR}{pn + 1}{END}) is right (it's [{INPUT_COLOR}{PLAYERS[pn]}{END}]): "):
             break
 pn -= 1
 pnc = pn
 while red < RED_WIN_NUM and black < BLACK_WIN_NUM and not Git_caput and not Git_cn:
+    if DEBUG_MODE:
+        print(f"{globs.PLAYERS= }")
+        print(f"{globs.ROLES= }")
+        print(f"{globs.HITLER= }")
+        print(f"{globs.STALIN= }")
+        print(f"{globs.COUNT_PLAYERS= }")
     if pnc != pn:
         if special_election:
-            print(f"{PURPLE}{pnc = } != {pn = } => Внеоф{END_T}")
+            if DEBUG_MODE:
+                print(f"{PURPLE}{pnc = } != {pn = } => Внеоф{END_T}")
         else:
             # print(f"{PURPLE}WTF?!! (Line 160)")
-            print(f"{PURPLE}{pnc = } != {pn = } but {special_election = }{END_T}")
+            if DEBUG_MODE:
+                print(f"{PURPLE}{pnc = } != {pn = } but {special_election = }{END_T}")
             pn = pnc
     if skips >= ANARCHY_SKIP_NUM:
         if yes_or_no(f"Anarchy? (Skips: {skips}): "):
@@ -325,7 +339,7 @@ while red < RED_WIN_NUM and black < BLACK_WIN_NUM and not Git_caput and not Git_
             else:
                 print(f"WTH?!!!! {ccp} isn't 'B' or 'R'")
             saved = 0
-            if gulag < c:
+            if gulag < count:
                 logs.append(((f"{PURPLE + 'ANARCHY' + END_T: <{LEN_FOR_TABLET}}", PLAYERS[gulag].table()),
                              (f'{PURPLE}FRE{END_T}', f'{PURPLE}E!{END_T}', f'{PURPLE}!{END_T}', '   ')))
                 print(f"{PURPLE}{PLAYERS[gulag]} was de-Gulag-ed{END_T}")
@@ -333,16 +347,16 @@ while red < RED_WIN_NUM and black < BLACK_WIN_NUM and not Git_caput and not Git_
                 PLAYERS[gulag].free()
                 gulag = MAX_PLAYER_NUM
             logs_out()
-    pn = (pn + 1) % c
+    pn = (pn + 1) % count
     if pn == gulag:
         print(f"{PURPLE}President can't be in gulag, next{END_T}")
-        pn = (pn + 1) % c
+        pn = (pn + 1) % count
     if pn == killed:
         print(f"{PURPLE}President can't be dead, next{END_T}")
-        pn = (pn + 1) % c
+        pn = (pn + 1) % count
     if pn == gulag:
         print(f"{PURPLE}President can't be in gulag, next{END_T}")
-        pn = (pn + 1) % c
+        pn = (pn + 1) % count
     PLAYERS[pn].chosen_gov(X.PRESIDENT)
     out()
     if not special_election:
@@ -361,8 +375,8 @@ while red < RED_WIN_NUM and black < BLACK_WIN_NUM and not Git_caput and not Git_
 
     cn = new_gov("Chancellor", YELLOW)
     if black >= 3 and cn not in Git_not:
-        if MAX_PLAYER_NUM <= stalin:
-            if cn == hitler:
+        if 0 > STALIN or STALIN >= count:
+            if cn == HITLER:
                 degov()
                 logs.append(((PLAYERS[pn].table(), PLAYERS[cn].table()),
                              (f'{BLACK}HIT{END_T}', f'{BLACK}LE{END_T}', f'{BLACK}R{END_T}', '   ')))
@@ -372,7 +386,7 @@ while red < RED_WIN_NUM and black < BLACK_WIN_NUM and not Git_caput and not Git_
             else:
                 Git_not.add(cn)
         else:
-            if hitler == cn:
+            if HITLER == cn:
                 if yes_or_no(f"Is {PLAYERS[cn]} hitler "):
                     degov()
                     logs.append(((PLAYERS[pn].table(), PLAYERS[cn].table()),
@@ -446,15 +460,14 @@ while red < RED_WIN_NUM and black < BLACK_WIN_NUM and not Git_caput and not Git_
             try:
                 pc = int(input(f"{CYAN}President{END} will check number (not index): {INPUT_COLOR}")) - 1
                 print(END, end='')
-                if pc >= c or pc < 0:
+                if pc >= count or pc < 0:
                     raise ValueError(f"Wrong number: {pc + 1}")
                 if pc == pn:
                     raise ValueError(f"Can't check yourself")
             except BaseException as fixes:
                 print(f"{RED}{fixes}{END}")
             else:
-                if not input(
-                        f"ENTER if number {INPUT_COLOR}{pc + 1}{END} is right (it's {INPUT_COLOR}[{PLAYERS[pc]}]{END}), else write something: "):
+                if yes_or_no(f"Are you sure that number {INPUT_COLOR}{pc + 1}{END} is right (it's [{INPUT_COLOR}{PLAYERS[pc]}{END}]): "):
                     break
         show_only_to_one(f"Color is {get_color(ROLES[pc])}")
         print(f"Input {BLACK}BLK{END} or {RED}RED{END}")
@@ -493,15 +506,15 @@ while red < RED_WIN_NUM and black < BLACK_WIN_NUM and not Git_caput and not Git_
             except BaseException as fixes:
                 print(f"{RED}{fixes}{END}")
             else:
-                if not input(
-                        f"ENTER if number {INPUT_COLOR}{gulag + 1}{END} is right (it's {INPUT_COLOR}[{PLAYERS[gulag]}]{END}), else write something: "):
+                if yes_or_no(
+                        f"Are you sure that if number {INPUT_COLOR}{gulag + 1}{END} is right (it's [{INPUT_COLOR}{PLAYERS[gulag]}{END}]): "):
                     break
         logs.append(((PLAYERS[pn].table(), PURPLE + GULAG + PLAYERS[gulag].table() + END_BG + END_T),
                      (PURPLE + 'GUL' + END_T, PURPLE + 'AG' + END_T, PURPLE + '!' + END_T, '   ')))
         normal_logs.append(Log(PLAYERS[pn], PLAYERS[gulag], special="In gulag", is_cards=False, is_chancellor=False))
         PLAYERS[gulag].purge(X.GULAG)
         checks += 1
-        if gulag == hitler:
+        if gulag == HITLER:
             degov()
             Git_caput = True
             break
@@ -527,8 +540,8 @@ while red < RED_WIN_NUM and black < BLACK_WIN_NUM and not Git_caput and not Git_
             except BaseException as fixes:
                 print(f"{RED}{fixes}{END}")
             else:
-                if not input(
-                        f"ENTER if number {INPUT_COLOR}{killed + 1}{END} is right (it's {INPUT_COLOR}[{PLAYERS[killed]}]{END}), else write something: "):
+                if yes_or_no(
+                        f"Are you sure that number {INPUT_COLOR}{killed + 1}{END} is right (it's [{INPUT_COLOR}{PLAYERS[killed]}{END}]): "):
                     break
         if gulag == killed:
             gulag = MAX_PLAYER_NUM
@@ -538,7 +551,7 @@ while red < RED_WIN_NUM and black < BLACK_WIN_NUM and not Git_caput and not Git_
         normal_logs.append(Log(PLAYERS[pn], PLAYERS[killed], special=f"Killed", is_chancellor=False))
         checks += 1
         if killed not in Git_not:
-            if killed == hitler:
+            if killed == HITLER:
                 degov()
                 Git_caput = True
                 break
@@ -574,7 +587,7 @@ try:
             print(f"{BLACK}{BOLD}{UNDERLINE}BLACK    WON!!!{END}")
             # print(f"{BLACK}{BOLD}{UNDERLINE}BLACK    WON!!!{END}", file=f)
             if Git_cn:
-                print(f"{BLACK}(Hitler is chancellor){END_T}")
+                print(f"{BLACK}(Hitler is {YELLOW}chancellor{BLACK}){END}")
                 # print(f"{BLACK}(Hitler is chancellor){END_T}", file=f)
         else:
             print(F"{PURPLE}{BOLD}{UNDERLINE}WHAT    THE    HELL?!!!!{END}")

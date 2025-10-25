@@ -19,7 +19,8 @@ class X:
     KILLED = "KILLED"
     BOT = "Bot"
     ERROR = "ERROR"
-
+    COORDINATION = 'coordination'
+    CHOOSE_ONE = "choose"
 # class HTML(str):
 #     pass
 class LogInfo:

@@ -1,6 +1,7 @@
-from player import Player
-
-# from user_settings import get_roles
-PLAYERS: list[Player] = []
+COUNT_PLAYERS: int = None
+PLAYERS: list["Player"] = []
 ROLES: list[str] = []
+HITLER: int = None
+STALIN: int = None
+# PURGED: dict[str: int] = set()
 # ERRORS: list[Error_log] = []

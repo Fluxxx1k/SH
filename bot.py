@@ -1,9 +1,10 @@
 import random as rnd
 from colors import PURPLE_TEXT_BRIGHT as PURPLE, END
 from player import Player
+from standard_classes import Cards
 from standard_names_SH import X
 from user_color_settings import CRITICAL
-from utils import get_color
+from utils import get_color, weighted_random
 
 
 class Bot(Player):
@@ -17,7 +18,7 @@ class Bot(Player):
                 print(f"{CRITICAL}Bot won't know who is hitler{END}")
         self.hitler = hitler
         self.risk = rnd.random()
-        self.black = []
+        self.black: set[int] = set()
 
     def president(self, cards, cnc, *, black, red) -> tuple[str, list[str], bool]:
         cards = sorted(cards)
@@ -126,27 +127,43 @@ class Bot(Player):
                 return "XX", "R"
 
     def president_said_after_chancellor(self, *, cards: str, cnc: "Player int", ccg: str, cps: str, ccs: str,
-                                        ccp: str) -> str:
-        return 'XXX'
+                                        ccp: str) -> Cards:
+        return Cards('XXX')
 
-    def check_cards(self) -> str:
-        return "XXX"
+    def check_cards(self, ) -> Cards:
+        return Cards("XXX")
 
-    def check_player(self, votes: dict[int, int] = None) -> tuple[int, str]:
+    def check_player(self, votes: list[int] = None) -> tuple[int, str]:
+        from globs import PLAYERS
         chosen:int = None
-        if votes is not None:
-            print("Sorry, \"votes\" isn't available")
+        if votes is None:
+            print("Sorry, You forgot about \"votes\"... It isn't available here...")
+        else:
+            if self.color == X.BLACK:
+                for player in self.black:
+                    votes[player] //= 2
+
         if self.bot_mind == X.BLACK:
             if rnd.random() < 0.25:
                 chosen = self.hitler
+
             if rnd.random() < 0.25:
                 if self.black:
                     chosen = self.black[rnd.randint(0, len(self.black) - 1)]
             if chosen is not None:
                 return chosen, X.RED
-        chosen = rnd.randint(0, len(self.black) - 1)
-        if self.bot_mind == X.BLACK:
-            if chosen in self.black:
+
+        chosen = rnd.randint(0, len(PLAYERS) - 1)
+        if chosen == self.num:
+            chosen -= 1
+        if self.color == X.BLACK:
+            if PLAYERS[chosen].color == X.BLACK:
                 return chosen, X.RED
-        from globs import PLAYERS
         return chosen, PLAYERS[chosen].color
+
+    # def gulag(self, votes: dict[int, int] = None) -> int:
+    #     if self.bot_mind == X.BLACK:
+    #         x = rnd.randint(0, len(self.black) - 1)
+    #         if self.color ==
+    #         while x != self.num
+
