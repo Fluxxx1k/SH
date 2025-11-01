@@ -46,7 +46,7 @@ while True:
         print(END, end='')
         if count < MIN_PLAYER_NUM or count > MAX_PLAYER_NUM:
             raise ValueError(f"Wrong size! ({count})")
-    except BaseException as fixes:
+    except Exception as fixes:
         print(f"{RED}Try again, wrong input: {fixes}{END_T}")
     else:
         if yes_or_no(f"Are you sure that here will be {INPUT_COLOR}{count}{END} gamers: "):
@@ -63,7 +63,7 @@ deck = ['R'] * red_start + ['B'] * black_start
 try:
     os.makedirs(path, exist_ok=True)
     check_logs = os.listdir(path)
-except BaseException as fixes:
+except Exception as fixes:
     print(f"{CRITICAL}Strange Error: {fixes}\nLogs won't be created{END}")
     full_path = None
 else:
@@ -81,7 +81,7 @@ else:
             full_path = path + NAME_FOR_LOGS + date + str(max_log_num) + tp
         open(full_path, 'w+').close()
         print(f"{GOOD}Logs in: {full_path}{END}")
-    except BaseException as fixes:
+    except Exception as fixes:
         print(f"{CRITICAL}Something went wrong, no logs available: {fixes}{END}")
         full_path = None
 gulag  = None
@@ -95,13 +95,13 @@ try:
     STALIN = ROLES.index(X.STALIN)
 except ValueError:
     print("No Sosalin :_((")
-except BaseException as fixes:
+except Exception as fixes:
     print(f"Can't find {X.STALIN= }: {fixes}")
 try:
     HITLER = ROLES.index(X.HITLER)
 except ValueError:
     print(f"{WARNING}WTH? No {X.HITLER} in ROLES...{END}")
-except BaseException as fixes:
+except Exception as fixes:
     print(f"Can't find {X.HITLER= }: {fixes}")
 
 globs.HITLER = HITLER
@@ -150,6 +150,9 @@ def dbg(s:str) -> bool:
             cpsa = coloring(s[1])
             print(f"cpsa: {cpsa}")
             return False
+        elif s[0].upper() == "EXIT":
+            print(f"EXIT")
+            return False
     print(f"{WARNING}Wrong parameters: {s}{END}")
     return True
 
@@ -165,12 +168,12 @@ def logs_out():
             logged += 1
             print(
                 f"{END}{UNDERLINE}{BOLD}{TABLE_SPLITTER} {CYAN + log[0][0] + END_T: <{LEN_FOR_TABLET}} {TABLE_SPLITTER} {YELLOW + log[0][1] + END_T: <{LEN_FOR_TABLET}} {TABLE_SPLITTER} {log[1][0] + END_T: <8} {TABLE_SPLITTER} {log[1][1] + END_T: <7}  {TABLE_SPLITTER} {log[1][2] + END_T: <6}   {TABLE_SPLITTER} {(log[1][3] if len(log[1]) >= 4 else 'XXX') + END_T: <8}  {TABLE_SPLITTER}{END}")
-    except BaseException as err:
+    except Exception as err:
         print(err)
         try:
             normal_logs.append(
                 Log(prs=f"{logged= }", cnc=f"{len(logs)= }", special=f"{type(err)}({err})", is_president=False, is_chancellor=False))
-        except BaseException as err:
+        except Exception as err:
             print(err)
         logged -= 1
         print(
@@ -195,7 +198,7 @@ def new_gov(gov_type:str=f"GOVERNMENT", color:str=BLUE) -> int:
                 raise ValueError(f"Can't choose {CYAN}president{END_T} as a {gov_type}")
             if  gov == gulag or gov == killed:
                 raise ValueError(f"Can't choose purged as a {YELLOW}chancellor{END_T}")
-        except BaseException as err:
+        except Exception as err:
             print(f"{RED}{err}{END}")
         else:
             if yes_or_no(f"Are you sure that number ({INPUT_COLOR}{gov + 1}{END}) is right (it's [{INPUT_COLOR}{PLAYERS[gov]}{END}]): "):
@@ -265,7 +268,7 @@ while True:
         for i in fixes:
             if i > count or i < 1:
                 raise ValueError(f"Wrong number: {i}")
-    except BaseException as fixes:
+    except Exception as fixes:
         print(f"{RED}{fixes}{END}")
     else:
         break
@@ -290,7 +293,7 @@ while True:
         print(END, end='')
         if pn >= count or pn < 0:
             raise ValueError(f"Wrong number: {pn + 1}")
-    except BaseException as fixes:
+    except Exception as fixes:
         print(f"{RED}{fixes}{END}")
     else:
         if yes_or_no(f"Are you sure that number ({INPUT_COLOR}{pn + 1}{END}) is right (it's [{INPUT_COLOR}{PLAYERS[pn]}{END}]): "):
@@ -464,7 +467,7 @@ while red < RED_WIN_NUM and black < BLACK_WIN_NUM and not Git_caput and not Git_
                     raise ValueError(f"Wrong number: {pc + 1}")
                 if pc == pn:
                     raise ValueError(f"Can't check yourself")
-            except BaseException as fixes:
+            except Exception as fixes:
                 print(f"{RED}{fixes}{END}")
             else:
                 if yes_or_no(f"Are you sure that number {INPUT_COLOR}{pc + 1}{END} is right (it's [{INPUT_COLOR}{PLAYERS[pc]}{END}]): "):
@@ -503,7 +506,7 @@ while red < RED_WIN_NUM and black < BLACK_WIN_NUM and not Git_caput and not Git_
                     raise ValueError(f"Wrong number: {gulag + 1}")
                 if gulag == pn:
                     raise ValueError(f"Can't purge yourself")
-            except BaseException as fixes:
+            except Exception as fixes:
                 print(f"{RED}{fixes}{END}")
             else:
                 if yes_or_no(
@@ -537,7 +540,7 @@ while red < RED_WIN_NUM and black < BLACK_WIN_NUM and not Git_caput and not Git_
                     raise ValueError(f"Wrong number: {killed + 1}")
                 elif killed == pn:
                     raise ValueError("No suicide!!")
-            except BaseException as fixes:
+            except Exception as fixes:
                 print(f"{RED}{fixes}{END}")
             else:
                 if yes_or_no(
@@ -596,5 +599,5 @@ try:
         # out()
 except FileNotFoundError:
     print("Can't open file")
-except BaseException as fixes:
+except Exception as fixes:
     print(f"{RED}{BOLD}{UNDERLINE}Something went wrong: {fixes}{END}")
