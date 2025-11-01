@@ -1,0 +1,12 @@
+pr_c = 'cyan'
+ch_c = 'yellow'
+red_c = 'red'
+black_c = 'lime'
+nrh_c = 'DeepSkyBlue'
+purple_c = 'DarkViolet'
+num_c = "orange"
+norm_c_cut = 'white'
+font_c_cut = 'black'
+norm_c = '"' + norm_c_cut + '"'
+font_c = '"' + font_c_cut + '"'
+special_c = "DeepPink"

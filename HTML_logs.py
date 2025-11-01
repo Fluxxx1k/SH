@@ -1,32 +1,28 @@
-from standard_functions import color_clear
-from standard_names_SH import *
-from colors import CRITICAL, WARNING, RESET
-pr_c = 'cyan'
-ch_c = 'yellow'
-red_c = 'red'
-black_c = 'lime'
-nrh_c = 'DeepSkyBlue'
-purple_c = 'DarkViolet'
-num_c = "orange"
-norm_c_cut = 'white'
-font_c_cut = 'black'
-norm_c = '"' + norm_c_cut + '"'
-font_c = '"' + font_c_cut + '"'
-special_c = "DeepPink"
+import os
+
+from standard_classes import Cards
+from standard_functions import color_clear, yes_or_no
+from standard_names_SH import X, LogInfo
+from colors import RESET
+from user_color_settings import WARNING, CRITICAL
+from HTML_colors import *
+from player import Player
+from user_settings import IS_PRINT_SMALL_INFO, IS_PRINT_FULL_INFO
+
 
 class Log:
-    def __init__(self, prs='', cnc='', c_prs_got = '', c_prs_said='', c_cnc_got='', c_cnc_said='', c_cnc_placed='', c_prs_said_after='', special='', reserve='',
-                 is_cards=True, is_president=True, is_chancellor=True):
-        if type(prs).__name__ == "Player":
-            self.prs = str(prs)
+    def __init__(self, prs: str | Player = '', cnc: str | Player = '', c_prs_got: str | Cards = '', c_prs_said: str | Cards = '', c_cnc_got: str | Cards = '', c_cnc_said: str | Cards = '', c_cnc_placed: str | Cards = '', c_prs_said_after: str | Cards = '', special: str = '', reserve: str = '',
+                 is_cards: bool = True, is_president: bool = True, is_chancellor: bool = True):
+        if isinstance(prs, Player):
+            self.prs = prs.name
         elif isinstance(prs, str):
             self.prs = color_clear(prs)
         else:
             self.prs = str(prs)
             print(f"Strange president name ({type(prs)= }): {prs=}")
 
-        if type(cnc).__name__ == "Player":
-            self.cnc = str(cnc)
+        if isinstance(cnc, Player):
+            self.cnc = cnc.name
         elif isinstance(cnc, str):
             self.cnc = color_clear(cnc)
         else:
@@ -56,7 +52,7 @@ class Log:
         row = president + chancellor + c_prs_got + c_prs_said + c_cnc_got + c_cnc_said + c_cnc_placed + c_prs_said_after + special
         return row
 
-def coloring_HTML_cards(s: str, print_errors = True, is_print=True) -> str:
+def coloring_HTML_cards(s: str, print_errors = IS_PRINT_FULL_INFO, is_print=IS_PRINT_SMALL_INFO) -> str:
     try:
         s = sorted(color_clear(s))
         errs = 0
@@ -84,7 +80,7 @@ def coloring_HTML_cards(s: str, print_errors = True, is_print=True) -> str:
         return s
 
 
-def color_of_HTML_roles(s: str, print_errors=True, is_print = True) -> str:
+def color_of_HTML_roles(s: str, print_errors=IS_PRINT_FULL_INFO, is_print = IS_PRINT_SMALL_INFO) -> str:
     try:
         s = color_clear(s)
         if s in {X.RED, X.STALIN, X.MOLOTOV}:
@@ -106,7 +102,7 @@ def color_of_HTML_roles(s: str, print_errors=True, is_print = True) -> str:
         return norm_c
 
 
-def create_HTML_roles(players: list["Player"] = None, roles: list[str] = None, print_errors = True, is_print = True) -> str:
+def create_HTML_roles(players: list[Player] = None, roles: list[str] = None, print_errors = IS_PRINT_FULL_INFO, is_print = IS_PRINT_SMALL_INFO) -> str:
     try:
         table_caption = ('\t<caption><h1><b>'
                          'Таблица ролей'
@@ -157,9 +153,13 @@ def create_HTML_roles(players: list["Player"] = None, roles: list[str] = None, p
                 except BaseException as err:
                     if print_errors:
                         print(f"{WARNING}Error occurred while creating HTML roles in cycle: {err}{RESET}")
-                    rows.append(f'\t\t<td style="color: red">ERROR in row</td>\n'
-                                f'\t\t<td style="color: red">{err}</td>\n'
-                                f'\t\t<td style="color: red"></td>\n')
+                        print(rls)
+                        print(players)
+                    rows.append(f'\t\t<tr>'
+                                f'\t\t\t<td style="color: red">{i + 1}</td>\n'
+                                f'\t\t\t<td style="color: red">ERROR in row</td>\n'
+                                f'\t\t\t<td style="color: red">{err}</td>\n'
+                                f' \t\t</tr>\n')
             table_body = f"\t<tbody>\n{''.join(rows)}</tbody>\n"
         except BaseException as err:
             try:
@@ -189,7 +189,7 @@ def create_HTML_roles(players: list["Player"] = None, roles: list[str] = None, p
         return ''
 
 
-def create_HTML_info(logs: list["LogInfo"] = None, print_errors = True) -> str:
+def create_HTML_info(logs: list["LogInfo"] = None, print_errors = IS_PRINT_FULL_INFO) -> str:
     table_caption = ("\t<caption><h1><strong>"
                      "Таблица с информацией об игре"
                      "<br>"
@@ -224,7 +224,7 @@ def create_HTML_info(logs: list["LogInfo"] = None, print_errors = True) -> str:
     return table
 
 
-def create_HTML_logs_cards(logs, print_errors = True, is_print = True) -> str:
+def create_HTML_logs_cards(logs, print_errors = IS_PRINT_FULL_INFO, is_print = IS_PRINT_SMALL_INFO) -> str:
     try:
         table_caption = ("<caption><h1><strong>"
                          "Таблица событий игры"
@@ -265,7 +265,17 @@ def create_HTML_logs_cards(logs, print_errors = True, is_print = True) -> str:
             print(f"{CRITICAL}Error occurred while creating HTML logs about cards{RESET}")
         return ''
 
-def create_HTML_logs(path: str, logs: list["Log"], players: list["Player"] = None, roles: list[str] = None, logs_info = None) -> str:
+def create_HTML_logs(path: str, logs: list[Log], players: list[Player] = None, roles: list[str] = None, logs_info = None) -> str:
+    if not os.path.exists(path):
+        print(f"{CRITICAL}Path is wrong!{RESET}")
+        if yes_or_no(f"Create path ({path}) to file? "):
+            try:
+                os.makedirs(path)
+            except PermissionError as err:
+                print(f"{CRITICAL}Error occurred while creating path: {type(err)}({err}){RESET}")
+            except Exception as err:
+                print(f"{CRITICAL}Error occurred while creating path: {type(err)}({err}){RESET}")
+                return ''
     try:
         head = """
          <head>
@@ -278,7 +288,7 @@ def create_HTML_logs(path: str, logs: list["Log"], players: list["Player"] = Non
                  }
                  table {
                      border:5px solid """ + norm_c_cut + """;
-                     <!-- bgcolor: black; -->
+                     bgcolor: #222;
                      padding: 10px;
                      cellpadding: 10px;
                      cellspacing: 2px;
@@ -335,3 +345,7 @@ def create_HTML_logs(path: str, logs: list["Log"], players: list["Player"] = Non
         print(f"Oops, something went wrong: {err}")
         print(f"{CRITICAL}HTML Table of logs could not be created!!!{RESET}")
         return ''
+
+
+if __name__ == '__main__':
+    create_HTML_logs('', [Log(Player(1,'123', 'RED'))])
