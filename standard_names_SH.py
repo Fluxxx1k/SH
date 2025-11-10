@@ -19,11 +19,12 @@ class X:
     KILLED = "KILLED"
     BOT = "Bot"
     ERROR = "ERROR"
+    OK = "OK"
+    INFO = "INFO"
+    DBG = "DBG"
     COORDINATION = 'coordination'
     CHOOSE_ONE = "choose"
 # class HTML(str):
 #     pass
-class LogInfo:
-    pass
 class MyErr(BaseException):
     pass

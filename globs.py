@@ -1,3 +1,4 @@
+LOGS: list["InfoLog"] = []
 COUNT_PLAYERS: int = None
 PLAYERS: list["Player"] = []
 ROLES: list[str] = []

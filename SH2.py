@@ -4,7 +4,7 @@ import sys
 import time as t
 from atexit import register as atexit
 
-from HTML_logs import create_HTML_logs, color_of_HTML_roles, Log, pr_c, purple_c
+from HTML_logs import create_HTML_logs, color_of_HTML_roles, GameLog, pr_c, purple_c, InfoLog
 from colors import (YELLOW_TEXT_BRIGHT as YELLOW,
                     BLUE_TEXT_BRIGHT as BLUE,
                     CYAN_TEXT_BRIGHT as CYAN,
@@ -17,14 +17,15 @@ from colors import (YELLOW_TEXT_BRIGHT as YELLOW,
                     END, BOLD, UNDERLINE,
                     )
 from player import Player
-from globs import PLAYERS, ROLES
+from globs import PLAYERS, ROLES, LOGS
 import globs
 from standard_functions import show_only_to_one, yes_or_no
 from standard_names_SH import X
 from user_color_settings import INPUT_COLOR, CRITICAL, WARNING, GOOD
 from utils import coloring, naming, get_color, input_cards
 from user_settings import *
-
+code_start_time = t.time()
+LOGS.append(InfoLog(info_type=X.INFO, info_name="Code start time", info1=t.strftime("%d.%m.%y %H:%M:%S"), info2=code_start_time))
 ff = __file__
 print(ff)
 saved = []
@@ -36,7 +37,7 @@ skips = 0
 logs: list[tuple[tuple[str, str], tuple[str, str, str, str]]] = []
 Git_not = set()
 print(f"If will be error say it to coder (DS: {PURPLE}@fluxxx1k{END})")
-normal_logs: list[Log] = []
+normal_logs: list[GameLog] = []
 
 
 # Number of players and their names
@@ -110,6 +111,7 @@ globs.COUNT_PLAYERS = count
 start_time = t.time()
 start_time_f = t.strftime("%d.%m.%y %H:%M:%S")
 print(start_time_f)
+LOGS.append(InfoLog(info_type=X.INFO, info_name="Game start time", info1=start_time_f, info2=start_time))
 red = black = 0
 checks = 1
 Git_caput = False
@@ -159,7 +161,7 @@ def dbg(s:str) -> bool:
 
 @atexit
 def logs_out():
-    create_HTML_logs(path=full_path, logs=normal_logs, players=PLAYERS, roles=ROLES)
+    create_HTML_logs(path=full_path, logs=normal_logs, players=PLAYERS)
     logged = 1
     try:
         print(
@@ -172,7 +174,7 @@ def logs_out():
         print(err)
         try:
             normal_logs.append(
-                Log(prs=f"{logged= }", cnc=f"{len(logs)= }", special=f"{type(err)}({err})", is_president=False, is_chancellor=False))
+                GameLog(prs=f"{logged= }", cnc=f"{len(logs)= }", special=f"{type(err)}({err})", is_president=False, is_chancellor=False))
         except Exception as err:
             print(err)
         logged -= 1
@@ -241,7 +243,7 @@ def take_random(c:int) -> list[str]:
         logs.append(((PURPLE + f'{"DECK":<{MAX_NAME_LEN}}' + END_T, PURPLE + f'{"RESET":<{MAX_NAME_LEN}}' + END_T),
                      (f'{BLACK}BLK{END_T}', f'{BLACK}{str(black_start-black):>2}{END_T}', f'{RED}{red_start-red}{END_T}', f'{RED}RED{END_T}')))
         normal_logs.append(
-            Log(special=f"Deck resetting<br>RED: {red_start - red}<br>BLACK: {black_start - black}", is_cards=False))
+            GameLog(special=f"Deck resetting<br>RED: {red_start - red}<br>BLACK: {black_start - black}", is_cards=False))
         deck = ["R"] * (red_start - red) + ["B"] * (black_start - black)
         chosen = rnd.sample(deck, k=c)
         logs_out()
@@ -321,13 +323,13 @@ while red < RED_WIN_NUM and black < BLACK_WIN_NUM and not Git_caput and not Git_
             if saved:
                 logs.append(((f"{PURPLE + 'SHUFFLED' + END_T: <{LEN_FOR_TABLET}}",
                           f"{PURPLE + 'CARDS' + END_T: <{LEN_FOR_TABLET}}"), ('   ', '  ', ' ', '   ')))
-                normal_logs.append(Log(special="Cards was shuffled!"))
+                normal_logs.append(GameLog(special="Cards was shuffled!"))
                 ccp = rnd.sample(saved, k=1)[0]
             else:
                 ccp = take_random(1)[0]
             logs.append(((f"{PURPLE + 'ANARCHY' + END_T: <{LEN_FOR_TABLET}}",
                           f"{PURPLE + 'ANARCHY' + END_T: <{LEN_FOR_TABLET}}"), ('   ', '  ', coloring(ccp), '   ')))
-            normal_logs.append(Log(c_cnc_placed=ccp, special="Anarchy"))
+            normal_logs.append(GameLog(c_cnc_placed=ccp, special="Anarchy"))
             if ccp == 'B':
                 black += 1
                 checks += 1
@@ -342,11 +344,11 @@ while red < RED_WIN_NUM and black < BLACK_WIN_NUM and not Git_caput and not Git_
             else:
                 print(f"WTH?!!!! {ccp} isn't 'B' or 'R'")
             saved = 0
-            if gulag < count:
+            if gulag is not None:
                 logs.append(((f"{PURPLE + 'ANARCHY' + END_T: <{LEN_FOR_TABLET}}", PLAYERS[gulag].table()),
                              (f'{PURPLE}FRE{END_T}', f'{PURPLE}E!{END_T}', f'{PURPLE}!{END_T}', '   ')))
                 print(f"{PURPLE}{PLAYERS[gulag]} was de-Gulag-ed{END_T}")
-                normal_logs.append(Log(special=f"Anarchy, {PLAYERS[gulag]} freed"))
+                normal_logs.append(GameLog(special=f"Anarchy, {PLAYERS[gulag]} freed"))
                 PLAYERS[gulag].free()
                 gulag = MAX_PLAYER_NUM
             logs_out()
@@ -378,12 +380,12 @@ while red < RED_WIN_NUM and black < BLACK_WIN_NUM and not Git_caput and not Git_
 
     cn = new_gov("Chancellor", YELLOW)
     if black >= 3 and cn not in Git_not:
-        if 0 > STALIN or STALIN >= count:
+        if not (STALIN is None):
             if cn == HITLER:
                 degov()
                 logs.append(((PLAYERS[pn].table(), PLAYERS[cn].table()),
                              (f'{BLACK}HIT{END_T}', f'{BLACK}LE{END_T}', f'{BLACK}R{END_T}', '   ')))
-                normal_logs.append(Log(prs=PLAYERS[pn], cnc=PLAYERS[cn], special="Hitler is chancellor!"))
+                normal_logs.append(GameLog(prs=PLAYERS[pn], cnc=PLAYERS[cn], special="Hitler is chancellor!"))
                 Git_cn = True
                 break
             else:
@@ -395,7 +397,7 @@ while red < RED_WIN_NUM and black < BLACK_WIN_NUM and not Git_caput and not Git_
                     logs.append(((PLAYERS[pn].table(), PLAYERS[cn].table()),
                                  (f'{BLACK}HIT{END_T}', f'{BLACK}vs{END_T}', f'{BLACK}S{END_T}', 'TAL')))
                     normal_logs.append(
-                        Log(prs=PLAYERS[pn], cnc=PLAYERS[cn], special="Hitler is chancellor!<br>But Stalin is president!"))
+                        GameLog(prs=PLAYERS[pn], cnc=PLAYERS[cn], special="Hitler is chancellor!<br>But Stalin is president!"))
                     Git_caput = True
                     break
             else:
@@ -435,14 +437,14 @@ while red < RED_WIN_NUM and black < BLACK_WIN_NUM and not Git_caput and not Git_
     ccs = coloring(ccs)
     if ccp != 'V':
         ccp = coloring(ccp)
-        normal_logs.append(Log(prs=PLAYERS[pn], cnc=PLAYERS[cn],
-                               c_prs_got=c_prs_got, c_prs_said=cps, c_prs_said_after=cpsa,
-                               c_cnc_got=c_cnc_got, c_cnc_said=ccs, c_cnc_placed=ccp))
+        normal_logs.append(GameLog(prs=PLAYERS[pn], cnc=PLAYERS[cn],
+                                   c_prs_got=c_prs_got, c_prs_said=cps, c_prs_said_after=cpsa,
+                                   c_cnc_got=c_cnc_got, c_cnc_said=ccs, c_cnc_placed=ccp))
     else:
-        normal_logs.append(Log(prs=PLAYERS[pn], cnc=PLAYERS[cn],
-                               c_prs_got=c_prs_got, c_prs_said=cps, c_prs_said_after=cpsa,
-                               c_cnc_got=c_cnc_got, c_cnc_said=ccs, c_cnc_placed="",
-                               special="VETO"))
+        normal_logs.append(GameLog(prs=PLAYERS[pn], cnc=PLAYERS[cn],
+                                   c_prs_got=c_prs_got, c_prs_said=cps, c_prs_said_after=cpsa,
+                                   c_cnc_got=c_cnc_got, c_cnc_said=ccs, c_cnc_placed="",
+                                   special="VETO"))
         ccp = PURPLE + "V" + END_T
     cpsa = coloring(cpsa)
     degov()
@@ -456,7 +458,7 @@ while red < RED_WIN_NUM and black < BLACK_WIN_NUM and not Git_caput and not Git_
         cpsc = coloring(cpsc)
         logs.append(((PLAYERS[pn].table(), f"{PURPLE + 'CARD CHECK' + END_T: <{LEN_FOR_TABLET}}"),
                      (cpsc, PURPLE + 'CH' + END_T, PURPLE + 'K' + END_T, '   ')))
-        normal_logs.append(Log(prs=PLAYERS[pn], c_prs_got=''.join(saved), c_prs_said=cpsc, special="Card check"))
+        normal_logs.append(GameLog(prs=PLAYERS[pn], c_prs_got=''.join(saved), c_prs_said=cpsc, special="Card check"))
         checks += 1
     elif black == 2 == checks:
         while True:
@@ -493,16 +495,16 @@ while red < RED_WIN_NUM and black < BLACK_WIN_NUM and not Git_caput and not Git_
             ((PLAYERS[pn].table(), PURPLE + PLAYERS[pc].table() + END_T),
              (cpc1, PURPLE + 'CH' + END_T, PURPLE + 'K' + END_T, f'{PURPLE}PLR{END_T}')))
         normal_logs.append(
-            Log(prs=PLAYERS[pn], cnc=PLAYERS[cn],
-                special=f"Color of <font color='{purple_c}'>{PLAYERS[cn]}</font> <font color='{pr_c}'>{PLAYERS[pn]}</font> said is <font color='{color_of_HTML_roles(cpc)}'>{cpc}</font>",
-                is_chancellor=False))
+            GameLog(prs=PLAYERS[pn], cnc=PLAYERS[cn],
+                    special=f"Color of <font color='{purple_c}'>{PLAYERS[cn]}</font> <font color='{pr_c}'>{PLAYERS[pn]}</font> said is <font color='{color_of_HTML_roles(cpc)}'>{cpc}</font>",
+                    is_chancellor=False))
         checks += 1
     elif black == 3 == checks:
         while True:
             try:
                 gulag = int(input(f"{CYAN}President{END} will place in gulag number (not index): {INPUT_COLOR}")) - 1
                 print(END, end='')
-                if gulag >= MAX_PLAYER_NUM or gulag < 0:
+                if gulag < 1 or gulag >= count:
                     raise ValueError(f"Wrong number: {gulag + 1}")
                 if gulag == pn:
                     raise ValueError(f"Can't purge yourself")
@@ -514,7 +516,7 @@ while red < RED_WIN_NUM and black < BLACK_WIN_NUM and not Git_caput and not Git_
                     break
         logs.append(((PLAYERS[pn].table(), PURPLE + GULAG + PLAYERS[gulag].table() + END_BG + END_T),
                      (PURPLE + 'GUL' + END_T, PURPLE + 'AG' + END_T, PURPLE + '!' + END_T, '   ')))
-        normal_logs.append(Log(PLAYERS[pn], PLAYERS[gulag], special="In gulag", is_cards=False, is_chancellor=False))
+        normal_logs.append(GameLog(PLAYERS[pn], PLAYERS[gulag], special="In gulag", is_cards=False, is_chancellor=False))
         PLAYERS[gulag].purge(X.GULAG)
         checks += 1
         if gulag == HITLER:
@@ -528,7 +530,7 @@ while red < RED_WIN_NUM and black < BLACK_WIN_NUM and not Git_caput and not Git_
         pn = new_gov("President", CYAN) - 1
         logs.append(((PLAYERS[temp].table(), PLAYERS[pn + 1].table()),
                      (PURPLE + 'PLA' + END_T, PURPLE + 'CE' + END_T, PURPLE + 'D' + END_T, '   ')))
-        normal_logs.append(Log(PLAYERS[temp], PLAYERS[pn + 1], special="Special placing", is_chancellor=False))
+        normal_logs.append(GameLog(PLAYERS[temp], PLAYERS[pn + 1], special="Special placing", is_chancellor=False))
         checks += 1
         special_election = True
     elif black == 5 == checks:
@@ -536,7 +538,7 @@ while red < RED_WIN_NUM and black < BLACK_WIN_NUM and not Git_caput and not Git_
             try:
                 killed = int(input(f"{CYAN}President{END} will kill number (not index): {INPUT_COLOR}")) - 1
                 print(END, end='')
-                if killed >= MAX_PLAYER_NUM or killed < 0:
+                if killed is not None:
                     raise ValueError(f"Wrong number: {killed + 1}")
                 elif killed == pn:
                     raise ValueError("No suicide!!")
@@ -551,7 +553,7 @@ while red < RED_WIN_NUM and black < BLACK_WIN_NUM and not Git_caput and not Git_
         PLAYERS[killed].purge(X.KILLED)
         logs.append(((PLAYERS[pn].table(), PLAYERS[killed].table()),
                      (PURPLE + 'KIL' + END_T, PURPLE + 'LE' + END_T, PURPLE + 'D' + END_T, '   ')))
-        normal_logs.append(Log(PLAYERS[pn], PLAYERS[killed], special=f"Killed", is_chancellor=False))
+        normal_logs.append(GameLog(PLAYERS[pn], PLAYERS[killed], special=f"Killed", is_chancellor=False))
         checks += 1
         if killed not in Git_not:
             if killed == HITLER:
@@ -569,35 +571,23 @@ while red < RED_WIN_NUM and black < BLACK_WIN_NUM and not Git_caput and not Git_
             print(f'№{i + 1}) {PLAYERS[i]}')
         print('\n')
 
-logs_out()
-try:
-    # raise MyErr("Not available now")
-    with open(full_path, "a+", encoding="UTF-8") as f:
-        end_time_f = t.strftime("%d.%m.%y %H:%M:%S")
-        end_time = t.time()
-        print("Game start time: " + start_time_f)
-        print("Game over time: " + end_time_f)
-        # print("Game start time: " + start_time_f, file=f)
-        # print("Game over time: " + end_time_f, file=f)
 
-        if red >= RED_WIN_NUM or Git_caput:
-            print(f"{RED}{BOLD}{UNDERLINE}RED    WON!!!{END}")
-            # print(f"{RED}{BOLD}{UNDERLINE}RED    WON!!!{END}", file=f)
-            if Git_caput:
-                print(f"{RED}(Hitler caput){END_T}")
-                # print(f"{RED}(Hitler caput){END_T}", file=f)
-        elif black >= BLACK_WIN_NUM or Git_cn:
-            print(f"{BLACK}{BOLD}{UNDERLINE}BLACK    WON!!!{END}")
-            # print(f"{BLACK}{BOLD}{UNDERLINE}BLACK    WON!!!{END}", file=f)
-            if Git_cn:
-                print(f"{BLACK}(Hitler is {YELLOW}chancellor{BLACK}){END}")
-                # print(f"{BLACK}(Hitler is chancellor){END_T}", file=f)
-        else:
-            print(F"{PURPLE}{BOLD}{UNDERLINE}WHAT    THE    HELL?!!!!{END}")
-            # print(F"{PURPLE}{BOLD}{UNDERLINE}WHAT    THE    HELL?!!!!{END}", file=f)
-        # print('\n\n\n', file=f)
-        # out()
-except FileNotFoundError:
-    print("Can't open file")
-except Exception as fixes:
-    print(f"{RED}{BOLD}{UNDERLINE}Something went wrong: {fixes}{END}")
+end_time_f = t.strftime("%d.%m.%y %H:%M:%S")
+end_time = t.time()
+LOGS.append(InfoLog(info_type=X.INFO, info_name="Game end time", info1=end_time_f, info2=end_time))
+print("Game start time: " + start_time_f)
+print("Game over time: " + end_time_f)
+
+if red >= RED_WIN_NUM or Git_caput:
+    print(f"{RED}{BOLD}{UNDERLINE}RED    WON!!!{END}")
+    if Git_caput:
+        print(f"{RED}(Hitler caput){END_T}")
+elif black >= BLACK_WIN_NUM or Git_cn:
+    print(f"{BLACK}{BOLD}{UNDERLINE}BLACK    WON!!!{END}")
+    if Git_cn:
+        print(f"{BLACK}(Hitler is {YELLOW}chancellor{BLACK}){END}")
+else:
+    print(F"{PURPLE}{BOLD}{UNDERLINE}WHAT    THE    HELL?!!!!{END}")
+
+
+logs_out()

@@ -127,5 +127,5 @@ def my_input(prompt, color:str= RESET_TEXT + RESET_BACKGROUND, input_color=PURPL
             raise err
         except EOFError as err:
             return str(err)
-        except BaseException as err:
+        except Exception as err:
             print(f"{UP*2}Error occurred while inputting: {WARNING}{err}{END}")

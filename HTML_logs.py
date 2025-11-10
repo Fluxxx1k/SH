@@ -1,8 +1,10 @@
 import os
+import time as t
 
+from globs import LOGS, ROLES
 from standard_classes import Cards
 from standard_functions import color_clear, yes_or_no
-from standard_names_SH import X, LogInfo
+from standard_names_SH import X
 from colors import RESET
 from user_color_settings import WARNING, CRITICAL
 from HTML_colors import *
@@ -10,7 +12,7 @@ from player import Player
 from user_settings import IS_PRINT_SMALL_INFO, IS_PRINT_FULL_INFO
 
 
-class Log:
+class GameLog:
     def __init__(self, prs: str | Player = '', cnc: str | Player = '', c_prs_got: str | Cards = '', c_prs_said: str | Cards = '', c_cnc_got: str | Cards = '', c_cnc_said: str | Cards = '', c_cnc_placed: str | Cards = '', c_prs_said_after: str | Cards = '', special: str = '', reserve: str = '',
                  is_cards: bool = True, is_president: bool = True, is_chancellor: bool = True):
         if isinstance(prs, Player):
@@ -39,7 +41,7 @@ class Log:
         self.is_cards = is_cards
         self.is_president = is_president
         self.is_chancellor = is_chancellor
-    def to_HTML(self) -> str:
+    def to_HTML_row(self) -> str:
         president = f'\t<td style="color: {pr_c if self.is_president else purple_c}"><b>{self.prs}</b></td>\n'
         chancellor = f'\t<td style="color: {ch_c if self.is_chancellor else purple_c}"><b>{self.cnc}</b></td>\n'
         c_prs_got = f"\t<td><b>{coloring_HTML_cards(self.cpg) if self.is_cards else self.cpg}</b></td>\n"
@@ -52,6 +54,43 @@ class Log:
         row = president + chancellor + c_prs_got + c_prs_said + c_cnc_got + c_cnc_said + c_cnc_placed + c_prs_said_after + special
         return row
 
+class InfoLog:
+    def __init__(self, info_type: str, info_name, info1: object, info2: object = ''):
+        self.info_type = str(info_type)
+        self.info_name = str(info_name)
+        self.info1 = str(info1)
+        self.info2 = str(info2)
+
+    def get_color_for_type(self, another_color: str = norm_c, num: int = None,
+                           *, print_errors: bool = IS_PRINT_SMALL_INFO) -> str:
+        match self.info_type:
+            case X.ERROR:
+                return red_c
+            case X.INFO:
+                return norm_c
+            case X.DBG:
+                return purple_c
+            case _:
+                if print_errors:
+                    print(f"{WARNING}Unknown info_name type: {self.info_type}")
+                    LOGS.append(
+                        InfoLog(info_type=X.ERROR, info_name=f"{WARNING}Unknown info_name type: {self.info_type}",
+                                info1=f'row= {num}, '
+                                      f'info_name= {self.info_name}, <br>'
+                                      f'additional_info= {self.info1}'))
+                return another_color
+
+
+    def to_HTML_row(self, num: int = None) -> str:
+        row: str
+        info_type       = f'\t\t\t<td style="color: {self.get_color_for_type()}"><b>{self.info_type}</b></td>\n'
+        info_name           = f'\t\t\t<td><b>{self.info_name}</b></td>\n'
+        info1 = f'\t\t\t<td>{self.info1}</td>\n'
+        info2 = f'\t\t\t<td>{self.info2}</td>\n'
+        row = f"\t\t<tr>\n{info_type}{info_name}{info1}{info2}</tr>\n"
+        return row
+
+
 def coloring_HTML_cards(s: str, print_errors = IS_PRINT_FULL_INFO, is_print=IS_PRINT_SMALL_INFO) -> str:
     try:
         s = sorted(color_clear(s))
@@ -63,16 +102,16 @@ def coloring_HTML_cards(s: str, print_errors = IS_PRINT_FULL_INFO, is_print=IS_P
             elif i == 'R':
                 s1 += f"<font color='{red_c}'>" + i + "</font>"
             elif i == 'X':
-                s1 += f"<font color='{norm_c_cut}'>" + i + "</font>"
+                s1 += f"<font color='{norm_c}'>" + i + "</font>"
             elif i == 'P':
                 s1 += f"<font color='{purple_c}'>" + i + "</font>"
             else:
                 if is_print:
                     print(f"{i} should be 'X' or 'R' or 'B' or 'P'")
                 errs += 1
-                s1 += f"<font color='{norm_c_cut}'>" + i + "</font>"
+                s1 += f"<font color='{norm_c}'>" + i + "</font>"
         return color_clear(s) if errs > 0 else s1
-    except BaseException as err:
+    except Exception as err:
         if print_errors:
             print(f"{WARNING}Error occurred while creating HTML cards: {err}{RESET}")
         elif is_print:
@@ -96,7 +135,7 @@ def color_of_HTML_roles(s: str, print_errors=IS_PRINT_FULL_INFO, is_print = IS_P
         if print_errors:
             print(f"UNKNOWN ROLE: {s}")
         return norm_c
-    except BaseException as err:
+    except Exception as err:
         if print_errors:
             print(f"{WARNING}Error occurred while creating HTML cards: {err}{RESET}")
         return norm_c
@@ -134,7 +173,7 @@ def create_HTML_roles(players: list[Player] = None, roles: list[str] = None, pri
                     print(f"{WARNING}No roles specified{RESET}")
             else:
                 rls = roles.copy()
-        except BaseException as err:
+        except Exception as err:
             if print_errors:
                 print(f"{WARNING}Too old version or smth else: {err}{RESET}")
             if is_print:
@@ -150,7 +189,7 @@ def create_HTML_roles(players: list[Player] = None, roles: list[str] = None, pri
                     role = f'\t\t\t<td style="color: {color}"><b>{rls[i]}</b></td>\n'
                     row = "\t\t<tr>\n" + number + player + role + "\t\t</tr>\n"
                     rows.append(row)
-                except BaseException as err:
+                except Exception as err:
                     if print_errors:
                         print(f"{WARNING}Error occurred while creating HTML roles in cycle: {err}{RESET}")
                         print(rls)
@@ -161,7 +200,7 @@ def create_HTML_roles(players: list[Player] = None, roles: list[str] = None, pri
                                 f'\t\t\t<td style="color: red">{err}</td>\n'
                                 f' \t\t</tr>\n')
             table_body = f"\t<tbody>\n{''.join(rows)}</tbody>\n"
-        except BaseException as err:
+        except Exception as err:
             try:
                 table_body = (f"\t<tbody>\n"
                               f"{''.join(rows)}"
@@ -169,7 +208,7 @@ def create_HTML_roles(players: list[Player] = None, roles: list[str] = None, pri
                               f'\t\t<td style="color: red">{err}</td>\n'
                               f'\t\t<td style="color: red"></td>\n'
                               f"</tbody>\n")
-            except BaseException as err1:
+            except Exception as err1:
                 table_body = ('\t<tbody>\n'
                               f'\t\t<td style="color: red">ERRORS</td>\n'
                               f'\t\t<td style="color: red">{err= }</td>\n'
@@ -181,7 +220,7 @@ def create_HTML_roles(players: list[Player] = None, roles: list[str] = None, pri
                 print(f"{WARNING}Error occurred while creating HTML roles{RESET}")
         table = "<table>\n" + table_caption + table_head + table_body + "</table>"
         return table
-    except BaseException as err:
+    except Exception as err:
         if print_errors:
             print(f"{WARNING}Error occurred while creating HTML roles: {err}{WARNING}")
         elif is_print:
@@ -189,7 +228,7 @@ def create_HTML_roles(players: list[Player] = None, roles: list[str] = None, pri
         return ''
 
 
-def create_HTML_info(logs: list["LogInfo"] = None, print_errors = IS_PRINT_FULL_INFO) -> str:
+def create_HTML_info(print_errors: bool = IS_PRINT_FULL_INFO, is_print: bool = IS_PRINT_SMALL_INFO) -> str:
     table_caption = ("\t<caption><h1><strong>"
                      "Таблица с информацией об игре"
                      "<br>"
@@ -197,7 +236,7 @@ def create_HTML_info(logs: list["LogInfo"] = None, print_errors = IS_PRINT_FULL_
                      "</strong></h1></caption>\n")
     table_head = (f"\t<thead>\n"
                   f"\t\t<tr>\n"
-                  f"\t\t\t<th style=\"color: {num_c}\">N</th>\n"
+                  f"\t\t\t<th style=\"color: {num_c}\">DBG</th>\n"
                   f"\t\t\t<th>Type of information</th>\n"
                   f"\t\t\t<th>Information-1</th>\n"
                   f"\t\t\t<th>Information-2 (reserve)</th>\n"
@@ -205,21 +244,30 @@ def create_HTML_info(logs: list["LogInfo"] = None, print_errors = IS_PRINT_FULL_
                   f"\t</thead>\n")
     table_body = ''
     try:
-        if logs is not None:
-            rows = []
-            for log in logs:
-                try:
-                    row = ''
-                    rows.append(row)
-                except BaseException as err:
-                    if print_errors:
-                        print(f"{WARNING}Error occurred while creating HTML info: {err}{RESET}")
-                    else:
-                        print(f"{WARNING}Error occurred while creating HTML info{RESET}")
-            table_body = "\t<tbody>\n" + '\n\t\t'.join(rows) + "\n\t</tbody>"
-    except BaseException as err:
+        rows = []
+        logs = LOGS[:99]
+        if len(LOGS) > 99:
+            print(f"{CRITICAL}ATTENTION! \n{WARNING}Too many errors, len of info_name is {len(LOGS)} (You still can play? may be){RESET}")
+        for log in logs:
+            try:
+                row = log.to_HTML_row()
+                rows.append(row)
+            except Exception as err:
+                LOGS.append(
+                    InfoLog(info_type=X.ERROR, info_name="Error occurred while creating HTML logs info_name",
+                            info1=f"{repr(err)}"))
+                if print_errors:
+                    print(f"{WARNING}Error occurred while creating HTML info_name: {err}{RESET}")
+                else:
+                    print(f"{WARNING}Error occurred while creating HTML info_name{RESET}")
+
+        rows.append(InfoLog(X.INFO, 'Log creating moment', t.strftime("%d.%m.%y %H:%M:%S"), t.time()).to_HTML_row())
+        table_body = "\t<tbody>\n" + ''.join(rows) + "\n\t</tbody>"
+    except Exception as err:
+        LOGS.append(
+            InfoLog(info_type=X.ERROR, info_name="Error occurred while creating HTML logs", info1=f"{repr(err)}"))
         if print_errors:
-            print(f"{WARNING}Error occurred while creating HTML info: {err}{RESET}")
+            print(f"{WARNING}Error occurred while creating HTML info_name: {err}{RESET}")
     table = "<table>\n" + table_caption + table_head + table_body + "\n</table>"
     return table
 
@@ -251,31 +299,60 @@ def create_HTML_logs_cards(logs, print_errors = IS_PRINT_FULL_INFO, is_print = I
         for i in range(len(logs)):
             log = logs[i]
             number = f'\t\t<td style="color: {num_c}">{i + 1}</td>\n'
-            cooked = log.to_HTML()
+            cooked = log.to_HTML_row()
             row = "\t<tr>" + number + cooked + '</tr>'
             rows.append(row)
         table_body += '\n'.join(rows)
         table_body += '\n</tbody>'
         table = "<table>\n" + table_caption + '\n' + table_head + '\n' + table_body + '\n</table>'
         return table
-    except BaseException as err:
+    except Exception as err:
         if print_errors:
             print(f"{CRITICAL}Error occurred while creating HTML logs about cards: {err}{RESET}")
         elif is_print:
             print(f"{CRITICAL}Error occurred while creating HTML logs about cards{RESET}")
+        LOGS.append(InfoLog(info_type=X.ERROR, info_name="Error occurred while creating HTML logs about cards",
+                            info1=f"{repr(err)}"))
         return ''
 
-def create_HTML_logs(path: str, logs: list[Log], players: list[Player] = None, roles: list[str] = None, logs_info = None) -> str:
-    if not os.path.exists(path):
-        print(f"{CRITICAL}Path is wrong!{RESET}")
-        if yes_or_no(f"Create path ({path}) to file? "):
-            try:
-                os.makedirs(path)
-            except PermissionError as err:
-                print(f"{CRITICAL}Error occurred while creating path: {type(err)}({err}){RESET}")
-            except Exception as err:
-                print(f"{CRITICAL}Error occurred while creating path: {type(err)}({err}){RESET}")
+def create_HTML_logs(path: str, logs: list[GameLog], players: list[Player] = None, *args, **kwargs) -> str:
+    try:
+        if args:
+            if IS_PRINT_FULL_INFO:
+                print(f"{WARNING}Too many arguments provided: {args}{RESET}")
+            elif IS_PRINT_SMALL_INFO:
+                print(f"{WARNING}too many arguments{RESET}")
+            LOGS.append(
+                InfoLog(info_type=X.ERROR, info_name=f"Too many arguments provided", info1=' '.join(args)))
+        if kwargs:
+            if IS_PRINT_FULL_INFO:
+                print(f"{WARNING}Too many keyword arguments provided: {kwargs}{RESET}")
+            elif IS_PRINT_SMALL_INFO:
+                print(f"{WARNING}Too many keyword arguments{RESET}")
+            LOGS.append(InfoLog(info_type=X.ERROR, info_name=f"Too many keyword arguments provided",
+                                info1=' '.join([f"({i}: {j})" for i, j in kwargs.items()])))
+        if not os.path.exists(path):
+            print(f"{CRITICAL}Path is wrong!{RESET}")
+            if yes_or_no(f"Create path ({path}) to file? "):
+                try:
+                    os.makedirs(path)
+                except PermissionError as err:
+                    print(f"{CRITICAL}Error occurred while creating path: {type(err)}({err}){RESET}")
+                    LOGS.append(InfoLog(info_type=X.ERROR, info_name="Error occurred while creating all HTML logs",
+                                        info1=f"{repr(err)}"))
+                except Exception as err:
+                    LOGS.append(InfoLog(info_type=X.ERROR, info_name="Error occurred while creating HTML logs",
+                                        info1=f"{repr(err)}"))
+                    print(f"{CRITICAL}Error occurred while creating path: {type(err)}({err}){RESET}")
+                    return ''
+            else:
+                print("OK, No logs")
                 return ''
+    except Exception as err:
+        if IS_PRINT_FULL_INFO:
+            print(f"{CRITICAL}Unexpected error occurred while creating HTML logs: {err}{RESET}")
+        else:
+            print(f"{CRITICAL}Unexpected error occurred while creating HTML logs{RESET}")
     try:
         head = """
          <head>
@@ -283,11 +360,11 @@ def create_HTML_logs(path: str, logs: list[Log], players: list[Player] = None, r
              <title>Secret Hitler logs</title>
              <style>
                  body {
-                     color:""" + norm_c_cut + """;
+                     color:""" + norm_c + """;
                      background-color: """ + font_c_cut + """;
                  }
                  table {
-                     border:5px solid """ + norm_c_cut + """;
+                     border:5px solid """ + norm_c + """;
                      bgcolor: #222;
                      padding: 10px;
                      cellpadding: 10px;
@@ -297,33 +374,38 @@ def create_HTML_logs(path: str, logs: list[Log], players: list[Player] = None, r
                      margin-bottom: 20px;
                  }
                  th {
-                     border: 3px """ + norm_c_cut + """ solid;
+                     border: 3px """ + norm_c + """ solid;
                  }
                  td {
-                     border: 2px """ + norm_c_cut + """ solid;
+                     border: 2px """ + norm_c + """ solid;
                  }
              </style>
          </head>
          """
 
         try:
-            table_roles = create_HTML_roles(players, roles)
-        except BaseException as err:
+            table_roles = create_HTML_roles(players, ROLES)
+        except Exception as err:
             table_roles = ''
             print(f"Oops, something went wrong: {err}")
             print(f"{WARNING}Table of roles could not be created{RESET}")
         try:
-            table_info = create_HTML_info(logs_info)
-        except BaseException as err:
+            table_info = create_HTML_info()
+        except Exception as err:
+            LOGS.append(InfoLog(info_type=X.ERROR, info_name="Error occurred while creating HTML info_name logs",
+                                info1=f"{repr(err)}"))
             table_info = ''
             print(f"Oops, something went wrong: {err}")
             print(f"{WARNING}Table with information could not be created{RESET}")
         try:
             table_logs = create_HTML_logs_cards(logs)
-        except BaseException as err:
+        except Exception as err:
+            LOGS.append(InfoLog(info_type=X.ERROR, info_name="Error occurred while creating HTML cards logs",
+                                info1=f"{repr(err)}"))
             table_logs = ''
             print(f"Oops, something went wrong: {err}")
             print(f"{CRITICAL}Table of logs with cards could not be created{RESET}")
+
         body = ("<body>\n" +
                 table_roles +
                 '\n' +
@@ -337,15 +419,16 @@ def create_HTML_logs(path: str, logs: list[Log], players: list[Player] = None, r
              '\n' +
              body +
              '\n</html>\n')
-
         with open(path, 'w+', encoding="UTF-8") as f:
             print(s, file=f)
         return s
-    except BaseException as err:
+    except Exception as err:
+        LOGS.append(
+            InfoLog(info_type=X.ERROR, info_name="Error occurred while creating all HTML logs", info1=f"{repr(err)}"))
         print(f"Oops, something went wrong: {err}")
         print(f"{CRITICAL}HTML Table of logs could not be created!!!{RESET}")
         return ''
 
 
 if __name__ == '__main__':
-    create_HTML_logs('', [Log(Player(1,'123', 'RED'))])
+    create_HTML_logs('', [GameLog(Player(1, '123', 'RED'))])
