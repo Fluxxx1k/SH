@@ -1,6 +1,5 @@
 import os
 import random as rnd
-import sys
 import time as t
 from atexit import register as atexit
 
@@ -22,15 +21,14 @@ import globs
 from standard_functions import show_only_to_one, yes_or_no, my_input
 from standard_names_SH import X
 from user_color_settings import INPUT_COLOR, CRITICAL, WARNING, GOOD
-from utils import coloring, naming, get_color, input_cards
+from utils import coloring, naming, get_color, input_cards, out
 from user_settings import *
 code_start_time = t.time()
-LOGS.append(InfoLog(info_type=X.INFO, info_name="Code start time", info1=t.strftime("%d.%m.%y %H:%M:%S"), info2=code_start_time))
-ff = __file__
-print(ff)
+LOGS.append(InfoLog(info_type=X.INFO, info_name="Code start time", info1=t.strftime(f"{DATE_FORMAT} {TIME_FORMAT}"), info2=code_start_time))
+print(__file__)
 saved = []
-path = os.getcwd() + "/LOGS/"
-date = t.strftime("%d.%m.%y ")
+path = f"{DIRECTORY_FOR_LOGS}\\"
+date = t.strftime(DATE_FORMAT) + ' '
 LEN_FOR_TABLET = MAX_NAME_LEN + max(len(CYAN), len(YELLOW)) + len(END_T)
 special_election = False
 skips = 0
@@ -42,7 +40,7 @@ normal_logs: list[GameLog] = []
 
 # Number of players and their names
 while True:
-        count = my_input(f"Input number of players: ", integer=True, possible=lambda x: MIN_PLAYER_NUM <= int(x) <= MAX_PLAYER_NUM)
+        count = int(my_input(f"Input number of players: ", integer=True, possible=lambda x: MIN_PLAYER_NUM <= int(x) <= MAX_PLAYER_NUM))
         if yes_or_no(f"Are you sure that here will be {INPUT_COLOR}{count}{END} gamers: "):
             break
 if count == 6:
@@ -102,7 +100,7 @@ globs.HITLER = HITLER
 globs.STALIN = STALIN
 globs.COUNT_PLAYERS = count
 start_time = t.time()
-start_time_f = t.strftime("%d.%m.%y %H:%M:%S")
+start_time_f = t.strftime(f"{DATE_FORMAT} {TIME_FORMAT}")
 print(start_time_f)
 LOGS.append(InfoLog(info_type=X.INFO, info_name="Game start time", info1=start_time_f, info2=start_time))
 red = black = 0
@@ -110,12 +108,6 @@ checks = 1
 Git_caput = False
 Git_cn = False
 f_l = {"OUT", "DEBUG_MODE", "EXIT"}
-
-
-
-def out(c = count, file=sys.stdout):
-    for player_num in range(c):
-        print(f"№{player_num + 1}) {PLAYERS[player_num].out()}", file=file)
 
 
 
@@ -565,7 +557,7 @@ while red < RED_WIN_NUM and black < BLACK_WIN_NUM and not Git_caput and not Git_
         print('\n')
 
 
-end_time_f = t.strftime("%d.%m.%y %H:%M:%S")
+end_time_f = t.strftime(f"{DATE_FORMAT} {TIME_FORMAT}")
 end_time = t.time()
 LOGS.append(InfoLog(info_type=X.INFO, info_name="Game end time", info1=end_time_f, info2=end_time))
 print("Game start time: " + start_time_f)

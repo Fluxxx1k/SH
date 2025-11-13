@@ -16,6 +16,9 @@ IS_PRINT_FULL_INFO: bool = DEBUG_MODE
 IS_PRINT_SMALL_INFO: bool = DEBUG_MODE
 
 TABLE_SPLITTER: str = '|'
+DIRECTORY_FOR_LOGS = 'LOGS1'
+DATE_FORMAT = "%d.%m.%y"
+TIME_FORMAT = "%H:%M:%S"
 def get_roles(length: int) -> tuple[list[str], bool]:
     """
     creates shuffled list of roles

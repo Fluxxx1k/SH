@@ -1,3 +1,4 @@
+import sys
 from globs import PLAYERS
 from standard_classes import POSSIBLE_CARDS
 from standard_names_SH import X
@@ -147,4 +148,11 @@ def voting_human(theme: str = f"{WARNING}Voting, U forgot to add text{END}", who
 
     elif type_ov_voting == X.CHOOSE_ONE:
         ...
+
+def out(c:int = None, file=sys.stdout):
+    if c is None:
+        import globs
+        c = globs.COUNT_PLAYERS
+    for player_num in range(c):
+        print(f"№{player_num + 1}) {PLAYERS[player_num].out()}", file=file)
 
