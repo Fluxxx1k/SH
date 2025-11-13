@@ -19,7 +19,7 @@ from colors import (YELLOW_TEXT_BRIGHT as YELLOW,
 from player import Player
 from globs import PLAYERS, ROLES, LOGS
 import globs
-from standard_functions import show_only_to_one, yes_or_no
+from standard_functions import show_only_to_one, yes_or_no, my_input
 from standard_names_SH import X
 from user_color_settings import INPUT_COLOR, CRITICAL, WARNING, GOOD
 from utils import coloring, naming, get_color, input_cards
@@ -42,14 +42,7 @@ normal_logs: list[GameLog] = []
 
 # Number of players and their names
 while True:
-    try:
-        count = int(input(f"Input number of players: {INPUT_COLOR}"))
-        print(END, end='')
-        if count < MIN_PLAYER_NUM or count > MAX_PLAYER_NUM:
-            raise ValueError(f"Wrong size! ({count})")
-    except Exception as fixes:
-        print(f"{RED}Try again, wrong input: {fixes}{END_T}")
-    else:
+        count = my_input(f"Input number of players: ", integer=True, possible=lambda x: MIN_PLAYER_NUM <= int(x) <= MAX_PLAYER_NUM)
         if yes_or_no(f"Are you sure that here will be {INPUT_COLOR}{count}{END} gamers: "):
             break
 if count == 6:
