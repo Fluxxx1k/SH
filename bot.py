@@ -130,7 +130,7 @@ class Bot(Player):
                                         ccp: str) -> Cards:
         return Cards('XXX')
 
-    def check_cards(self, ) -> Cards:
+    def check_cards(self, *args, **kwargs) -> Cards:
         return Cards("XXX")
 
     def check_player(self, votes: list[int] = None) -> tuple[int, str]:
@@ -161,9 +161,7 @@ class Bot(Player):
                 return chosen, X.RED
         return chosen, PLAYERS[chosen].color
 
-    # def gulag(self, votes: dict[int, int] = None) -> int:
-    #     if self.bot_mind == X.BLACK:
-    #         x = rnd.randint(0, len(self.black) - 1)
-    #         if self.color ==
-    #         while x != self.num
-
+    def gulag(self, votes: dict[int, int] = None) -> int:
+        if self.bot_mind == X.BLACK:
+            x = rnd.randint(0, len(self.black) - 1)
+            
