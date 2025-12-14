@@ -8,6 +8,7 @@ else:
     try:
         if user_settings.LOG_CONSOLE:
             import based_logger
+        print("Will be created log of console")
     except Exception as e:
         print(repr(e))
         print("Cannot log console of game")

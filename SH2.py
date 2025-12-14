@@ -300,10 +300,19 @@ while red < RED_WIN_NUM and black < BLACK_WIN_NUM and not Git_caput and not Git_
             if DEBUG_MODE:
                 print(f"{PURPLE}{pnc = } != {pn = } => ВнеОП{END_T}")
         else:
-            # print(f"{PURPLE}WTF?!! (Line 160)")
-            if DEBUG_MODE:
-                print(f"{PURPLE}{pnc = } != {pn = } but {special_election = }{END_T}")
+            print(f"{PURPLE}{pnc = } != {pn = } but {special_election = }{END_T}")
             pn = pnc
+    else:
+        pn = (pn + 1) % count
+        if pn == gulag:
+            print(f"{PURPLE}President can't be in gulag, next{END_T}")
+            pn = (pn + 1) % count
+        if pn == killed:
+            print(f"{PURPLE}President can't be dead, next{END_T}")
+            pn = (pn + 1) % count
+        if pn == gulag:
+            print(f"{PURPLE}President can't be in gulag, next{END_T}")
+            pn = (pn + 1) % count
     if skips >= ANARCHY_SKIP_NUM:
         if yes_or_no(f"Anarchy? (Skips: {skips}): "):
             if saved:
@@ -338,24 +347,12 @@ while red < RED_WIN_NUM and black < BLACK_WIN_NUM and not Git_caput and not Git_
                 PLAYERS[gulag].free()
                 gulag = MAX_PLAYER_NUM
             logs_out()
-    pn = (pn + 1) % count
-    if pn == gulag:
-        print(f"{PURPLE}President can't be in gulag, next{END_T}")
-        pn = (pn + 1) % count
-    if pn == killed:
-        print(f"{PURPLE}President can't be dead, next{END_T}")
-        pn = (pn + 1) % count
-    if pn == gulag:
-        print(f"{PURPLE}President can't be in gulag, next{END_T}")
-        pn = (pn + 1) % count
     PLAYERS[pn].chosen_gov(X.PRESIDENT)
     out()
-    if not special_election:
-        pnc = pn
-    else:
-        # if pnc == pn:
-        #    pnc =
+    if special_election:
         special_election = False
+    else:
+        pnc = pn
     if yes_or_no(f"Skip? (Skips: {skips}): "):
         skips += 1
         degov()
@@ -366,7 +363,7 @@ while red < RED_WIN_NUM and black < BLACK_WIN_NUM and not Git_caput and not Git_
 
     cn = new_gov("Chancellor", YELLOW)
     if black >= 3 and cn not in Git_not:
-        if not (STALIN is None):
+        if STALIN is None:
             if cn == HITLER:
                 degov()
                 logs.append(((PLAYERS[pn].table(), PLAYERS[cn].table()),
@@ -380,11 +377,17 @@ while red < RED_WIN_NUM and black < BLACK_WIN_NUM and not Git_caput and not Git_
             if HITLER == cn:
                 if yes_or_no(f"Is {PLAYERS[cn]} hitler "):
                     degov()
-                    logs.append(((PLAYERS[pn].table(), PLAYERS[cn].table()),
-                                 (f'{BLACK}HIT{END_T}', f'{BLACK}vs{END_T}', f'{BLACK}S{END_T}', 'TAL')))
-                    normal_logs.append(
-                        GameLog(prs=PLAYERS[pn], cnc=PLAYERS[cn], special="Hitler is chancellor!<br>But Stalin is president!"))
-                    Git_caput = True
+                    if pn == STALIN:
+                        logs.append(((PLAYERS[pn].table(), PLAYERS[cn].table()),
+                                     (f'{BLACK}HIT{END_T}', f'{BLACK}vs{END_T}', f'{BLACK}S{END_T}', 'TAL')))
+                        normal_logs.append(
+                            GameLog(prs=PLAYERS[pn], cnc=PLAYERS[cn], special="Hitler is chancellor!<br>But Stalin is president!"))
+                        Git_caput = True
+                    else:
+                        logs.append(((PLAYERS[pn].table(), PLAYERS[cn].table()),
+                                     (f'{BLACK}HTL{END_T}', f'{BLACK}ER{END_T}', f'{YELLOW}C{END_T}', f'{YELLOW}HAN{END_T}')))
+                        normal_logs.append(GameLog(prs=PLAYERS[pn], cnc=PLAYERS[cn], special="Hitler is chancellor!"))
+                        Git_cn = True
                     break
             else:
                 yes_or_no(f"Is {PLAYERS[cn]} hitler? ", yes=set())
@@ -437,7 +440,7 @@ while red < RED_WIN_NUM and black < BLACK_WIN_NUM and not Git_caput and not Git_
     print("\n\n\n")
 
     logs.append(((PLAYERS[pn].table(), PLAYERS[cn].table()), (cps, ccs, ccp, cpsa)))
-    if black == 1 == checks:
+    if black == 1 >= checks:
         saved = take_random(3)
         cpsc = PLAYERS[pn].check_cards(''.join(saved))
         normal_logs.append(GameLog(prs=PLAYERS[pn],
@@ -448,8 +451,8 @@ while red < RED_WIN_NUM and black < BLACK_WIN_NUM and not Git_caput and not Git_
         logs.append(((PLAYERS[pn].table(),
                       f"{PURPLE + 'CARD CHECK' + END_T: <{LEN_FOR_TABLET}}"),
                      (cpsc, PURPLE + 'CH' + END_T, PURPLE + 'K' + END_T, '   ')))
-        checks += 1
-    elif black == 2 == checks:
+        checks = 2
+    elif black == 2 >= checks:
         pc, cpc = PLAYERS[pn].check_player()
         cpc1 = cpc
         match cpc:
@@ -469,29 +472,29 @@ while red < RED_WIN_NUM and black < BLACK_WIN_NUM and not Git_caput and not Git_
             GameLog(prs=PLAYERS[pn], cnc=PLAYERS[cn],
                     special=f"Color of [<font color='{purple_c}'>{PLAYERS[cn]}</font>] that [<font color='{pr_c}'>{PLAYERS[pn]}</font>] said is <font color='{color_of_HTML_roles(cpc)}'>{cpc}</font>",
                     is_chancellor=False))
-        checks += 1
-    elif black == 3 == checks:
+        checks = 3
+    elif black == 3 >= checks:
         gulag = PLAYERS[pn].purge_another(X.GULAG)
         logs.append(((PLAYERS[pn].table(), PURPLE + GULAG + PLAYERS[gulag].table() + END_BG + END_T),
                      (PURPLE + 'GUL' + END_T, PURPLE + 'AG' + END_T, PURPLE + '!' + END_T, '   ')))
         normal_logs.append(GameLog(PLAYERS[pn], PLAYERS[gulag], special="In gulag", is_cards=False, is_chancellor=False))
         PLAYERS[gulag].purge(X.GULAG)
-        checks += 1
         if gulag == HITLER:
             degov()
             Git_caput = True
             break
         else:
             Git_not.add(gulag)
-    elif black == 4 == checks:
+        checks = 4
+    elif black == 4 >= checks:
         temp = pn
         pn = PLAYERS[pn].place_another()
         logs.append(((PLAYERS[temp].table(), PLAYERS[pn + 1].table()),
                      (PURPLE + 'PLA' + END_T, PURPLE + 'CE' + END_T, PURPLE + 'D' + END_T, '   ')))
         normal_logs.append(GameLog(PLAYERS[temp], PLAYERS[pn + 1], special="Special placing", is_chancellor=False))
-        checks += 1
         special_election = True
-    elif black == 5 == checks:
+        checks = 5
+    elif black == 5 >= checks:
         killed = PLAYERS[pn].purge_another(X.SHOUT)
         if gulag == killed:
             gulag = MAX_PLAYER_NUM
@@ -499,7 +502,6 @@ while red < RED_WIN_NUM and black < BLACK_WIN_NUM and not Git_caput and not Git_
         logs.append(((PLAYERS[pn].table(), PLAYERS[killed].table()),
                      (PURPLE + 'KIL' + END_T, PURPLE + 'LE' + END_T, PURPLE + 'D' + END_T, '   ')))
         normal_logs.append(GameLog(PLAYERS[pn], PLAYERS[killed], special=f"Killed", is_chancellor=False))
-        checks += 1
         if killed not in Git_not:
             if killed == HITLER:
                 degov()
@@ -507,6 +509,7 @@ while red < RED_WIN_NUM and black < BLACK_WIN_NUM and not Git_caput and not Git_
                 break
             else:
                 Git_not.add(killed)
+        checks = 6
     logs_out()
     if Git_not:
         print("Not Hitlers: ")
