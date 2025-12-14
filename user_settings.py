@@ -12,10 +12,10 @@ RED_WIN_NUM: int = 5
 BLACK_WIN_NUM: int = 6
 
 ANARCHY_SKIP_NUM: int = 3
-DEBUG_MODE: bool = True
+DEBUG_MODE: bool = False
 LOG_CONSOLE: bool = DEBUG_MODE
 IS_PRINT_FULL_INFO: bool = DEBUG_MODE
-IS_PRINT_SMALL_INFO: bool = DEBUG_MODE
+IS_PRINT_SMALL_INFO: bool = True
 DIRECTORY_FOR_CONSOLE_LOGS:str = "Console_logs"
 NAME_FOR_CONSOLE_LOGS:str = "log"
 EXTENSION_FOR_CONSOLE_LOGS: str = '.txt'  # расширение
