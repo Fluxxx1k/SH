@@ -8,7 +8,7 @@ from colors import (YELLOW_BACKGROUND_BRIGHT as GULAG,
                     RED_BACKGROUND_BRIGHT as DEAD,
                     RESET_BACKGROUND as END_BG,
                     )
-from utils import get_color, coloring, naming, input_cards
+from utils import get_color, coloring, naming, input_cards, preproc_votes, weighted_random_for_indexes
 from standard_names_SH import X
 from standard_functions import show_only_to_one, yes_or_no, is_x_in_y, my_input
 from colors import (BLUE_TEXT_BRIGHT as BLUE,
@@ -275,4 +275,10 @@ class Player:
                         f"Are you sure that number {INPUT_COLOR}{placed + 1}{END} is right (it's [{INPUT_COLOR}{PLAYERS[placed]}{END}]): "):
                     break
         return placed
+    def choose_chancellor(self, cannot_be: set[int] = set(), votes: dict[int, int] = {}) -> int:
+        ppv = preproc_votes(votes)
+        x = weighted_random_for_indexes(ppv)
+        while x == self.num or x in cannot_be:
+            x = weighted_random_for_indexes(ppv)
+        return x
 

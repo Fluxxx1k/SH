@@ -15,9 +15,6 @@ class Cards(str):
         # super().__init__()
     def __matmul__(self, other=None) -> str:
         return self.coloring_cards()
-    def __del__(self):
-        print(f"{WARNING}IDK, {self.cards}")
-        print("del")
     def coloring_cards(self=None, cards: "str | Cards" = None, *,
                        print_errors: bool = IS_PRINT_FULL_INFO,
                        is_print: bool = IS_PRINT_SMALL_INFO) -> str:

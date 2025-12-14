@@ -4,6 +4,7 @@ import time as t
 from atexit import register as atexit
 
 from HTML_logs import create_HTML_logs, color_of_HTML_roles, GameLog, pr_c, purple_c, InfoLog
+from bot import Bot
 from colors import (YELLOW_TEXT_BRIGHT as YELLOW,
                     BLUE_TEXT_BRIGHT as BLUE,
                     CYAN_TEXT_BRIGHT as CYAN,
@@ -26,7 +27,6 @@ from user_settings import *
 
 code_start_time = t.time()
 LOGS.append(InfoLog(info_type=X.INFO, info_name="Code start time", info1=t.strftime(f"{DATE_FORMAT} {TIME_FORMAT}"), info2=code_start_time))
-print(__file__)
 saved = []
 path = f"{DIRECTORY_FOR_GAME_LOGS}\\"
 date = t.strftime(DATE_FORMAT) + ' '
@@ -35,15 +35,36 @@ special_election = False
 skips = 0
 logs: list[tuple[tuple[str, str], tuple[str, str, str, str]]] = []
 Git_not = set()
-print(f"If will be error say it to coder (DS: {PURPLE}@fluxxx1k{END})")
 normal_logs: list[GameLog] = []
 
 
-# Number of players and their names
 while True:
-        count = int(my_input(f"Input number of players: ", integer=True, possible=lambda x: MIN_PLAYER_NUM <= int(x) <= MAX_PLAYER_NUM))
-        if yes_or_no(f"Are you sure that here will be {INPUT_COLOR}{count}{END} gamers: "):
+    try:
+        count = input(f"Input number of players: ")
+        splt = count.split()
+        if len(splt) == 2:
+            if (splt[0]+splt[1]).isdigit() :
+                players_count = int(splt[0])
+                bots_count = int(splt[1])
+                count = bots_count + players_count
+                if MIN_PLAYER_NUM <= count <= MAX_PLAYER_NUM:
+                    break
+                else:
+                    raise ValueError
+            else:
+                raise ValueError
+        if not count.isdigit():
+            raise ValueError
+        players_count = count = int(count)
+        bots_count = 0
+        if MIN_PLAYER_NUM <= count <= MAX_PLAYER_NUM:
             break
+        else:
+            raise ValueError
+    except ValueError:
+        print(f"{CRITICAL}Input number of players from {MIN_PLAYER_NUM} to {MAX_PLAYER_NUM}{END}")
+    except Exception as e:
+        print(repr(e))
 if count == 6:
     print(f"{INPUT_COLOR}5 {RED}RED{PURPLE} cards, 11 {BLACK}BLACK{PURPLE} cards{END}")
     red_start = 5
@@ -239,7 +260,7 @@ def take_random(c:int) -> list[str]:
 
 
 
-for i in range(count):
+for i in range(players_count):
     pl_name = input(f"GAYmer №{i + 1}) {INPUT_COLOR}")
     print(END, end='')
     while len(pl_name) > MAX_NAME_LEN or len(pl_name) < MIN_NAME_LEN or pl_name in PLAYERS:
@@ -254,24 +275,36 @@ while True:
         fixes = list(map(int, input(f"Print numbers of mistakes: {INPUT_COLOR}").split()))
         print(END, end='')
         for i in fixes:
-            if i > count or i < 1:
+            if i > players_count or i < 1:
                 raise ValueError(f"Wrong number: {i}")
-    except Exception as fixes:
-        print(f"{RED}{fixes}{END}")
+    except Exception as e:
+        print(f"{RED}{e}{END}")
     else:
         break
 for i in fixes:
     pl_name = input(f"{PURPLE}Fixing names:{END} GAYmer №{i}) {INPUT_COLOR}").strip()
     print(END, end='')
     while len(pl_name) > MAX_NAME_LEN or pl_name == '' or pl_name in PLAYERS:
-        print(f"{RED}Length of name should be 1-{MAX_NAME_LEN} symbols!{END}")
+        print(f"{RED}Length of name should be {MIN_NAME_LEN}-{MAX_NAME_LEN} symbols!{END}")
         pl_name = input(f"{RED}New try:{END} GAYmer №{i}) {INPUT_COLOR}").strip()
         print(END, end='')
     PLAYERS[i - 1] = Player(num=i - 1, name=pl_name, role=ROLES[i - 1])
+
+for i in range(bots_count):
+    pl_name = input(f"Bot №{i + 1}) {INPUT_COLOR}")
+    print(END, end='')
+    while len(pl_name) > MAX_NAME_LEN or pl_name == '' or pl_name in PLAYERS:
+        print(f"{RED}Length of name should be {MAX_NAME_LEN}-{MAX_NAME_LEN} symbols!{END}")
+        pl_name = input(f"{RED}New try:{END} Bot №{i + 1}) {INPUT_COLOR}").strip()
+        print(END, end='')
+    PLAYERS.append(Bot(num=players_count + i, name=pl_name, role=ROLES[players_count + i]))
+
 if DEBUG_MODE:
     print(*list(map(repr, PLAYERS)), sep='\n')
 
 for i in range(count):
+    if isinstance(PLAYERS[i], Bot):
+        continue
     print(f"[{INPUT_COLOR}{PLAYERS[i]}{END}], come here to get your role!")
     show_only_to_one(f"Your role is: {INPUT_COLOR}{naming(ROLES[i])}{END}", 25)
 
@@ -288,6 +321,7 @@ while True:
             break
 pn -= 1
 pnc = pn
+cn = MAX_PLAYER_NUM
 while red < RED_WIN_NUM and black < BLACK_WIN_NUM and not Git_caput and not Git_cn:
     if DEBUG_MODE:
         print(f"{globs.PLAYERS= }")
@@ -361,7 +395,7 @@ while red < RED_WIN_NUM and black < BLACK_WIN_NUM and not Git_caput and not Git_
     else:
         skips = 0
 
-    cn = new_gov("Chancellor", YELLOW)
+    cn = PLAYERS[pn].choose_chancellor(cannot_be={pn, cn})
     if black >= 3 and cn not in Git_not:
         if STALIN is None:
             if cn == HITLER:
@@ -398,6 +432,9 @@ while red < RED_WIN_NUM and black < BLACK_WIN_NUM and not Git_caput and not Git_
     cps, cards, is_veto = PLAYERS[pn].president(cards, PLAYERS[cn], black=black, red=red)
     c_cnc_got = ''.join(cards)
     ccs, ccp = PLAYERS[cn].chancellor(cards, pn, cps, is_veto, black=black, red=red)
+    if isinstance(PLAYERS[cn], Bot):
+        print(f"Bot said {coloring(cps)}")
+        print(f"Bot placed {coloring(ccp)}")
     # cpsa = input_cards(f"Cards {CYAN}president{END_T} ({players[pn]}) said after chancellor: ", q={3, 0})
     cpsa = PLAYERS[pn].president_said_after_chancellor(cnc=PLAYERS[cn], cards=c_prs_got, ccg=c_cnc_got, ccp=ccp,
                                                        cps=cps, ccs=ccs, )

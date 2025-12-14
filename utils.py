@@ -1,7 +1,7 @@
 import sys
 from typing import Any, Iterable
 
-from globs import PLAYERS, COUNT_PLAYERS
+from globs import PLAYERS
 from standard_classes import POSSIBLE_CARDS
 from standard_names_SH import X
 from standard_functions import color_clear, my_input
@@ -102,9 +102,12 @@ def weighted_random(a, weights):
 
 def weighted_random_for_indexes(weights):
     import random
+    if sum(weights) == 0:
+        return random.choice(range(len(weights)))
     return random.choices(range(len(weights)), weights)[0]
 def preproc_votes(votes: dict[int, int], smalling:Iterable[int]=(), times_smalling:int|float=2) -> list[int]:
-    x = [0]*COUNT_PLAYERS
+    import globs
+    x = [0]*globs.COUNT_PLAYERS
     for i in votes:
         x[i] = votes[i] if i not in smalling else votes[i] // times_smalling
     return x

@@ -12,7 +12,7 @@ RED_WIN_NUM: int = 5
 BLACK_WIN_NUM: int = 6
 
 ANARCHY_SKIP_NUM: int = 3
-DEBUG_MODE: bool = False
+DEBUG_MODE: bool = True
 LOG_CONSOLE: bool = DEBUG_MODE
 IS_PRINT_FULL_INFO: bool = DEBUG_MODE
 IS_PRINT_SMALL_INFO: bool = True
