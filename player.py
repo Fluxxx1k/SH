@@ -178,10 +178,10 @@ class Player:
     def check_cards(self):
         ...
 
-    def table(self):
+    def table(self) -> str:
         return self.gov_pref + self.purge_pref + self.prefix + self.tablet_name + self.gov_suff + self.purge_suff + self.suffix
 
-    def out(self):
+    def out(self) -> str:
         return self.gov_pref + self.purge_pref + self.prefix + self.name + self.gov_suff + self.purge_suff + self.suffix
 
 #    def check_color(self):

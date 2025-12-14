@@ -38,8 +38,8 @@ def get_roles(length: int) -> tuple[list[str], bool]:
         black *= 3
     else:
         from standard_functions import my_input
-        black *= my_input("Too many players, input how many fascists will be in game",
-                          integer=True)
+        black *= int(my_input("Too many players, input how many fascists will be in game",
+                          integer=True))
     molotov = []
     ribbentrop = []
     roles = hitler + black + molotov + ribbentrop

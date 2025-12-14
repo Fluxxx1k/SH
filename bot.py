@@ -1,9 +1,14 @@
 import random as rnd
+import time
+
+from HTML_logs import InfoLog
 from colors import PURPLE_TEXT_BRIGHT as PURPLE, END
+from globs import HITLER, LOGS
 from player import Player
 from standard_classes import Cards
 from standard_names_SH import X
-from user_color_settings import CRITICAL
+from user_color_settings import CRITICAL, WARNING
+from user_settings import DATE_FORMAT, TIME_FORMAT, IS_PRINT_SMALL_INFO
 from utils import get_color, weighted_random
 
 
@@ -154,14 +159,51 @@ class Bot(Player):
                 return chosen, X.RED
 
         chosen = rnd.randint(0, len(PLAYERS) - 1)
-        if chosen == self.num:
-            chosen -= 1
+        while chosen == self.num:
+            chosen = rnd.randint(0, len(PLAYERS) - 1)
         if self.color == X.BLACK:
             if PLAYERS[chosen].color == X.BLACK:
                 return chosen, X.RED
         return chosen, PLAYERS[chosen].color
 
-    def gulag(self, votes: dict[int, int] = None) -> int:
-        if self.bot_mind == X.BLACK:
+    def purge_another(self, votes: dict[int, int] = None) -> int:
+        try:
+            match self.bot_mind:
+                case X.BLACK:
+                    x = rnd.randint(0, len(self.black) - 1)
+                    while x == HITLER or x in self.black or x == self.num:
+                        x = rnd.randint(0, len(self.black) - 1)
+                case X.HITLER:
+                    x = rnd.randint(0, len(self.black) - 1)
+                    while x in self.black or x == self.num:
+                        x = rnd.randint(0, len(self.black) - 1)
+                case X.RED:
+                    if self.black:
+                        x = list(self.black)[rnd.randint(0, len(self.black) - 1)]
+                    x = rnd.randint(0, len(self.black) - 1)
+                    while x == HITLER or x in self.black or x == self.num:
+                        x = rnd.randint(0, len(self.black) - 1)
+                case X.NRH:
+                    x = rnd.randint(0, len(self.black) - 1)
+                    while x == self.num:
+                        x = rnd.randint(0, len(self.black) - 1)
+                case _:
+                    print("Unknown bot mind")
+                    LOGS.append(InfoLog(info_type=X.ERROR, info_name= f"Unknown bot mind", info1=f"{self.bot_mind= }", info2=time.strftime(f"{DATE_FORMAT} {TIME_FORMAT}")))
+                    x = rnd.randint(0, len(self.black) - 1)
+                    while x == self.num:
+                        x = rnd.randint(0, len(self.black) - 1)
+        except Exception as err:
+            LOGS.append(InfoLog(info_type=X.ERROR, info_name=f"Error while purging another",
+                                info1=f"{self.bot_mind= } {repr(err)}",
+                                info2=time.strftime(f"{DATE_FORMAT} {TIME_FORMAT}")))
+        try:
+            return x
+        except NameError:
+            LOGS.append(InfoLog(info_type=X.ERROR, info_name=f"No out of purge_another()", info1=f"{self.bot_mind= }",
+                                info2=time.strftime(f"{DATE_FORMAT} {TIME_FORMAT}")))
             x = rnd.randint(0, len(self.black) - 1)
-            
+            while x == self.num:
+                x = rnd.randint(0, len(self.black) - 1)
+
+
