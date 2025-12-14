@@ -1,15 +1,16 @@
 import random as rnd
 import time
 
+import user_settings
 from HTML_logs import InfoLog
 from colors import PURPLE_TEXT_BRIGHT as PURPLE, END
-from globs import HITLER, LOGS
+from globs import HITLER, LOGS, COUNT_PLAYERS
 from player import Player
 from standard_classes import Cards
 from standard_names_SH import X
 from user_color_settings import CRITICAL, WARNING
 from user_settings import DATE_FORMAT, TIME_FORMAT, IS_PRINT_SMALL_INFO
-from utils import get_color, weighted_random
+from utils import get_color, weighted_random_for_indexes, preproc_votes
 
 
 class Bot(Player):
@@ -20,7 +21,8 @@ class Bot(Player):
         self.bot_mind = get_color(self.role, out_type=X.BOT)
         if self.bot_mind == X.BLACK:
             if hitler is None:
-                print(f"{CRITICAL}Bot won't know who is hitler{END}")
+                if user_settings.IS_PRINT_FULL_INFO:
+                    print(f"{CRITICAL}Bot won't know who is hitler{END}")
         self.hitler = hitler
         self.risk = rnd.random()
         self.black: set[int] = set()
@@ -143,11 +145,6 @@ class Bot(Player):
         chosen:int = None
         if votes is None:
             print("Sorry, You forgot about \"votes\"... It isn't available here...")
-        else:
-            if self.color == X.BLACK:
-                for player in self.black:
-                    votes[player] //= 2
-
         if self.bot_mind == X.BLACK:
             if rnd.random() < 0.25:
                 chosen = self.hitler
@@ -157,53 +154,58 @@ class Bot(Player):
                     chosen = self.black[rnd.randint(0, len(self.black) - 1)]
             if chosen is not None:
                 return chosen, X.RED
-
-        chosen = rnd.randint(0, len(PLAYERS) - 1)
-        while chosen == self.num:
+        try:
+            x = [0]*COUNT_PLAYERS
+            for i in votes:
+                x[i] = votes[i]
+            chosen = weighted_random_for_indexes(x)
+        except Exception as e:
+            LOGS.append(InfoLog(info_type=X.ERROR, info_name=f"Error while checking another",
+                                info1=f"{votes= } {repr(e)}",
+                                info2=time.strftime(f"{DATE_FORMAT} {TIME_FORMAT}")))
             chosen = rnd.randint(0, len(PLAYERS) - 1)
+            while chosen == self.num:
+                chosen = rnd.randint(0, len(PLAYERS) - 1)
         if self.color == X.BLACK:
             if PLAYERS[chosen].color == X.BLACK:
                 return chosen, X.RED
         return chosen, PLAYERS[chosen].color
 
     def purge_another(self, votes: dict[int, int] = None) -> int:
+        if votes is None:
+            votes = {}
+            print("Sorry, You forgot about \"votes\"... It isn't available here...")
         try:
             match self.bot_mind:
-                case X.BLACK:
-                    x = rnd.randint(0, len(self.black) - 1)
-                    while x == HITLER or x in self.black or x == self.num:
-                        x = rnd.randint(0, len(self.black) - 1)
-                case X.HITLER:
-                    x = rnd.randint(0, len(self.black) - 1)
-                    while x in self.black or x == self.num:
-                        x = rnd.randint(0, len(self.black) - 1)
                 case X.RED:
                     if self.black:
-                        x = list(self.black)[rnd.randint(0, len(self.black) - 1)]
-                    x = rnd.randint(0, len(self.black) - 1)
-                    while x == HITLER or x in self.black or x == self.num:
-                        x = rnd.randint(0, len(self.black) - 1)
-                case X.NRH:
-                    x = rnd.randint(0, len(self.black) - 1)
-                    while x == self.num:
-                        x = rnd.randint(0, len(self.black) - 1)
+                        return list(self.black)[rnd.randint(0, len(self.black) - 1)]
+                    return weighted_random_for_indexes(preproc_votes(votes))
+                case X.BLACK, X.HITLER:
+                    return weighted_random_for_indexes(preproc_votes(votes, self.black, times_smalling=float('inf')))
+                case X.ANARCHIST:
+                    return weighted_random_for_indexes(preproc_votes(votes))
                 case _:
-                    print("Unknown bot mind")
+                    if IS_PRINT_SMALL_INFO:
+                        print("Unknown bot mind")
+                    if user_settings.IS_PRINT_FULL_INFO:
+                        print(f"{self.bot_mind= }")
                     LOGS.append(InfoLog(info_type=X.ERROR, info_name= f"Unknown bot mind", info1=f"{self.bot_mind= }", info2=time.strftime(f"{DATE_FORMAT} {TIME_FORMAT}")))
                     x = rnd.randint(0, len(self.black) - 1)
                     while x == self.num:
                         x = rnd.randint(0, len(self.black) - 1)
+                    return x
         except Exception as err:
             LOGS.append(InfoLog(info_type=X.ERROR, info_name=f"Error while purging another",
                                 info1=f"{self.bot_mind= } {repr(err)}",
                                 info2=time.strftime(f"{DATE_FORMAT} {TIME_FORMAT}")))
-        try:
-            return x
-        except NameError:
-            LOGS.append(InfoLog(info_type=X.ERROR, info_name=f"No out of purge_another()", info1=f"{self.bot_mind= }",
-                                info2=time.strftime(f"{DATE_FORMAT} {TIME_FORMAT}")))
+
+        if IS_PRINT_SMALL_INFO:
+            print("Error in Bot.purge_another")
+        x = rnd.randint(0, len(self.black) - 1)
+        while x == self.num:
             x = rnd.randint(0, len(self.black) - 1)
-            while x == self.num:
-                x = rnd.randint(0, len(self.black) - 1)
+        return x
+
 
 

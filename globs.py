@@ -1,8 +1,8 @@
-LOGS = []
-COUNT_PLAYERS = None
-PLAYERS = []
+LOGS: list = []
+COUNT_PLAYERS:int = None
+PLAYERS: list["Player"] = []
 ROLES: list[str] = []
-HITLER = None
-STALIN = None
+HITLER:int = None
+STALIN:int = None
 # PURGED: dict[str: int] = set()
 # ERRORS: list[Error_log] = []
