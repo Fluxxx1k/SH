@@ -1,4 +1,7 @@
-from colors import PURPLE_TEXT, WARNING, END, RESET_BACKGROUND, RESET_TEXT, UP
+from typing import Callable
+
+from colors import PURPLE_TEXT, END, RESET_BACKGROUND, RESET_TEXT, UP
+from user_color_settings import WARNING
 from standard_names_SH import MyErr
 def color_clear(s:str | list, print_errors=True) -> str:
     """
@@ -98,12 +101,15 @@ def show_only_to_one(text: str, hide_len: int = None) -> None:
 
 
 def my_input(prompt, color:str= RESET_TEXT + RESET_BACKGROUND, input_color=PURPLE_TEXT, *,
-             possible:set[str]=None, strip=True, upper=False, lower=False, integer: bool=False) -> str|int:
+             possible: "set[str] | Callable"=None, strip=True, upper=False, lower=False, integer: bool=False) -> str:
     if possible is None:
-        possible = set()
+        possible = lambda alpha: True
     x = input('\b' + color + prompt + input_color)
-    print('\r' + END, end='')    
+    print('\r' + END, end='')
+    errors_count = 0
     while True:
+        if errors_count > 100:
+            raise Exception("Too many errors")
         try:
             if strip:
                 x = x.strip()
@@ -111,20 +117,34 @@ def my_input(prompt, color:str= RESET_TEXT + RESET_BACKGROUND, input_color=PURPL
                 x = x.upper()
             if lower:
                 x = x.lower()
-            if possible:
+            if not callable(possible):
                 if x not in possible:
-                    raise MyErr("Impossible")
+                    raise MyErr("Impossible input")
+            else:
+                try:
+                    if integer:
+                        if not x.isdigit():
+                            raise MyErr("Not a digit")
+                        res = possible(int(x))
+                    else:
+                        res = possible(x)
+                except Exception as err:
+                    raise err
+                if not res:
+                    raise MyErr("Impossible input")
             if integer:
                 if not x.isdigit():
                     raise MyErr("Not a digit")
-                return int(x)
+                return x
             return x
         except MyErr as err:
+            errors_count += 1
             x = input('\b' + UP + str(err.args[0]) + ": " + color + prompt + input_color)
             print('\r' + END, end='')
         except KeyboardInterrupt as err:
             raise err
         except EOFError as err:
-            return str(err)
-        except BaseException as err:
+            raise err
+        except Exception as err:
+            errors_count += 1
             print(f"{UP*2}Error occurred while inputting: {WARNING}{err}{END}")

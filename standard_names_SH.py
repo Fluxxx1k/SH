@@ -4,8 +4,8 @@ class X:
     """
     CHANCELLOR = CNC = "chancellor"
     PRESIDENT = PRS = "president"
-    HITLER = HTLR = "HITLER"
-    STALIN = STLN = "STALIN"
+    HITLER = "HITLER"
+    STALIN = "STALIN"
     NO_INFO = N_I = "No Info"
     RED = "RED"
     BLACK = BLK = "BLACK"
@@ -18,16 +18,13 @@ class X:
     SHOUT = "SHOUT"
     KILLED = "KILLED"
     BOT = "Bot"
+    ERROR = "ERROR"
+    OK = "OK"
+    INFO = "INFO"
+    DBG = "DBG"
+    COORDINATION = 'coordination'
+    CHOOSE_ONE = "choose"
 # class HTML(str):
 #     pass
-
-class Player:
-    pass
-class Bot:
-    pass
-class Log:
-    pass
-class LogInfo:
-    pass
 class MyErr(BaseException):
     pass
