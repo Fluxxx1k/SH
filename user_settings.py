@@ -1,5 +1,6 @@
-NAME_FOR_LOGS: str = "SH LOG_TEST "  # You can change it
-tp: str = '.html'  # расширение
+DIRECTORY_FOR_GAME_LOGS: str = "LOGS"
+NAME_FOR_GAME_LOGS: str = "SH LOG_TEST "  # You can change it
+EXTENSION_FOR_GAME_LOGS: str = '.html'  # расширение
 MIN_NAME_LEN: int = 1
 MAX_NAME_LEN: int = 15  # You can change it from 10 to infinity
 
@@ -12,13 +13,16 @@ BLACK_WIN_NUM: int = 6
 
 ANARCHY_SKIP_NUM: int = 3
 DEBUG_MODE: bool = True
+LOG_CONSOLE: bool = DEBUG_MODE
 IS_PRINT_FULL_INFO: bool = DEBUG_MODE
 IS_PRINT_SMALL_INFO: bool = DEBUG_MODE
+DIRECTORY_FOR_CONSOLE_LOGS:str = "Console_logs"
+NAME_FOR_CONSOLE_LOGS:str = "log"
+EXTENSION_FOR_CONSOLE_LOGS: str = '.txt'  # расширение
 
 TABLE_SPLITTER: str = '|'
-DIRECTORY_FOR_LOGS = 'LOGS1'
-DATE_FORMAT = "%d.%m.%y"
-TIME_FORMAT = "%H:%M:%S"
+DATE_FORMAT: str = "%d.%m.%y"
+TIME_FORMAT: str = "%H:%M:%S"
 def get_roles(length: int) -> tuple[list[str], bool]:
     """
     creates shuffled list of roles

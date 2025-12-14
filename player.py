@@ -1,3 +1,8 @@
+from globs import PLAYERS, ROLES
+from user_color_settings import (INPUT_COLOR,
+                                 BLACK_PLAYER_COLOR as BLACK,
+                                 RED_PLAYER_COLOR as RED,
+                                 PURPLE_PLAYER_COLOR as PURPLE, WARNING)
 from user_settings import MAX_PLAYER_NUM, MAX_NAME_LEN
 from colors import (YELLOW_BACKGROUND_BRIGHT as GULAG,
                     RED_BACKGROUND_BRIGHT as DEAD,
@@ -175,8 +180,10 @@ class Player:
         print(UP + phrase + coloring(cpsa))
         return cpsa
 
-    def check_cards(self):
-        ...
+    def check_cards(self, cards: str) -> str:
+        show_only_to_one(coloring(cards))
+        return input_cards(f"Cards {CYAN}president{END} said after checking: ", q=3)
+
 
     def table(self) -> str:
         return self.gov_pref + self.purge_pref + self.prefix + self.tablet_name + self.gov_suff + self.purge_suff + self.suffix
@@ -184,11 +191,88 @@ class Player:
     def out(self) -> str:
         return self.gov_pref + self.purge_pref + self.prefix + self.name + self.gov_suff + self.purge_suff + self.suffix
 
-#    def check_color(self):
-#        x = weighted_random(g, list(map(Player.dark, g)))
-#        if self.bot_mind == X.RED:
-#            return x.name, x.colored_color
-#        if self.bot_mind = X.BLACK:
-#
-#    def check_cards(self,  card):
-#        print(coloring("BBB"))
+    def check_player(self) -> tuple[int, str]:
+        while True:
+            try:
+                pc = int(input(f"{CYAN}President{END} will check number (not index): {INPUT_COLOR}")) - 1
+                print(END, end='')
+                from globs import COUNT_PLAYERS
+                if pc >= COUNT_PLAYERS or pc < 0:
+                    raise ValueError(f"Wrong number: {pc + 1}")
+                if pc == self.num:
+                    raise ValueError(f"Can't check yourself")
+            except Exception as fixes:
+                print(f"{RED}{fixes}{END}")
+            else:
+                if yes_or_no(
+                        f"Are you sure that number {INPUT_COLOR}{pc + 1}{END} is right (it's [{INPUT_COLOR}{PLAYERS[pc]}{END}]): "):
+                    break
+        show_only_to_one(f"Color is {get_color(ROLES[pc])}")
+        print(f"Input {BLACK}{X.BLK}{END} or {RED}{X.RED}{END} or {PURPLE}{X.NRH}{END}")
+        cpc = input(f"Color of {PLAYERS[pc]} {CYAN}President{END} said: {INPUT_COLOR}").upper()
+        print(END, end='')  # card_chancellor_placed
+        while cpc not in {X.BLACK, X.RED, X.NRH}:
+            print(f"{RED}WRONG    INPUT{END}")
+            cpc = input(f"Color of {PURPLE}{PLAYERS[pc]}{END_T} {CYAN}President{END_T} said: {INPUT_COLOR}").upper()
+            print(END, end='')
+        return pc, cpc
+    def purge_another(self, purge_type: str, votes: dict[int, int] = None) -> int:
+        match purge_type:
+            case X.GULAG:
+                while True:
+                    try:
+                        gulag = int(
+                            input(f"{CYAN}President{END} will place in gulag number (not index): {INPUT_COLOR}")) - 1
+                        print(END, end='')
+                        from globs import COUNT_PLAYERS
+                        if gulag < 1 or gulag >= COUNT_PLAYERS:
+                            raise ValueError(f"Wrong number: {gulag + 1}")
+                        if gulag == self.num:
+                            raise ValueError(f"Can't purge yourself")
+                    except Exception as fixes:
+                        print(f"{RED}{fixes}{END}")
+                    else:
+                        if yes_or_no(
+                                f"Are you sure that if number {INPUT_COLOR}{gulag + 1}{END} is right (it's [{INPUT_COLOR}{PLAYERS[gulag]}{END}]): "):
+                            break
+                return gulag
+            case X.SHOUT:
+                while True:
+                    try:
+                        killed = int(input(f"{CYAN}President{END} will kill number (not index): {INPUT_COLOR}")) - 1
+                        print(END, end='')
+                        from globs import COUNT_PLAYERS
+                        if killed < 0 or killed >= COUNT_PLAYERS:
+                            raise ValueError(f"Wrong number: {killed + 1}")
+                        elif killed == self.num:
+                            raise ValueError("No suicide!!")
+                    except Exception as fixes:
+                        print(f"{RED}{fixes}{END}")
+                    else:
+                        if yes_or_no(
+                                f"Are you sure that number {INPUT_COLOR}{killed + 1}{END} is right (it's [{INPUT_COLOR}{PLAYERS[killed]}{END}]): "):
+                            break
+                return killed
+            case _:
+                print(f"{WARNING}Wrong purge type{END}")
+                return self.purge_another(purge_type, votes)
+
+    def place_another(self) -> int:
+        while True:
+            try:
+                placed = int(
+                    input(f"{CYAN}President{END} will place number (not index): {INPUT_COLOR}")) - 1
+                print(END, end='')
+                from globs import COUNT_PLAYERS
+                if placed < 0 or placed >= COUNT_PLAYERS:
+                    raise ValueError(f"Wrong number: {placed + 1}")
+                if placed == self.num:
+                    raise ValueError(f"Can't place yourself")
+            except Exception as fixes:
+                print(f"{RED}{fixes}{END}")
+            else:
+                if yes_or_no(
+                        f"Are you sure that number {INPUT_COLOR}{placed + 1}{END} is right (it's [{INPUT_COLOR}{PLAYERS[placed]}{END}]): "):
+                    break
+        return placed
+

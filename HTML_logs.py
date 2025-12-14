@@ -1,8 +1,8 @@
 import os
 import time as t
-
+from GameLog import GameLog
+from InfoLog import InfoLog
 from globs import LOGS, ROLES
-from standard_classes import Cards
 from standard_functions import color_clear, yes_or_no
 from standard_names_SH import X
 from colors import RESET
@@ -11,84 +11,6 @@ from HTML_colors import *
 from player import Player
 from user_settings import IS_PRINT_SMALL_INFO, IS_PRINT_FULL_INFO
 
-
-class GameLog:
-    def __init__(self, prs: str | Player = '', cnc: str | Player = '', c_prs_got: str | Cards = '', c_prs_said: str | Cards = '', c_cnc_got: str | Cards = '', c_cnc_said: str | Cards = '', c_cnc_placed: str | Cards = '', c_prs_said_after: str | Cards = '', special: str = '', reserve: str = '',
-                 is_cards: bool = True, is_president: bool = True, is_chancellor: bool = True):
-        if isinstance(prs, Player):
-            self.prs = prs.name
-        elif isinstance(prs, str):
-            self.prs = color_clear(prs)
-        else:
-            self.prs = str(prs)
-            print(f"Strange president name ({type(prs)= }): {prs=}")
-
-        if isinstance(cnc, Player):
-            self.cnc = cnc.name
-        elif isinstance(cnc, str):
-            self.cnc = color_clear(cnc)
-        else:
-            self.cnc = str(cnc)
-            print(f"Strange president name ({type(cnc)= }): {cnc=}")
-        self.cpg = c_prs_got
-        self.cps = c_prs_said
-        self.ccg = c_cnc_got
-        self.ccs = c_cnc_said
-        self.ccp = c_cnc_placed
-        self.cpsa = c_prs_said_after
-        self.reserve = reserve
-        self.special = special
-        self.is_cards = is_cards
-        self.is_president = is_president
-        self.is_chancellor = is_chancellor
-    def to_HTML_row(self) -> str:
-        president = f'\t<td style="color: {pr_c if self.is_president else purple_c}"><b>{self.prs}</b></td>\n'
-        chancellor = f'\t<td style="color: {ch_c if self.is_chancellor else purple_c}"><b>{self.cnc}</b></td>\n'
-        c_prs_got = f"\t<td><b>{coloring_HTML_cards(self.cpg) if self.is_cards else self.cpg}</b></td>\n"
-        c_prs_said = f"\t<td><b>{coloring_HTML_cards(self.cps) if self.is_cards else self.cps}</b></td>\n"
-        c_cnc_got = f"\t<td><b>{coloring_HTML_cards(self.ccg) if self.is_cards else self.ccg}</b></td>\n"
-        c_cnc_said = f"\t<td><b>{coloring_HTML_cards(self.ccs) if self.is_cards else self.ccs}</b></td>\n"
-        c_cnc_placed = f"\t<td><b>{coloring_HTML_cards(self.ccp) if self.is_cards else self.ccp}</b></td>\n"
-        c_prs_said_after = f"\t<td><b>{coloring_HTML_cards(self.cpsa) if self.is_cards else self.cpsa}</b></td>\n"
-        special = f'\t<td style="color: {special_c}"><b>{self.special}</b></td>\n'
-        row = president + chancellor + c_prs_got + c_prs_said + c_cnc_got + c_cnc_said + c_cnc_placed + c_prs_said_after + special
-        return row
-
-class InfoLog:
-    def __init__(self, info_type: str, info_name, info1: object, info2: object = ''):
-        self.info_type = str(info_type)
-        self.info_name = str(info_name)
-        self.info1 = str(info1)
-        self.info2 = str(info2)
-
-    def get_color_for_type(self, another_color: str = norm_c, num: int = None,
-                           *, print_errors: bool = IS_PRINT_SMALL_INFO) -> str:
-        match self.info_type:
-            case X.ERROR:
-                return red_c
-            case X.INFO:
-                return norm_c
-            case X.DBG:
-                return purple_c
-            case _:
-                if print_errors:
-                    print(f"{WARNING}Unknown info_name type: {self.info_type}")
-                    LOGS.append(
-                        InfoLog(info_type=X.ERROR, info_name=f"{WARNING}Unknown info_name type: {self.info_type}",
-                                info1=f'row= {num}, '
-                                      f'info_name= {self.info_name}, <br>'
-                                      f'additional_info= {self.info1}'))
-                return another_color
-
-
-    def to_HTML_row(self, num: int = None) -> str:
-        row: str
-        info_type       = f'\t\t\t<td style="color: {self.get_color_for_type()}"><b>{self.info_type}</b></td>\n'
-        info_name           = f'\t\t\t<td><b>{self.info_name}</b></td>\n'
-        info1 = f'\t\t\t<td>{self.info1}</td>\n'
-        info2 = f'\t\t\t<td>{self.info2}</td>\n'
-        row = f"\t\t<tr>\n{info_type}{info_name}{info1}{info2}</tr>\n"
-        return row
 
 
 def coloring_HTML_cards(s: str, print_errors = IS_PRINT_FULL_INFO, is_print=IS_PRINT_SMALL_INFO) -> str:

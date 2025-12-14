@@ -1,3 +1,16 @@
+try:
+    import user_settings
+except Exception as e:
+    print(repr(e))
+    print("Cannot use user settings")
+    exit(0)
+else:
+    try:
+        if user_settings.LOG_CONSOLE:
+            import based_logger
+    except Exception as e:
+        print(repr(e))
+        print("Cannot log console of game")
 print("Checking files:")
 try:
     import os
@@ -31,6 +44,7 @@ while temp != '1' and temp != '2':
     temp = input("Input: ")
 if temp == '1':
     print("\033[32mLaunching\033[0m")
+    # noinspection PyUnusedImports
     import SH2
 elif temp == '2':
     print("\033[31mNot available now...\033[0m")

@@ -4,7 +4,7 @@ import time
 import user_settings
 from HTML_logs import InfoLog
 from colors import PURPLE_TEXT_BRIGHT as PURPLE, END
-from globs import HITLER, LOGS, COUNT_PLAYERS
+from globs import LOGS
 from player import Player
 from standard_classes import Cards
 from standard_names_SH import X
@@ -25,7 +25,8 @@ class Bot(Player):
                     print(f"{CRITICAL}Bot won't know who is hitler{END}")
         self.hitler = hitler
         self.risk = rnd.random()
-        self.black: set[int] = set()
+        self.black: list[int] = []
+
 
     def president(self, cards, cnc, *, black, red) -> tuple[str, list[str], bool]:
         cards = sorted(cards)
@@ -155,6 +156,8 @@ class Bot(Player):
             if chosen is not None:
                 return chosen, X.RED
         try:
+
+            from globs import COUNT_PLAYERS
             x = [0]*COUNT_PLAYERS
             for i in votes:
                 x[i] = votes[i]
@@ -171,7 +174,7 @@ class Bot(Player):
                 return chosen, X.RED
         return chosen, PLAYERS[chosen].color
 
-    def purge_another(self, votes: dict[int, int] = None) -> int:
+    def purge_another(self, purge_type: str = None, votes: dict[int, int] = None) -> int:
         if votes is None:
             votes = {}
             print("Sorry, You forgot about \"votes\"... It isn't available here...")
@@ -202,6 +205,11 @@ class Bot(Player):
 
         if IS_PRINT_SMALL_INFO:
             print("Error in Bot.purge_another")
+        x = rnd.randint(0, len(self.black) - 1)
+        while x == self.num:
+            x = rnd.randint(0, len(self.black) - 1)
+        return x
+    def place_another(self):
         x = rnd.randint(0, len(self.black) - 1)
         while x == self.num:
             x = rnd.randint(0, len(self.black) - 1)

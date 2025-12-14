@@ -23,11 +23,12 @@ from standard_names_SH import X
 from user_color_settings import INPUT_COLOR, CRITICAL, WARNING, GOOD
 from utils import coloring, naming, get_color, input_cards, out
 from user_settings import *
+
 code_start_time = t.time()
 LOGS.append(InfoLog(info_type=X.INFO, info_name="Code start time", info1=t.strftime(f"{DATE_FORMAT} {TIME_FORMAT}"), info2=code_start_time))
 print(__file__)
 saved = []
-path = f"{DIRECTORY_FOR_LOGS}\\"
+path = f"{DIRECTORY_FOR_GAME_LOGS}\\"
 date = t.strftime(DATE_FORMAT) + ' '
 LEN_FOR_TABLET = MAX_NAME_LEN + max(len(CYAN), len(YELLOW)) + len(END_T)
 special_election = False
@@ -62,15 +63,15 @@ else:
     try:
         logs_nums = []
         for i in check_logs:
-            if i.startswith(NAME_FOR_LOGS + date):
+            if i.startswith(NAME_FOR_GAME_LOGS + date):
                 logs_nums.append(i)
         max_log_num = len(logs_nums) + 1
-        full_path = path + NAME_FOR_LOGS + date + str(max_log_num) + tp
+        full_path = path + NAME_FOR_GAME_LOGS + date + str(max_log_num) + EXTENSION_FOR_GAME_LOGS
         while os.path.exists(full_path):
             max_log_num += 1
             print(RED + BOLD + UNDERLINE + full_path +
                   f"    is already exists, trying {CYAN}{max_log_num}{END}")
-            full_path = path + NAME_FOR_LOGS + date + str(max_log_num) + tp
+            full_path = path + NAME_FOR_GAME_LOGS + date + str(max_log_num) + EXTENSION_FOR_GAME_LOGS
         open(full_path, 'w+').close()
         print(f"{GOOD}Logs in: {full_path}{END}")
     except Exception as fixes:
@@ -297,7 +298,7 @@ while red < RED_WIN_NUM and black < BLACK_WIN_NUM and not Git_caput and not Git_
     if pnc != pn:
         if special_election:
             if DEBUG_MODE:
-                print(f"{PURPLE}{pnc = } != {pn = } => Внеоф{END_T}")
+                print(f"{PURPLE}{pnc = } != {pn = } => ВнеОП{END_T}")
         else:
             # print(f"{PURPLE}WTF?!! (Line 160)")
             if DEBUG_MODE:
@@ -438,67 +439,39 @@ while red < RED_WIN_NUM and black < BLACK_WIN_NUM and not Git_caput and not Git_
     logs.append(((PLAYERS[pn].table(), PLAYERS[cn].table()), (cps, ccs, ccp, cpsa)))
     if black == 1 == checks:
         saved = take_random(3)
-        show_only_to_one(coloring(saved))
-        cpsc = input_cards(f"Cards {CYAN}president{END} said after checking: ", q=3)
+        cpsc = PLAYERS[pn].check_cards(''.join(saved))
+        normal_logs.append(GameLog(prs=PLAYERS[pn],
+                                   c_prs_got=''.join(saved),
+                                   c_prs_said=cpsc,
+                                   special="Card check"))
         cpsc = coloring(cpsc)
-        logs.append(((PLAYERS[pn].table(), f"{PURPLE + 'CARD CHECK' + END_T: <{LEN_FOR_TABLET}}"),
+        logs.append(((PLAYERS[pn].table(),
+                      f"{PURPLE + 'CARD CHECK' + END_T: <{LEN_FOR_TABLET}}"),
                      (cpsc, PURPLE + 'CH' + END_T, PURPLE + 'K' + END_T, '   ')))
-        normal_logs.append(GameLog(prs=PLAYERS[pn], c_prs_got=''.join(saved), c_prs_said=cpsc, special="Card check"))
         checks += 1
     elif black == 2 == checks:
-        while True:
-            try:
-                pc = int(input(f"{CYAN}President{END} will check number (not index): {INPUT_COLOR}")) - 1
-                print(END, end='')
-                if pc >= count or pc < 0:
-                    raise ValueError(f"Wrong number: {pc + 1}")
-                if pc == pn:
-                    raise ValueError(f"Can't check yourself")
-            except Exception as fixes:
-                print(f"{RED}{fixes}{END}")
-            else:
-                if yes_or_no(f"Are you sure that number {INPUT_COLOR}{pc + 1}{END} is right (it's [{INPUT_COLOR}{PLAYERS[pc]}{END}]): "):
-                    break
-        show_only_to_one(f"Color is {get_color(ROLES[pc])}")
-        print(f"Input {BLACK}BLK{END} or {RED}RED{END}")
-        cpc = input(f"Color of {PLAYERS[pc]} {CYAN}President{END} said: {INPUT_COLOR}").upper()
-        print(END, end='')  # card_chancellor_placed
-        while cpc not in {X.BLACK, X.RED, X.NRH}:
-            print(f"{RED}WRONG    INPUT{END}")
-            cpc = input(f"Color of {PURPLE}{PLAYERS[pc]}{END_T} {CYAN}President{END_T} said: {INPUT_COLOR}").upper()
-            print(END, end='')
-        if cpc == X.BLACK:
-            cpc1 = BLACK + "BLK" + END_T
-        elif cpc == X.RED:
-            cpc1 = RED + "RED" + END_T
-        elif cpc == X.NRH:
-            cpc1 = PURPLE + "NRH" + END_T
-        else:
-            print(f"WTH?!!!! {cpc} isn't '{X.BLACK}' or '{X.RED}'")
-            cpc1 = PURPLE + "WTH" + END_T
+        pc, cpc = PLAYERS[pn].check_player()
+        cpc1 = cpc
+        match cpc:
+            case X.BLACK:
+                cpc1 = BLACK + "BLK" + END_T
+            case X.RED:
+                cpc1 = RED + "RED" + END_T
+            case X.NRH:
+                cpc1 = PURPLE + "NRH" + END_T
+            case _:
+                print(f"WTH?!!!! {cpc} isn't '{X.BLACK}' or '{X.RED}'")
+                cpc1 = PURPLE + "WTH" + END_T
         logs.append(
             ((PLAYERS[pn].table(), PURPLE + PLAYERS[pc].table() + END_T),
              (cpc1, PURPLE + 'CH' + END_T, PURPLE + 'K' + END_T, f'{PURPLE}PLR{END_T}')))
         normal_logs.append(
             GameLog(prs=PLAYERS[pn], cnc=PLAYERS[cn],
-                    special=f"Color of <font color='{purple_c}'>{PLAYERS[cn]}</font> <font color='{pr_c}'>{PLAYERS[pn]}</font> said is <font color='{color_of_HTML_roles(cpc)}'>{cpc}</font>",
+                    special=f"Color of [<font color='{purple_c}'>{PLAYERS[cn]}</font>] that [<font color='{pr_c}'>{PLAYERS[pn]}</font>] said is <font color='{color_of_HTML_roles(cpc)}'>{cpc}</font>",
                     is_chancellor=False))
         checks += 1
     elif black == 3 == checks:
-        while True:
-            try:
-                gulag = int(input(f"{CYAN}President{END} will place in gulag number (not index): {INPUT_COLOR}")) - 1
-                print(END, end='')
-                if gulag < 1 or gulag >= count:
-                    raise ValueError(f"Wrong number: {gulag + 1}")
-                if gulag == pn:
-                    raise ValueError(f"Can't purge yourself")
-            except Exception as fixes:
-                print(f"{RED}{fixes}{END}")
-            else:
-                if yes_or_no(
-                        f"Are you sure that if number {INPUT_COLOR}{gulag + 1}{END} is right (it's [{INPUT_COLOR}{PLAYERS[gulag]}{END}]): "):
-                    break
+        gulag = PLAYERS[pn].purge_another(X.GULAG)
         logs.append(((PLAYERS[pn].table(), PURPLE + GULAG + PLAYERS[gulag].table() + END_BG + END_T),
                      (PURPLE + 'GUL' + END_T, PURPLE + 'AG' + END_T, PURPLE + '!' + END_T, '   ')))
         normal_logs.append(GameLog(PLAYERS[pn], PLAYERS[gulag], special="In gulag", is_cards=False, is_chancellor=False))
@@ -512,27 +485,14 @@ while red < RED_WIN_NUM and black < BLACK_WIN_NUM and not Git_caput and not Git_
             Git_not.add(gulag)
     elif black == 4 == checks:
         temp = pn
-        pn = new_gov("President", CYAN) - 1
+        pn = PLAYERS[pn].place_another()
         logs.append(((PLAYERS[temp].table(), PLAYERS[pn + 1].table()),
                      (PURPLE + 'PLA' + END_T, PURPLE + 'CE' + END_T, PURPLE + 'D' + END_T, '   ')))
         normal_logs.append(GameLog(PLAYERS[temp], PLAYERS[pn + 1], special="Special placing", is_chancellor=False))
         checks += 1
         special_election = True
     elif black == 5 == checks:
-        while True:
-            try:
-                killed = int(input(f"{CYAN}President{END} will kill number (not index): {INPUT_COLOR}")) - 1
-                print(END, end='')
-                if killed is not None:
-                    raise ValueError(f"Wrong number: {killed + 1}")
-                elif killed == pn:
-                    raise ValueError("No suicide!!")
-            except Exception as fixes:
-                print(f"{RED}{fixes}{END}")
-            else:
-                if yes_or_no(
-                        f"Are you sure that number {INPUT_COLOR}{killed + 1}{END} is right (it's [{INPUT_COLOR}{PLAYERS[killed]}{END}]): "):
-                    break
+        killed = PLAYERS[pn].purge_another(X.SHOUT)
         if gulag == killed:
             gulag = MAX_PLAYER_NUM
         PLAYERS[killed].purge(X.KILLED)
@@ -547,8 +507,6 @@ while red < RED_WIN_NUM and black < BLACK_WIN_NUM and not Git_caput and not Git_
                 break
             else:
                 Git_not.add(killed)
-    # if red >= 3 and molotov_ribbentrop:
-    #    input()
     logs_out()
     if Git_not:
         print("Not Hitlers: ")

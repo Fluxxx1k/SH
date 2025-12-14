@@ -1,8 +1,15 @@
-LOGS: list = []
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
+
+if TYPE_CHECKING:
+    from InfoLog import InfoLog
+    from player import Player
+
+LOGS: list[InfoLog] = []
 COUNT_PLAYERS:int = None
-PLAYERS: list["Player"] = []
+PLAYERS: list[Player] = []
 ROLES: list[str] = []
 HITLER:int = None
 STALIN:int = None
-# PURGED: dict[str: int] = set()
-# ERRORS: list[Error_log] = []
+PURGED: set[Player] = set()
