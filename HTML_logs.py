@@ -72,7 +72,7 @@ def create_HTML_roles(players: list[Player] = None, roles: list[str] = None, pri
                          '</b></h1></caption>\n')
         table_head = (f"\t<thead>\n"
                         f"\t\t<tr>\n"
-                        f"\t\t\t<th style='{num_c}'>Number</th>\n"
+                        f"\t\t\t<th style='color: {num_c}'>Number</th>\n"
                         f"\t\t\t<th>Player</th>\n"
                         f"\t\t\t<th>Role</th>"
                         f"\t\t</tr>\n"
@@ -158,7 +158,7 @@ def create_HTML_info(print_errors: bool = IS_PRINT_FULL_INFO, is_print: bool = I
                      "</strong></h1></caption>\n")
     table_head = (f"\t<thead>\n"
                   f"\t\t<tr>\n"
-                  f"\t\t\t<th style=\"color: {num_c}\">DBG</th>\n"
+                  f"\t\t\t<th style=\"color: {num_c}\">DBG TYPE</th>\n"
                   f"\t\t\t<th>Type of information</th>\n"
                   f"\t\t\t<th>Information-1</th>\n"
                   f"\t\t\t<th>Information-2 (reserve)</th>\n"
