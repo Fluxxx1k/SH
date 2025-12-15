@@ -19,10 +19,6 @@ class Bot(Player):
     def __init__(self, num: int, name:str, role: str, *, hitler: int = None):
         super().__init__(num=num, role=role, name=name)
         self.bot_mind = get_color(self.role, out_type=X.BOT)
-        if self.bot_mind == X.BLACK:
-            if hitler is None:
-                if user_settings.IS_PRINT_FULL_INFO:
-                    print(f"{CRITICAL}Bot won't know who is hitler{END}")
         self.risk = rnd.random()
         self.black: list[int] = []
 
@@ -144,6 +140,7 @@ class Bot(Player):
         from globs import PLAYERS
         chosen:int = None
         if votes is None:
+            votes = {}
             print("Sorry, You forgot about \"votes\"... It isn't available here...")
         if self.bot_mind == X.BLACK:
             if rnd.random() < 0.25:
@@ -184,7 +181,9 @@ class Bot(Player):
                     if self.black:
                         return list(self.black)[rnd.randint(0, len(self.black) - 1)]
                     return weighted_random_for_indexes(preproc_votes(votes))
-                case X.BLACK, X.HITLER:
+                case X.BLACK:
+                    return weighted_random_for_indexes(preproc_votes(votes, self.black, times_smalling=float('inf')))
+                case X.HITLER:
                     return weighted_random_for_indexes(preproc_votes(votes, self.black, times_smalling=float('inf')))
                 case X.ANARCHIST:
                     return weighted_random_for_indexes(preproc_votes(votes))
