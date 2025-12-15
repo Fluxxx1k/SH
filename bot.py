@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import datetime
 import random as rnd
 import time
 
@@ -10,7 +11,7 @@ from globs import LOGS, PLAYERS, ROLES
 from player import Player
 from standard_classes import Cards
 from standard_names_SH import X
-from user_settings import DATE_FORMAT, TIME_FORMAT, IS_PRINT_SMALL_INFO
+from user_settings import DATE_FORMAT, TIME_FORMAT, IS_PRINT_SMALL_INFO,IS_PRINT_FULL_INFO
 from utils import get_color, weighted_random_for_indexes, preproc_votes
 
 
@@ -37,7 +38,9 @@ class Bot(Player):
             except Exception as e:
                 if user_settings.IS_PRINT_FULL_INFO:
                     print(repr(e))
-                LOGS.append(InfoLog(info_type=X.ERROR,info_name=f"Cannot add Hitler to black list: {repr(e)}", info1=f"{globs.HITLER= } {self.bot_mind= }"))
+                LOGS.append(InfoLog(info_type=X.ERROR,
+                                    info_name=f"Cannot add Hitler to black list: {repr(e)}",
+                                    info1=f"{globs.HITLER= } {self.bot_mind= }"))
         if self.bot_mind == X.HITLER:
             self.black.add(self.num)
 
@@ -56,6 +59,14 @@ class Bot(Player):
                     return "XXX", ["B", "R"], False
             if cards == ["B", "B", "B"]:
                 return "XXX", ["B", "B"], False
+            if user_settings.IS_PRINT_FULL_INFO:
+                print(f"Unknown situation {cards= }")
+            elif IS_PRINT_SMALL_INFO:
+                print(f"Unknown situation")
+            LOGS.append(InfoLog(info_type=X.ERROR,
+                                info_name=f"Unknown situation",
+                                info1=f"{self.bot_mind= } {cards= }",
+                                info2=f"{datetime.datetime.now().strftime(f'{DATE_FORMAT} {TIME_FORMAT}')}"))
         if self.bot_mind == X.BLACK:
             if cards == ["B", "R", "R"]:
                 return "XXX", ["B", "R"], False
@@ -68,7 +79,15 @@ class Bot(Player):
                 return "XXX", ["B", "B"], False
             if cards == ["R", "R", "R"]:
                 return "XXX", ["R", "R"], black == 5
-            print(f"Unknown situation {cards= }")
+            if user_settings.IS_PRINT_FULL_INFO:
+                print(f"Unknown situation {cards= }")
+            elif IS_PRINT_SMALL_INFO:
+                print(f"Unknown situation")
+            LOGS.append(InfoLog(info_type=X.ERROR,
+                                info_name=f"Unknown situation",
+                                info1=f"{self.bot_mind= } {cards= }",
+                                info2=f"{datetime.datetime.now().strftime(f'{DATE_FORMAT} {TIME_FORMAT}')}"))
+
             return "XXX", cards[:2], black == 5
         if self.bot_mind == X.RED:
             if cards == ["B", "R", "R"]:
@@ -84,7 +103,14 @@ class Bot(Player):
                 return "XXX", ["R"] * 2, False
             if cards == ["B"] * 3:
                 return "XXX", ["B"] * 2, black == 5
-            print("Unknown situation {card= }")
+            if user_settings.IS_PRINT_FULL_INFO:
+                print(f"Unknown situation {cards= }")
+            elif IS_PRINT_SMALL_INFO:
+                print(f"Unknown situation")
+            LOGS.append(InfoLog(info_type=X.ERROR,
+                                info_name=f"Unknown situation",
+                                info1=f"{self.bot_mind= } {cards=}",
+                                info2=f"{datetime.datetime.now().strftime(f'{DATE_FORMAT} {TIME_FORMAT}')}"))
             return "XXX", cards[1:], black == 5
         if self.bot_mind == X.NRH:
             if "B" in cards and "R" in cards:
@@ -92,7 +118,14 @@ class Bot(Player):
             else:
                 return "XXX", cards[1:], black == 5
         else:
-            print(f"Unknown {self.bot_mind= }")
+            if user_settings.IS_PRINT_FULL_INFO:
+                print(f"Unknown bot mind {self.bot_mind= } {cards= }")
+            elif IS_PRINT_SMALL_INFO:
+                print(f"Unknown bot mind")
+            LOGS.append(InfoLog(info_type=X.ERROR,
+                                info_name=f"Unknown bot mind",
+                                info1=f"{self.bot_mind= }{cards= }",
+                                info2=f"{datetime.datetime.now().strftime(f'{DATE_FORMAT} {TIME_FORMAT}')}"))
             if "B" in cards and "R" in cards:
                 return "XXX", ["B", "R"], black == 5
             else:
@@ -122,7 +155,7 @@ class Bot(Player):
         if self.bot_mind == X.BLACK:
             if cards == ["B"] * 2:
                 return "XX", "B"
-            if cards == ["R"]:
+            if cards == ["R"] * 2:
                 if veto:
                     return "XX", 'X'
                 return "XX", "R"
@@ -134,7 +167,7 @@ class Bot(Player):
                 if rnd.random() < 0.69:
                     return "XX", "R"
                 return "XX", "B"
-            if rnd.random() < 0.96:
+            if rnd.random() < 0.75:
                 return "XX", "R"
             return "XX", "B"
         else:
@@ -152,9 +185,55 @@ class Bot(Player):
                     return "XX", "B"
                 return "XX", "R"
 
-    def president_said_after_chancellor(self, *, cards: str, cnc: "Player int", ccg: str, cps: str, ccs: str,
-                                        ccp: str) -> Cards:
-        return Cards('XXX')
+    def president_said_after_chancellor(self, *, cards: str, cnc: int | Player,
+                                        ccg: str, cps: str,
+                                        ccs: str, ccp: str) -> Cards:
+        """
+        Check cards after chancellor
+        :param cards: Cards president got
+        :param cnc: Number of chancellor
+        :param ccg: Cards chancellor got
+        :param cps: Cards president said
+        :param ccs: Cards chancellor said
+        :param ccp: Cards chancellor placed
+        :return: Cards of president said after chancellor movement
+        """
+        if isinstance(cnc, Player):
+            cnc = cnc.num
+        match self.bot_mind:
+            case X.RED:
+                if "R" in ccg and ccp == "B":
+                    self.black.add(cnc)
+                return Cards(cards)
+            case X.BLACK:
+                if cnc in self.black:
+                    if ccp == "B":
+                        return Cards("BBB")
+                    return Cards(cps)
+                else:
+                    if ccp == "R":
+                        return Cards(cards)
+                    return Cards(cps)
+            case X.HITLER:
+                if "R" in ccg and ccp == "B":
+                    self.black.add(cnc)
+                if 'R' == ccp:
+                    return Cards(cards)
+                return Cards(cps)
+            case X.ANARCHIST:
+                return Cards(cps)
+            case _:
+                LOGS.append(InfoLog(X.ERROR, info_name="Unknown bot mind",
+                                    info1=f"№{self.num} [{self}] {self.bot_mind= }",
+                                    info2=datetime.datetime.now().strftime(f"{DATE_FORMAT} {TIME_FORMAT}")))
+                if IS_PRINT_FULL_INFO:
+                    print(f"Unknown {self.bot_mind= }")
+                elif IS_PRINT_SMALL_INFO:
+                    print("Unknown bot mind")
+                return Cards("XXX")
+
+
+
 
     def check_cards(self, cards, *args, **kwargs) -> Cards:
         match self.bot_mind:
@@ -196,6 +275,7 @@ class Bot(Player):
             if rnd.random() < 0.25:
                 import globs
                 chosen = globs.HITLER
+                PLAYERS[globs.HITLER].black.add(self.num)
                 return chosen, X.RED
             if rnd.random() < 0.25:
                 if self.black:
@@ -221,7 +301,7 @@ class Bot(Player):
             if PLAYERS[chosen].color == X.BLACK:
                 PLAYERS[chosen].black.add(self.num)
                 return chosen, X.RED
-            elif PLAYERS[chosen].color == X.RED and rnd.random() < 0.25:
+            elif self.bot_mind != X.HITLER and PLAYERS[chosen].color == X.RED and rnd.random() < self.risk:
                 PLAYERS[chosen].black.add(self.num)
                 return chosen, X.BLACK
         return chosen, PLAYERS[chosen].color
@@ -229,7 +309,8 @@ class Bot(Player):
     def purge_another(self, purge_type: str = None, votes: dict[int, int] = None) -> int:
         if votes is None:
             votes = {}
-            print("Sorry, You forgot about \"votes\"... It isn't available here...")
+            if IS_PRINT_SMALL_INFO:
+                print("Sorry, coder forgot about \"votes\"... It isn't available here...")
         try:
             import globs
             ppv = [1] * globs.COUNT_PLAYERS

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import os
 import random as rnd
 import time as t
@@ -98,6 +100,7 @@ else:
     except Exception as error:
         print(f"{CRITICAL}Something went wrong, no logs available: {error}{END}")
         full_path = None
+del logs_nums
 
 gulag  = None
 killed = None
@@ -261,7 +264,7 @@ def take_random(c:int) ->  list[str]:
 
 
 bots_places = get_bot_places(bots_count)
-
+# (bots_places := list(range(count))).remove(HITLER)
 
 for i in range(count):
     pl_name = my_input(f"{'GAYmer' if i not in bots_places else 'Bot'} №{i + 1})")
@@ -287,13 +290,13 @@ while True:
     else:
         break
 for i in fixes:
-    pl_name = my_input(f"{PURPLE}Fixing names:{END} {'GAYmer' if i not in bots_places else 'Bot'} №{i})")
+    pl_name = my_input(f"{PURPLE}Fixing names:{END} {'GAYmer' if i - 1 not in bots_places else 'Bot'} №{i})")
     print(END, end='')
     while len(pl_name) > MAX_NAME_LEN or pl_name == '' or pl_name in PLAYERS:
-        print(f"{RED}Length of name should be {MIN_NAME_LEN}-{MAX_NAME_LEN} symbols!{END}")
+        print(f"{RED}Length of name should be {MIN_NAME_LEN}-{MAX_NAME_LEN} symbols and unique!{END}")
         pl_name = my_input(f"{RED}New try:{END} {'GAYmer' if i not in bots_places else 'Bot'} №{i})").strip()
         print(END, end='')
-    PLAYERS[i - 1] = (Player if i not in bots_places else Bot)(num=i - 1, name=pl_name, role=ROLES[i - 1])
+    PLAYERS[i - 1] = (Player if i - 1 not in bots_places else Bot)(num=i - 1, name=pl_name, role=ROLES[i - 1])
 if DEBUG_MODE:
     print(*list(map(repr, PLAYERS)), sep='\n')
 
@@ -354,7 +357,9 @@ while red < RED_WIN_NUM and black < BLACK_WIN_NUM and not Git_caput and not Git_
                 ccp = take_random(1)[0]
             logs.append(((f"{PURPLE + 'ANARCHY' + END_T: <{LEN_FOR_TABLET}}",
                           f"{PURPLE + 'ANARCHY' + END_T: <{LEN_FOR_TABLET}}"), ('   ', '  ', coloring(ccp), '   ')))
-            normal_logs.append(GameLog(c_cnc_placed=ccp, special="Anarchy"))
+            normal_logs.append(GameLog(prs="ANARCHY", cnc="ANARCHY",
+                                       c_cnc_placed=ccp, special=f"({skips} skips)",
+                                       is_chancellor=False, is_president=False))
             if ccp == 'B':
                 black += 1
                 checks += 1
@@ -373,7 +378,7 @@ while red < RED_WIN_NUM and black < BLACK_WIN_NUM and not Git_caput and not Git_
                 logs.append(((f"{PURPLE + 'ANARCHY' + END_T: <{LEN_FOR_TABLET}}", PLAYERS[gulag].table()),
                              (f'{PURPLE}FRE{END_T}', f'{PURPLE}E!{END_T}', f'{PURPLE}!{END_T}', '   ')))
                 print(f"{PURPLE}{PLAYERS[gulag]} was de-Gulag-ed{END_T}")
-                normal_logs.append(GameLog(special=f"Anarchy, {PLAYERS[gulag]} freed"))
+                normal_logs.append(GameLog(prs="ANARCHY", cnc="ANARCHY", special=f"Anarchy, {PLAYERS[gulag]} freed", is_chancellor=False, is_president=False))
                 PLAYERS[gulag].free()
                 gulag = MAX_PLAYER_NUM
             logs_out()
@@ -432,6 +437,7 @@ while red < RED_WIN_NUM and black < BLACK_WIN_NUM and not Git_caput and not Git_
         if is_veto:
             print(f"{CYAN}President{END} bot [{PURPLE}{BOLD}{PLAYERS[pn]}{END}] requested veto")
     c_cnc_got = ''.join(cards)
+
     ccs, ccp = PLAYERS[cn].chancellor(cards, pn, cps, is_veto, black=black, red=red)
     if cn in bots_places:
         print(f"{YELLOW}Chancellor{END} bot [{PURPLE}{BOLD}{PLAYERS[cn]}{END}] said {coloring(ccs)}")
@@ -520,8 +526,8 @@ while red < RED_WIN_NUM and black < BLACK_WIN_NUM and not Git_caput and not Git_
             ((PLAYERS[pn].table(), PURPLE + PLAYERS[pc].table() + END_T),
              (cpc1, PURPLE + 'CH' + END_T, PURPLE + 'K' + END_T, f'{PURPLE}PLR{END_T}')))
         normal_logs.append(
-            GameLog(prs=PLAYERS[pn], cnc=PLAYERS[cn],
-                    special=f"[<font color='{pr_c}'>{PLAYERS[pn]}</font>] said, that color of [<font color='{purple_c}'>{PLAYERS[cn]}</font>] is <font color='{color_of_HTML_roles(cpc)}'>{cpc}</font>",
+            GameLog(prs=PLAYERS[pn], cnc=PLAYERS[pc],
+                    special=f"[<font color='{pr_c}'>{PLAYERS[pn]}</font>] said, that color of [<font color='{purple_c}'>{PLAYERS[pc]}</font>] is <font color='{color_of_HTML_roles(cpc)}'>{cpc}</font>",
                     is_chancellor=False))
         checks = 3
     elif black == 3 >= checks:
