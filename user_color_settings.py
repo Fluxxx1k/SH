@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from colors import *
 INPUT_COLOR = BOLD + PURPLE_TEXT_BRIGHT
 

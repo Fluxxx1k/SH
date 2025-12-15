@@ -283,7 +283,7 @@ def create_HTML_logs(path: str, logs: list[GameLog], players: list[Player] = Non
              <style>
                  body {
                      color:""" + norm_c + """;
-                     background-color: """ + font_c_cut + """;
+                     background-color: """ + font_c + """;
                  }
                  table {
                      border:5px solid """ + norm_c + """;

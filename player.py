@@ -1,9 +1,11 @@
+from typing import Iterable
+
 from globs import PLAYERS, ROLES
 from user_color_settings import (INPUT_COLOR,
                                  BLACK_PLAYER_COLOR as BLACK,
                                  RED_PLAYER_COLOR as RED,
                                  PURPLE_PLAYER_COLOR as PURPLE, WARNING)
-from user_settings import MAX_PLAYER_NUM, MAX_NAME_LEN
+from user_settings import MAX_PLAYER_NUM, MAX_NAME_LEN, IS_PRINT_SMALL_INFO
 from colors import (YELLOW_BACKGROUND_BRIGHT as GULAG,
                     RED_BACKGROUND_BRIGHT as DEAD,
                     RESET_BACKGROUND as END_BG,
@@ -23,24 +25,25 @@ class Player:
     base_name = "Player"
 
     def __init__(self, num: int, name: str, role: str):
-        self.gov_pref = ''
-        self.gov_suff = ''
-        self.purge_pref = ''
-        self.purge_suff = ''
-        self.num = num
-        self.role = role
+        self.gov_pref: str = ''
+        self.gov_suff: str = ''
+        self.purge_pref: str = ''
+        self.purge_suff: str = ''
+        self.num: int = num
+        self.role: str = role
         self.color = get_color(self.role, out_type=X.BOT)
         if self.color == X.HITLER:
             self.color = X.BLACK
-        self.colored_color = get_color(self.role)
-        self.prefix = ''
-        self.suffix = ''
+        self.colored_color: str = get_color(self.role)
+        self.prefix: str = ''
+        self.suffix: str = ''
         if name == '' or not isinstance(name, str):
-            self.name = Player.base_name + str(num)
+            self.name: str = Player.base_name + str(num)
         else:
-            self.name = name
-        self.tablet_name = f"{self.name: <{MAX_NAME_LEN}}"
-        self.dark = 0
+            self.name: str = name
+        self.tablet_name: str = f"{self.name: <{MAX_NAME_LEN}}"
+        self.dark: float = 0
+        self.black: set[int] = set()
 
     def __repr__(self):
         s = '[Info: '
@@ -48,6 +51,7 @@ class Player:
             s += f"({name}: {repr(value)}) "
         s = s[:-1] + ']'
         return s
+
     def __hash__(self):
         return hash(self.name)
 
@@ -184,7 +188,6 @@ class Player:
         show_only_to_one(coloring(cards))
         return input_cards(f"Cards {CYAN}president{END} said after checking: ", q=3)
 
-
     def table(self) -> str:
         return self.gov_pref + self.purge_pref + self.prefix + self.tablet_name + self.gov_suff + self.purge_suff + self.suffix
 
@@ -201,8 +204,8 @@ class Player:
                     raise ValueError(f"Wrong number: {pc + 1}")
                 if pc == self.num:
                     raise ValueError(f"Can't check yourself")
-            except Exception as fixes:
-                print(f"{RED}{fixes}{END}")
+            except Exception as error:
+                print(f"{RED}{error}{END}")
             else:
                 if yes_or_no(
                         f"Are you sure that number {INPUT_COLOR}{pc + 1}{END} is right (it's [{INPUT_COLOR}{PLAYERS[pc]}{END}]): "):
@@ -216,6 +219,7 @@ class Player:
             cpc = input(f"Color of {PURPLE}{PLAYERS[pc]}{END_T} {CYAN}President{END_T} said: {INPUT_COLOR}").upper()
             print(END, end='')
         return pc, cpc
+
     def purge_another(self, purge_type: str, votes: dict[int, int] = None) -> int:
         match purge_type:
             case X.GULAG:
@@ -229,8 +233,8 @@ class Player:
                             raise ValueError(f"Wrong number: {gulag + 1}")
                         if gulag == self.num:
                             raise ValueError(f"Can't purge yourself")
-                    except Exception as fixes:
-                        print(f"{RED}{fixes}{END}")
+                    except Exception as error:
+                        print(f"{RED}{error}{END}")
                     else:
                         if yes_or_no(
                                 f"Are you sure that if number {INPUT_COLOR}{gulag + 1}{END} is right (it's [{INPUT_COLOR}{PLAYERS[gulag]}{END}]): "):
@@ -246,8 +250,8 @@ class Player:
                             raise ValueError(f"Wrong number: {killed + 1}")
                         elif killed == self.num:
                             raise ValueError("No suicide!!")
-                    except Exception as fixes:
-                        print(f"{RED}{fixes}{END}")
+                    except Exception as error:
+                        print(f"{RED}{error}{END}")
                     else:
                         if yes_or_no(
                                 f"Are you sure that number {INPUT_COLOR}{killed + 1}{END} is right (it's [{INPUT_COLOR}{PLAYERS[killed]}{END}]): "):
@@ -257,7 +261,7 @@ class Player:
                 print(f"{WARNING}Wrong purge type{END}")
                 return self.purge_another(purge_type, votes)
 
-    def place_another(self) -> int:
+    def place_another(self, cannot_be: Iterable[int] = frozenset(), votes: dict[int, int] = None) -> int:
         while True:
             try:
                 placed = int(
@@ -266,22 +270,37 @@ class Player:
                 from globs import COUNT_PLAYERS
                 if placed < 0 or placed >= COUNT_PLAYERS:
                     raise ValueError(f"Wrong number: {placed + 1}")
+                if placed in cannot_be:
+                    raise ValueError(f"Can't place number {placed + 1}")
                 if placed == self.num:
                     raise ValueError(f"Can't place yourself")
-            except Exception as fixes:
-                print(f"{RED}{fixes}{END}")
+            except Exception as error:
+                print(f"{RED}{error}{END}")
             else:
                 if yes_or_no(
                         f"Are you sure that number {INPUT_COLOR}{placed + 1}{END} is right (it's [{INPUT_COLOR}{PLAYERS[placed]}{END}]): "):
                     break
         return placed
-    def choose_chancellor(self, cannot_be: set[int] = frozenset(), votes: dict[int, int] = None) -> int:
-        if votes is None:
-            votes = {}
-            print("Sorry, You forgot about \"votes\"...")
-        ppv = preproc_votes(votes)
-        x = weighted_random_for_indexes(ppv)
-        while x == self.num or x in cannot_be:
-            x = weighted_random_for_indexes(ppv)
-        return x
+
+    def choose_chancellor(self, cannot_be: Iterable[int] = frozenset(), votes: dict[int, int] = None) -> int:
+        print(f"{CYAN}President{END} [{PURPLE}{PLAYERS[self.num]}{END}] will choose  {YELLOW}chancellor{END}")
+        while True:
+            try:
+                chancellor = int(
+                    input(f"{CYAN}President{END} will choose number (not index): {INPUT_COLOR}")) - 1
+                print(END, end='')
+                from globs import COUNT_PLAYERS
+                if chancellor < 0 or chancellor >= COUNT_PLAYERS:
+                    raise ValueError(f"Wrong number: {chancellor + 1}")
+                if chancellor in cannot_be:
+                    raise ValueError(f"Can't choose number {chancellor + 1}")
+                if chancellor == self.num:
+                    raise ValueError(f"Can't choose yourself")
+            except Exception as error:
+                print(f"{RED}{error}{END}")
+            else:
+                if yes_or_no(
+                        f"Are you sure that number {INPUT_COLOR}{chancellor + 1}{END} is right (it's [{INPUT_COLOR}{PLAYERS[chancellor]}{END}]): "):
+                    break
+        return chancellor
 

@@ -1,9 +1,16 @@
+from __future__ import annotations
+
+from datetime import datetime
 import sys
 from typing import Iterable, TYPE_CHECKING
+
+import InfoLog
+from user_settings import TIME_FORMAT, DATE_FORMAT, IS_PRINT_SMALL_INFO
+
 if TYPE_CHECKING:
     from player import Player
 
-from globs import PLAYERS
+from globs import PLAYERS, LOGS
 from standard_classes import POSSIBLE_CARDS
 from standard_names_SH import X
 from standard_functions import color_clear, my_input
@@ -100,16 +107,24 @@ def get_color(x:str, out_type=''):
 
 def weighted_random(a, weights):
     import random
+    if sum(weights) <= 0:
+        if IS_PRINT_SMALL_INFO:
+            print(f"{RED}{BOLD}{UNDERLINE}Sum of weights <= 0, using random choice{END}")
+        LOGS.append(InfoLog.InfoLog(X.ERROR, "Sum of weights <= 0, using random choice", info1=f"{weights= }", info2=datetime.strftime(datetime.now(), f"{DATE_FORMAT} {TIME_FORMAT}")))
+        return random.choice(a)
     return random.choices(a, weights, k=1)[0]
 
 def weighted_random_for_indexes(weights):
     import random
-    if sum(weights) == 0:
+    if sum(weights) <= 0:
+        if IS_PRINT_SMALL_INFO:
+            print(f"{RED}{BOLD}{UNDERLINE}Sum of weights <= 0, using random choice{END}")
+        LOGS.append(InfoLog.InfoLog(X.ERROR, "Sum of weights <= 0, using random choice", info1=f"{weights= }", info2=datetime.strftime(datetime.now(), f"{DATE_FORMAT} {TIME_FORMAT}")))
         return random.choice(range(len(weights)))
-    return random.choices(range(len(weights)), weights)[0]
+    return random.choices(range(len(weights)), weights, k=1)[0]
 def preproc_votes(votes: dict[int, int], smalling:Iterable[int]=(), times_smalling:int|float=2) -> list[int]:
     import globs
-    x = [0]*globs.COUNT_PLAYERS
+    x = [1]*globs.COUNT_PLAYERS
     for i in votes:
         x[i] = votes[i] if i not in smalling else votes[i] // times_smalling
     return x

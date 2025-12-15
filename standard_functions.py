@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Callable
 
 from colors import PURPLE_TEXT, END, RESET_BACKGROUND, RESET_TEXT, UP
