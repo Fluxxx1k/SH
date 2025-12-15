@@ -107,21 +107,23 @@ def get_color(x:str, out_type=''):
 
 def weighted_random(a, weights):
     import random
-    if sum(weights) <= 0:
+    if sum(weights) <= 0 or len(weights) != len(a):
         if IS_PRINT_SMALL_INFO:
-            print(f"{RED}{BOLD}{UNDERLINE}Sum of weights <= 0, using random choice{END}")
-        LOGS.append(InfoLog.InfoLog(X.ERROR, "Sum of weights <= 0, using random choice", info1=f"{weights= }", info2=datetime.strftime(datetime.now(), f"{DATE_FORMAT} {TIME_FORMAT}")))
+            print(f"{RED}{BOLD}{UNDERLINE}Sum of weights <= 0 or wrong length, using random choice{END}")
+        LOGS.append(InfoLog.InfoLog(X.ERROR, "Sum of weights <= 0 or wrong length, using random choice", info1=f"{a= } {weights= }", info2=datetime.strftime(datetime.now(), f"{DATE_FORMAT} {TIME_FORMAT}")))
         return random.choice(a)
     return random.choices(a, weights, k=1)[0]
 
-def weighted_random_for_indexes(weights):
+def weighted_random_for_indexes(weights) -> int:
     import random
-    if sum(weights) <= 0:
+    import globs
+    if sum(weights) <= 0 or len(weights) != globs.COUNT_PLAYERS:
         if IS_PRINT_SMALL_INFO:
-            print(f"{RED}{BOLD}{UNDERLINE}Sum of weights <= 0, using random choice{END}")
-        LOGS.append(InfoLog.InfoLog(X.ERROR, "Sum of weights <= 0, using random choice", info1=f"{weights= }", info2=datetime.strftime(datetime.now(), f"{DATE_FORMAT} {TIME_FORMAT}")))
-        return random.choice(range(len(weights)))
-    return random.choices(range(len(weights)), weights, k=1)[0]
+            print(f"{RED}{BOLD}{UNDERLINE}Sum of weights <= 0 or wrong length, using random choice{END}")
+        LOGS.append(InfoLog.InfoLog(X.ERROR, "Sum of weights <= 0 or wrong length, using random choice", info1=f"{weights= }", info2=datetime.strftime(datetime.now(), f"{DATE_FORMAT} {TIME_FORMAT}")))
+        return random.choice(range(globs.COUNT_PLAYERS))
+    return random.choices(range(globs.COUNT_PLAYERS), weights, k=1)[0]
+
 def preproc_votes(votes: dict[int, int], smalling:Iterable[int]=(), times_smalling:int|float=2) -> list[int]:
     import globs
     x = [1]*globs.COUNT_PLAYERS

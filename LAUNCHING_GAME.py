@@ -17,7 +17,15 @@ try:
     import os
     out_file = []
     out_dirs = []
-    need = ['HTML_colors.py', 'HTML_logs.py', 'LAUNCHING_GAME.py', 'SH2.py', 'bot.py', 'colors.py', 'globs.py', 'player.py', 'standard_classes.py', 'standard_functions.py', 'standard_names_SH.py', 'test.py', 'user_color_settings.py', 'user_settings.py', 'utils.py']
+    need = ['HTML_colors.py', 'HTML_logs.py',
+            'LAUNCHING_GAME.py', 'SH2.py',
+            'bot.py', 'colors.py',
+            'globs.py', 'player.py',
+            'standard_classes.py',
+            'standard_functions.py',
+            'standard_names_SH.py',
+            'user_color_settings.py',
+            'user_settings.py', 'utils.py',]
     for item in sorted(os.listdir(os.getcwd())):
         if item.endswith('.py'):
             out_file.append(item)
