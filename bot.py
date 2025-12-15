@@ -283,13 +283,9 @@ class Bot(Player):
                     return chosen, X.RED
         try:
             from globs import COUNT_PLAYERS
-            if votes:
-                x = [0]*COUNT_PLAYERS
-                for i in votes:
-                    x[i] = votes[i]
-            else:
-                x=[1]*COUNT_PLAYERS
-            chosen = weighted_random_for_indexes(x)
+            ppv = preproc_votes(votes)
+            ppv[self.num] = 0
+            chosen = weighted_random_for_indexes(ppv)
         except Exception as e:
             LOGS.append(InfoLog(info_type=X.ERROR, info_name=f"Error while checking another",
                                 info1=f"{votes= } {repr(e)}",
@@ -332,9 +328,17 @@ class Bot(Player):
                                         info2=time.strftime(f"{DATE_FORMAT} {TIME_FORMAT}")))
                     ppv = preproc_votes(votes)
             ppv[self.num] = 0
+            if globs.GULAG is not None:
+                ppv[globs.GULAG] = 0
+            if globs.KILLED is not None:
+                ppv[globs.KILLED] = 0
             if sum(ppv) == 0:
                 ppv = [1] * globs.COUNT_PLAYERS
                 ppv[self.num] = 0
+                if globs.GULAG is not None:
+                    ppv[globs.GULAG] = 0
+                if globs.KILLED is not None:
+                    ppv[globs.KILLED] = 0
             x = weighted_random_for_indexes(ppv)
             return x
         except Exception as err:
@@ -350,15 +354,24 @@ class Bot(Player):
                             info2=time.strftime(f"{DATE_FORMAT} {TIME_FORMAT}")))
         return weighted_random_for_indexes([0])
     def choose_chancellor(self, cannot_be: set[int] = frozenset(), votes: dict[int, int] = None, gov_type=X.CHANCELLOR) -> int:
+        print(f"{cannot_be= }")
         if votes is None:
             votes = {}
-            print("Sorry, You forgot about \"votes\"... It isn't available here...")
+            if IS_PRINT_SMALL_INFO:
+                print("Sorry, You forgot about \"votes\"... It isn't available here...")
         if self.bot_mind == X.BLACK:
             ppv = preproc_votes(votes, self.black, times_smalling=0.5)
+            ppv[self.num] = 0
+            for i in cannot_be:
+                print(i)
+                if i is not None:
+                    ppv[i] = 0
             import globs
             try:
                 if gov_type == X.CHANCELLOR:
-                    ppv[globs.HITLER] <<= 1
+                    if globs.HITLER is not None and globs.HITLER not in cannot_be:
+
+                            ppv[globs.HITLER] <<= 1
                 elif gov_type == X.PRESIDENT:
                     ppv[globs.HITLER] >>= 1
                 else:
@@ -385,10 +398,20 @@ class Bot(Player):
             ppv = preproc_votes(votes)
         ppv[self.num] = 0
         if sum(ppv) == 0:
+            if IS_PRINT_SMALL_INFO:
+                print("votes empty, so choose random player")
+            LOGS.append(InfoLog(info_type=X.INFO, info_name=f"votes empty, so choose random player", info1=f"{self= } {votes= } {cannot_be= }",
+                                info2=time.strftime(f"{DATE_FORMAT} {TIME_FORMAT}")))
+
             import globs
             ppv = [1] * globs.COUNT_PLAYERS
-            ppv[self.num] = 0
+        ppv[self.num] = 0
+        for i in cannot_be:
+            print(i)
+            if i is not None:
+                ppv[i] = 0
         x = weighted_random_for_indexes(ppv)
+        print(f"{ppv= }")
         return x
     place_another = choose_chancellor
 

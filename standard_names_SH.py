@@ -26,5 +26,5 @@ class X:
     CHOOSE_ONE = "choose"
 # class HTML(str):
 #     pass
-class MyErr(BaseException):
+class MyErr(Exception):
     pass
