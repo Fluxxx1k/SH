@@ -19,10 +19,10 @@ from colors import (YELLOW_TEXT_BRIGHT as YELLOW,
 from player import Player
 from globs import PLAYERS, ROLES, LOGS
 import globs
-from standard_functions import show_only_to_one, yes_or_no, my_input
+from standard_functions import show_only_to_one, yes_or_no
 from standard_names_SH import X
 from user_color_settings import INPUT_COLOR, CRITICAL, WARNING, GOOD
-from utils import coloring, naming, get_color, input_cards, out
+from utils import coloring, naming, input_cards, out
 from user_settings import *
 
 code_start_time = t.time()

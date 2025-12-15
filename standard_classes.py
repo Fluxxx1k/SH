@@ -40,15 +40,3 @@ class Cards(str):
 
 
 POSSIBLE_CARDS: set[str] = set("BRX")
-
-if __name__ == "__main__":
-    a = Cards("RBX")
-    b = Cards("RBX")
-    print(a == b)
-    print(a != b)
-    print(a != "RBX")
-    print(a == "RBX")
-    print(a.colored_cards)
-    print(Cards.coloring_cards(None, 'P'))
-    print(Cards('BB')@'12')
-    print(0)

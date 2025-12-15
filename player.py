@@ -275,7 +275,10 @@ class Player:
                         f"Are you sure that number {INPUT_COLOR}{placed + 1}{END} is right (it's [{INPUT_COLOR}{PLAYERS[placed]}{END}]): "):
                     break
         return placed
-    def choose_chancellor(self, cannot_be: set[int] = set(), votes: dict[int, int] = {}) -> int:
+    def choose_chancellor(self, cannot_be: set[int] = frozenset(), votes: dict[int, int] = None) -> int:
+        if votes is None:
+            votes = {}
+            print("Sorry, You forgot about \"votes\"...")
         ppv = preproc_votes(votes)
         x = weighted_random_for_indexes(ppv)
         while x == self.num or x in cannot_be:

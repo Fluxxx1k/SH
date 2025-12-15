@@ -212,7 +212,10 @@ class Bot(Player):
         while x == self.num:
             x = weighted_random_for_indexes(preproc_votes(votes))
         return x
-    def choose_chancellor(self, cannot_be: set[int] = set(), votes: dict[int, int] = {}) -> int:
+    def choose_chancellor(self, cannot_be: set[int] = frozenset(), votes: dict[int, int] = None) -> int:
+        if votes is None:
+            votes = {}
+            print("Sorry, You forgot about \"votes\"... It isn't available here...")
         ppv = preproc_votes(votes)
         x = weighted_random_for_indexes(ppv)
         while x == self.num or x in cannot_be:

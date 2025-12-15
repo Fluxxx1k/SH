@@ -1,4 +1,3 @@
-import pprint
 import sys
 import os
 from datetime import datetime
@@ -27,7 +26,6 @@ def start_logging(log_directory=DIRECTORY_FOR_CONSOLE_LOGS,
     log_extension=EXTENSION_FOR_CONSOLE_LOGS,
     date_format=DATE_FORMAT):
     date = datetime.now().strftime(date_format)
-    full_path = None
     try:
         os.makedirs(log_directory, exist_ok=True)
         check_logs = os.listdir(log_directory)
@@ -47,8 +45,7 @@ def start_logging(log_directory=DIRECTORY_FOR_CONSOLE_LOGS,
             print(f"Log file {full_path} already exists, trying next number: {max_log_num}")
             full_path = os.path.join(log_directory, log_name_prefix + date + str(max_log_num) + log_extension)
         
-        with open(full_path, 'w+', encoding='utf-8') as f:
-            pass
+        open(full_path, 'w+', encoding='utf-8').close()
         
         print(f"Console logs will be saved to: {full_path}")
 

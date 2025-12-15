@@ -1,5 +1,7 @@
 import sys
-from typing import Any, Iterable
+from typing import Iterable, TYPE_CHECKING
+if TYPE_CHECKING:
+    from player import Player
 
 from globs import PLAYERS
 from standard_classes import POSSIBLE_CARDS

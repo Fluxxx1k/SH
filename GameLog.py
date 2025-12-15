@@ -1,5 +1,6 @@
 from __future__ import annotations
 from player import Player
+from standard_classes import Cards
 
 from standard_functions import color_clear
 
@@ -33,7 +34,7 @@ class GameLog:
         self.is_cards = is_cards
         self.is_president = is_president
         self.is_chancellor = is_chancellor
-    def to_HTML_row(self) -> str:
+    def to_html_row(self) -> str:
         from HTML_colors import ch_c, pr_c, special_c, purple_c
         from HTML_logs import coloring_HTML_cards
         president = f'\t<td style="color: {pr_c if self.is_president else purple_c}"><b>{self.prs}</b></td>\n'

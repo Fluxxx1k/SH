@@ -150,7 +150,7 @@ def create_HTML_roles(players: list[Player] = None, roles: list[str] = None, pri
         return ''
 
 
-def create_HTML_info(print_errors: bool = IS_PRINT_FULL_INFO, is_print: bool = IS_PRINT_SMALL_INFO) -> str:
+def create_HTML_info(print_errors: bool = IS_PRINT_FULL_INFO) -> str:
     table_caption = ("\t<caption><h1><strong>"
                      "Таблица с информацией об игре"
                      "<br>"
