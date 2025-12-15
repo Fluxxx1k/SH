@@ -360,7 +360,7 @@ while red < RED_WIN_NUM and black < BLACK_WIN_NUM and not Git_caput and not Git_
         else:
             if DEBUG_MODE:
                 print(f"{PURPLE}{pnc = } != {pn = } but {special_election = }{END_T}")
-            pn = pnc
+            pn = (pnc + 1) % count
     else:
         pn = (pn + 1) % count
         if pn == gulag:
@@ -623,5 +623,3 @@ elif black >= BLACK_WIN_NUM or Git_cn:
 else:
     print(F"{PURPLE}{BOLD}{UNDERLINE}WHAT    THE    HELL?!!!!{END}")
 
-
-logs_out()
