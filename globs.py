@@ -13,3 +13,6 @@ ROLES: list[str] = []
 HITLER:int = None
 STALIN:int = None
 PURGED: set[Player] = set()
+GULAG: int = None
+KILLED: int = None
+cards: dict[str, int] = {"BLACK":0,}

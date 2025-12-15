@@ -128,7 +128,9 @@ def preproc_votes(votes: dict[int, int], smalling:Iterable[int]=(), times_smalli
     import globs
     x = [1]*globs.COUNT_PLAYERS
     for i in votes:
-        x[i] = votes[i] if i not in smalling else votes[i] // times_smalling
+        x[i] += votes[i]
+        if i in smalling:
+            x[i] //= times_smalling
     return x
 
 def input_cards(text=f"{WARNING}Some input: {END_T}", q: int | set[int] = 0, c_p:bool=False, veto=False) -> str:

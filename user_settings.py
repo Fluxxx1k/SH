@@ -16,7 +16,7 @@ DEBUG_MODE: bool = False
 IS_PROMT_ENTERING_COMMAND: bool = DEBUG_MODE
 LOG_CONSOLE: bool = DEBUG_MODE
 IS_PRINT_FULL_INFO: bool = DEBUG_MODE
-IS_PRINT_SMALL_INFO: bool = True
+IS_PRINT_SMALL_INFO: bool = False
 DIRECTORY_FOR_CONSOLE_LOGS:str = "Console_logs"
 NAME_FOR_CONSOLE_LOGS:str = "log"
 EXTENSION_FOR_CONSOLE_LOGS: str = '.txt'  # расширение
@@ -61,3 +61,11 @@ def get_bot_places(length: int) -> list[int]:
     import random
     bot_places = random.sample(range(COUNT_PLAYERS), length)
     return bot_places
+
+
+# Funny thing, if you set it to True,
+# then all game will be generated automatically with bots
+# made for debug
+IS_BOT_ONLY: bool = False
+BOT_BASE_NAME = "Bot"
+BOT_NUM: int = 6
