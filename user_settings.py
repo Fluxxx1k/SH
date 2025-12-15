@@ -12,7 +12,8 @@ RED_WIN_NUM: int = 5
 BLACK_WIN_NUM: int = 6
 
 ANARCHY_SKIP_NUM: int = 3
-DEBUG_MODE: bool = True
+DEBUG_MODE: bool = False
+IS_PROMT_ENTERING_COMMAND: bool = DEBUG_MODE
 LOG_CONSOLE: bool = DEBUG_MODE
 IS_PRINT_FULL_INFO: bool = DEBUG_MODE
 IS_PRINT_SMALL_INFO: bool = True
@@ -51,3 +52,12 @@ def get_roles(length: int) -> tuple[list[str], bool]:
     roles.extend(red)
     random.shuffle(roles)
     return roles, bool(molotov or ribbentrop)
+def get_bot_places(length: int) -> list[int]:
+    """
+    creates list of places for bots
+    :param length: number of bots
+    """
+    from globs import COUNT_PLAYERS
+    import random
+    bot_places = random.sample(range(COUNT_PLAYERS), length)
+    return bot_places

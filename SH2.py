@@ -19,7 +19,7 @@ from colors import (YELLOW_TEXT_BRIGHT as YELLOW,
 from player import Player
 from globs import PLAYERS, ROLES, LOGS
 import globs
-from standard_functions import show_only_to_one, yes_or_no
+from standard_functions import show_only_to_one, yes_or_no, my_input
 from standard_names_SH import X
 from user_color_settings import INPUT_COLOR, CRITICAL, WARNING, GOOD
 from utils import coloring, naming, input_cards, out
@@ -77,8 +77,8 @@ deck = ['R'] * red_start + ['B'] * black_start
 try:
     os.makedirs(path, exist_ok=True)
     check_logs = os.listdir(path)
-except Exception as fixes:
-    print(f"{CRITICAL}Strange Error: {fixes}\nLogs won't be created{END}")
+except Exception as error:
+    print(f"{CRITICAL}Strange Error: {error}\nLogs won't be created{END}")
     full_path = None
 else:
     try:
@@ -95,9 +95,10 @@ else:
             full_path = path + NAME_FOR_GAME_LOGS + date + str(max_log_num) + EXTENSION_FOR_GAME_LOGS
         open(full_path, 'w+').close()
         print(f"{GOOD}Logs in: {full_path}{END}")
-    except Exception as fixes:
-        print(f"{CRITICAL}Something went wrong, no logs available: {fixes}{END}")
+    except Exception as error:
+        print(f"{CRITICAL}Something went wrong, no logs available: {error}{END}")
         full_path = None
+
 gulag  = None
 killed = None
 HITLER = None
@@ -109,14 +110,14 @@ try:
     STALIN = ROLES.index(X.STALIN)
 except ValueError:
     print("No Sosalin :_((")
-except Exception as fixes:
-    print(f"Can't find {X.STALIN= }: {fixes}")
+except Exception as error:
+    print(f"Can't find {X.STALIN= }: {error}")
 try:
     HITLER = ROLES.index(X.HITLER)
 except ValueError:
     print(f"{WARNING}WTH? No {X.HITLER} in ROLES...{END}")
-except Exception as fixes:
-    print(f"Can't find {X.HITLER= }: {fixes}")
+except Exception as error:
+    print(f"Can't find {X.HITLER= }: {error}")
 
 globs.HITLER = HITLER
 globs.STALIN = STALIN
@@ -259,16 +260,20 @@ def take_random(c:int) -> list[str]:
     return chosen
 
 
+bots_places = get_bot_places(bots_count)
 
-for i in range(players_count):
-    pl_name = input(f"GAYmer №{i + 1}) {INPUT_COLOR}")
+
+for i in range(count):
+    pl_name = my_input(f"{'GAYmer' if i not in bots_places else 'Bot'} №{i + 1})")
     print(END, end='')
     while len(pl_name) > MAX_NAME_LEN or len(pl_name) < MIN_NAME_LEN or pl_name in PLAYERS:
-        print(f"{RED}Length of name should be 1-{MAX_NAME_LEN} symbols!{END}")
-        pl_name = input(f"{RED}New attempt:{END} GAYmer №{i + 1}) {INPUT_COLOR}")
+        print(f"{RED}Length of name should be 1-{MAX_NAME_LEN} symbols and unique!{END}")
+        pl_name = my_input(f"{RED}New attempt:{END} {'GAYmer' if i not in bots_places else 'Bot'} №{i + 1})")
         print(END, end='')
-
-    PLAYERS.append(Player(num=i, name=pl_name, role=ROLES[i]))
+    if i in bots_places:
+        PLAYERS.append(Bot(num=i, name=pl_name, role=ROLES[i]))
+    else:
+        PLAYERS.append(Player(num=i, name=pl_name, role=ROLES[i]))
 fixes = []
 while True:
     try:
@@ -282,28 +287,18 @@ while True:
     else:
         break
 for i in fixes:
-    pl_name = input(f"{PURPLE}Fixing names:{END} GAYmer №{i}) {INPUT_COLOR}").strip()
+    pl_name = my_input(f"{PURPLE}Fixing names:{END} {'GAYmer' if i not in bots_places else 'Bot'} №{i})")
     print(END, end='')
     while len(pl_name) > MAX_NAME_LEN or pl_name == '' or pl_name in PLAYERS:
         print(f"{RED}Length of name should be {MIN_NAME_LEN}-{MAX_NAME_LEN} symbols!{END}")
-        pl_name = input(f"{RED}New try:{END} GAYmer №{i}) {INPUT_COLOR}").strip()
+        pl_name = my_input(f"{RED}New try:{END} {'GAYmer' if i not in bots_places else 'Bot'} №{i})").strip()
         print(END, end='')
     PLAYERS[i - 1] = Player(num=i - 1, name=pl_name, role=ROLES[i - 1])
-
-for i in range(bots_count):
-    pl_name = input(f"Bot №{i + 1}) {INPUT_COLOR}")
-    print(END, end='')
-    while len(pl_name) > MAX_NAME_LEN or pl_name == '' or pl_name in PLAYERS:
-        print(f"{RED}Length of name should be {MAX_NAME_LEN}-{MAX_NAME_LEN} symbols!{END}")
-        pl_name = input(f"{RED}New try:{END} Bot №{i + 1}) {INPUT_COLOR}").strip()
-        print(END, end='')
-    PLAYERS.append(Bot(num=players_count + i, name=pl_name, role=ROLES[players_count + i]))
-
 if DEBUG_MODE:
     print(*list(map(repr, PLAYERS)), sep='\n')
 
 for i in range(count):
-    if isinstance(PLAYERS[i], Bot):
+    if i not in bots_places:
         continue
     print(f"[{INPUT_COLOR}{PLAYERS[i]}{END}], come here to get your role!")
     show_only_to_one(f"Your role is: {INPUT_COLOR}{naming(ROLES[i])}{END}", 25)
@@ -314,8 +309,8 @@ while True:
         print(END, end='')
         if pn >= count or pn < 0:
             raise ValueError(f"Wrong number: {pn + 1}")
-    except Exception as fixes:
-        print(f"{RED}{fixes}{END}")
+    except Exception as error:
+        print(f"{RED}{error}{END}")
     else:
         if yes_or_no(f"Are you sure that number ({INPUT_COLOR}{pn + 1}{END}) is right (it's [{INPUT_COLOR}{PLAYERS[pn]}{END}]): "):
             break
@@ -395,7 +390,7 @@ while red < RED_WIN_NUM and black < BLACK_WIN_NUM and not Git_caput and not Git_
     else:
         skips = 0
 
-    cn = PLAYERS[pn].choose_chancellor(cannot_be={pn, cn})
+    cn = PLAYERS[pn].choose_chancellor(cannot_be={pn, cn, gulag, killed})
     if black >= 3 and cn not in Git_not:
         if STALIN is None:
             if cn == HITLER:
@@ -409,7 +404,7 @@ while red < RED_WIN_NUM and black < BLACK_WIN_NUM and not Git_caput and not Git_
                 Git_not.add(cn)
         else:
             if HITLER == cn:
-                if yes_or_no(f"Is {PLAYERS[cn]} hitler "):
+                if yes_or_no(f"Is {PLAYERS[cn]} a Hitler? "):
                     degov()
                     if pn == STALIN:
                         logs.append(((PLAYERS[pn].table(), PLAYERS[cn].table()),
@@ -424,7 +419,7 @@ while red < RED_WIN_NUM and black < BLACK_WIN_NUM and not Git_caput and not Git_
                         Git_cn = True
                     break
             else:
-                yes_or_no(f"Is {PLAYERS[cn]} hitler? ", yes=set())
+                yes_or_no(f"Is {PLAYERS[cn]} a Hitler? ", yes=set())
     PLAYERS[cn].chosen_gov(X.CHANCELLOR)
     out()
     cards = take_random(3)
@@ -432,17 +427,20 @@ while red < RED_WIN_NUM and black < BLACK_WIN_NUM and not Git_caput and not Git_
     cps, cards, is_veto = PLAYERS[pn].president(cards, PLAYERS[cn], black=black, red=red)
     c_cnc_got = ''.join(cards)
     ccs, ccp = PLAYERS[cn].chancellor(cards, pn, cps, is_veto, black=black, red=red)
-    if isinstance(PLAYERS[cn], Bot):
+    if pn in bots_places:
         print(f"Bot said {coloring(cps)}")
+    if cn in bots_places:
+        print(f"Bot said {coloring(ccs)}")
         print(f"Bot placed {coloring(ccp)}")
     # cpsa = input_cards(f"Cards {CYAN}president{END_T} ({players[pn]}) said after chancellor: ", q={3, 0})
     cpsa = PLAYERS[pn].president_said_after_chancellor(cnc=PLAYERS[cn], cards=c_prs_got, ccg=c_cnc_got, ccp=ccp,
                                                        cps=cps, ccs=ccs, )
-    temp = input(f'Command: {INPUT_COLOR}').upper()
-    print(END, end='')
-    while comm(temp):
-        temp = input(f'Command (new try): {INPUT_COLOR}').upper()
+    if IS_PROMT_ENTERING_COMMAND:
+        temp = input(f'Command: {INPUT_COLOR}').upper()
         print(END, end='')
+        while comm(temp):
+            temp = input(f'Command (new try): {INPUT_COLOR}').upper()
+            print(END, end='')
     if ccp == 'B' or ccp == BLACK + "B" + END_T:
         black += 1
     elif ccp == 'R' or ccp == RED + "R" + END_T:
@@ -450,12 +448,24 @@ while red < RED_WIN_NUM and black < BLACK_WIN_NUM and not Git_caput and not Git_
     elif ccp == 'P' or ccp == PURPLE + "P" + END_T:
         red += 1
         black += 1
-    elif (ccp == 'VETO' or ccp == "X") and black >= 5:
+    elif (ccp == 'VETO' or ccp == "X" or ccp == 'V') and black >= 5:
         print(f"{GOOD}{PURPLE}VETO{END_T}")
         ccp = "V"
     else:
         print(f"WTH?!!!! {ccp} isn't 'B' or 'R'")
         ccp = input_cards("New (last) try to input cards (debug version):", 1, c_p = True)
+        if ccp == 'B' or ccp == BLACK + "B" + END_T:
+            black += 1
+        elif ccp == 'R' or ccp == RED + "R" + END_T:
+            red += 1
+        elif ccp == 'P' or ccp == PURPLE + "P" + END_T:
+            red += 1
+            black += 1
+        elif (ccp == 'VETO' or ccp == "X" or ccp == 'V') and black >= 5:
+            print(f"{GOOD}{PURPLE}VETO{END_T}")
+            ccp = "V"
+        else:
+            print("Fuck")
     if not cpsa:
         cpsa = cps
 
@@ -525,7 +535,7 @@ while red < RED_WIN_NUM and black < BLACK_WIN_NUM and not Git_caput and not Git_
         checks = 4
     elif black == 4 >= checks:
         temp = pn
-        pn = PLAYERS[pn].place_another()
+        pn = PLAYERS[pn].place_another(cannot_be={pn, gulag, killed})
         logs.append(((PLAYERS[temp].table(), PLAYERS[pn + 1].table()),
                      (PURPLE + 'PLA' + END_T, PURPLE + 'CE' + END_T, PURPLE + 'D' + END_T, '   ')))
         normal_logs.append(GameLog(PLAYERS[temp], PLAYERS[pn + 1], special="Special placing", is_chancellor=False))
