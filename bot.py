@@ -1,10 +1,12 @@
+from __future__ import annotations
+
 import random as rnd
 import time
 
 
 import user_settings
 from HTML_logs import InfoLog
-from globs import LOGS
+from globs import LOGS, PLAYERS, ROLES
 from player import Player
 from standard_classes import Cards
 from standard_names_SH import X
@@ -18,9 +20,26 @@ class Bot(Player):
     def __init__(self, num: int, name:str, role: str):
         super().__init__(num=num, role=role, name=name)
         self.bot_mind: X = get_color(self.role, out_type=X.BOT)
-        self.risk: float = rnd.random()
+        if self.bot_mind == X.ANARCHIST:
+            self.risk: float = rnd.random() * 0.5 + 0.5
+        elif self.bot_mind == X.HITLER:
+            self.risk: float = rnd.random() * 0.125 + 0.0625
+        else:
+            self.risk: float = rnd.random() * 0.7 + 0.25
         self.black: set[int] = set()
-
+        if self.bot_mind == X.BLACK:
+            import globs
+            for i in range(globs.COUNT_PLAYERS):
+                if ROLES[i] == X.BLACK or ROLES[i] == X.RIBBENTROP:
+                    self.black.add(i)
+            try:
+                self.black.add(globs.HITLER)
+            except Exception as e:
+                if user_settings.IS_PRINT_FULL_INFO:
+                    print(repr(e))
+                LOGS.append(InfoLog(info_type=X.ERROR,info_name=f"Cannot add Hitler to black list: {repr(e)}", info1=f"{globs.HITLER= } {self.bot_mind= }"))
+        if self.bot_mind == X.HITLER:
+            self.black.add(self.num)
 
 
     def president(self, cards, cnc, *, black, red) -> tuple[str, list[str], bool]:
@@ -94,6 +113,7 @@ class Bot(Player):
                     return "XX", "B"
                 if veto:
                     return "XX", 'X'
+            if 'R' in cards:
                 return "XX", "R"
             if "B" in cards and prs in self.black and (words == "BBB" or words == "XXX"):
                 return "XX", "B"
@@ -119,7 +139,10 @@ class Bot(Player):
             return "XX", "B"
         else:
             if self.bot_mind != X.NRH:
-                print("Unknown role {self.bot_mind= }")
+                if IS_PRINT_SMALL_INFO:
+                    print(f"Unknown role")
+                LOGS.append(InfoLog(info_type=X.ERROR, info_name=f"Unknown bot mind",
+                                    info1=f"№{self.num} [{self}] {self.bot_mind= }"))
             if red <= black:
                 if "R" in cards:
                     return "XX", "R"
@@ -133,12 +156,39 @@ class Bot(Player):
                                         ccp: str) -> Cards:
         return Cards('XXX')
 
-    def check_cards(self, *args, **kwargs) -> Cards:
+    def check_cards(self, cards, *args, **kwargs) -> Cards:
+        match self.bot_mind:
+            case X.RED:
+                return Cards(cards) if rnd.random() < self.risk else Cards("BBB")
+            case X.BLACK:
+                if cards == 'BBR':
+                    from globs import COUNT_PLAYERS
+                    if PLAYERS[self.num%COUNT_PLAYERS].color == X.RED:
+                        return Cards(cards) if rnd.random() < self.risk else Cards("BBB")
+                    else:
+                        return Cards("BBB")
+                if cards == 'BRR':
+                    if cards == 'BBR':
+                        from globs import COUNT_PLAYERS
+                        if PLAYERS[self.num % COUNT_PLAYERS].color == X.RED:
+                            return Cards(cards) if rnd.random() < self.risk else Cards("BBB")
+                        else:
+                            return Cards("BBB")
+                return Cards(cards)
+            case X.ANARCHIST:
+                return Cards(cards) if rnd.random() < self.risk else Cards("BBB")
+            case X.HITLER:
+                return Cards(cards) if rnd.random() < self.risk else Cards("BBB")
+
+        if IS_PRINT_SMALL_INFO:
+            print(f"Unknown bot_mind")
+        LOGS.append(InfoLog(info_type=X.ERROR, info_name=f"Unknown bot_mind",
+                            info1=f"№{self.num} [{self}] {self.bot_mind= }",
+                            info2=time.strftime(f"{DATE_FORMAT} {TIME_FORMAT}")))
         return Cards("XXX")
 
     def check_player(self, votes: list[int] = None) -> tuple[int, str]:
         from globs import PLAYERS
-        chosen:int = None
         if votes is None:
             votes = {}
             print("Sorry, You forgot about \"votes\"... It isn't available here...")
@@ -146,18 +196,19 @@ class Bot(Player):
             if rnd.random() < 0.25:
                 import globs
                 chosen = globs.HITLER
-
+                return chosen, X.RED
             if rnd.random() < 0.25:
                 if self.black:
                     chosen = list(self.black)[rnd.randint(0, len(self.black) - 1)]
-            if chosen is not None:
-                return chosen, X.RED
+                    return chosen, X.RED
         try:
-
             from globs import COUNT_PLAYERS
-            x = [0]*COUNT_PLAYERS
-            for i in votes:
-                x[i] = votes[i]
+            if votes:
+                x = [0]*COUNT_PLAYERS
+                for i in votes:
+                    x[i] = votes[i]
+            else:
+                x=[1]*COUNT_PLAYERS
             chosen = weighted_random_for_indexes(x)
         except Exception as e:
             LOGS.append(InfoLog(info_type=X.ERROR, info_name=f"Error while checking another",
@@ -180,17 +231,31 @@ class Bot(Player):
             votes = {}
             print("Sorry, You forgot about \"votes\"... It isn't available here...")
         try:
+            import globs
+            ppv = [1] * globs.COUNT_PLAYERS
             match self.bot_mind:
                 case X.RED:
                     if self.black:
                         return list(self.black)[rnd.randint(0, len(self.black) - 1)]
                     return weighted_random_for_indexes(preproc_votes(votes))
                 case X.BLACK:
-                    return weighted_random_for_indexes(preproc_votes(votes, self.black, times_smalling=float('inf')))
+                    ppv = preproc_votes(votes, self.black, times_smalling=float('inf'))
                 case X.HITLER:
-                    return weighted_random_for_indexes(preproc_votes(votes, self.black, times_smalling=float('inf')))
+                    ppv = preproc_votes(votes, self.black, times_smalling=float('inf'))
                 case X.ANARCHIST:
-                    return weighted_random_for_indexes(preproc_votes(votes))
+                    ppv = preproc_votes(votes)
+                case _:
+                    if IS_PRINT_SMALL_INFO:
+                        print("Unknown bot mind")
+                    LOGS.append(InfoLog(info_type=X.ERROR, info_name=f"Unknown bot mind", info1=f"{self= } {self.bot_mind= }",
+                                        info2=time.strftime(f"{DATE_FORMAT} {TIME_FORMAT}")))
+                    ppv = preproc_votes(votes)
+            ppv[self.num] = 0
+            if sum(ppv) == 0:
+                ppv = [1] * globs.COUNT_PLAYERS
+                ppv[self.num] = 0
+            x = weighted_random_for_indexes(ppv)
+            return x
         except Exception as err:
             LOGS.append(InfoLog(info_type=X.ERROR, info_name=f"Error while purging another",
                                 info1=f"{self.bot_mind= } {repr(err)}",
@@ -202,11 +267,7 @@ class Bot(Player):
             print(f"{self.bot_mind= }")
         LOGS.append(InfoLog(info_type=X.ERROR, info_name=f"Unknown bot mind", info1=f"{self.bot_mind= }",
                             info2=time.strftime(f"{DATE_FORMAT} {TIME_FORMAT}")))
-        from globs import COUNT_PLAYERS
-        x = rnd.randint(0, COUNT_PLAYERS - 1)
-        while x == self.num:
-            x = rnd.randint(0, COUNT_PLAYERS - 1)
-        return x
+        return weighted_random_for_indexes([0])
     def choose_chancellor(self, cannot_be: set[int] = frozenset(), votes: dict[int, int] = None, gov_type=X.CHANCELLOR) -> int:
         if votes is None:
             votes = {}
@@ -241,9 +302,12 @@ class Bot(Player):
             LOGS.append(InfoLog(info_type=X.ERROR, info_name=f"Unknown bot mind", info1=f"{self= } {self.bot_mind= }",
                                 info2=time.strftime(f"{DATE_FORMAT} {TIME_FORMAT}")))
             ppv = preproc_votes(votes)
+        ppv[self.num] = 0
+        if sum(ppv) == 0:
+            import globs
+            ppv = [1] * globs.COUNT_PLAYERS
+            ppv[self.num] = 0
         x = weighted_random_for_indexes(ppv)
-        while x == self.num or x in cannot_be:
-            x = weighted_random_for_indexes(ppv)
         return x
     place_another = choose_chancellor
 

@@ -6,5 +6,5 @@ nrh_c = 'DeepSkyBlue'
 purple_c = 'DarkViolet'
 num_c = "orange"
 norm_c = 'white'
-font_c_cut = 'black'
+font_c = 'black'
 special_c = "DeepPink"

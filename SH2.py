@@ -219,8 +219,8 @@ def new_gov(gov_type:str=f"GOVERNMENT", color:str=BLUE) -> int:
 def degov() -> None:
     for player_num in range(count):
         PLAYERS[player_num].degov()
-
-    print(f"{PURPLE}  # GOVERNMENT RESET (dbg){END}")
+    if DEBUG_MODE:
+        print(f"{PURPLE}  # GOVERNMENT RESET (dbg){END}")
     # out()
 
 
@@ -237,7 +237,7 @@ def comm(cmd: str) -> bool | None:
     return True
 
 
-def take_random(c:int) -> list[str]:
+def take_random(c:int) ->  list[str]:
     global saved
     if saved:
         x = saved.copy()
@@ -257,7 +257,7 @@ def take_random(c:int) -> list[str]:
         logs_out()
     for card in chosen:
         deck.remove(card)
-    return chosen
+    return sorted(chosen)
 
 
 bots_places = get_bot_places(bots_count)
@@ -293,12 +293,12 @@ for i in fixes:
         print(f"{RED}Length of name should be {MIN_NAME_LEN}-{MAX_NAME_LEN} symbols!{END}")
         pl_name = my_input(f"{RED}New try:{END} {'GAYmer' if i not in bots_places else 'Bot'} №{i})").strip()
         print(END, end='')
-    PLAYERS[i - 1] = Player(num=i - 1, name=pl_name, role=ROLES[i - 1])
+    PLAYERS[i - 1] = (Player if i not in bots_places else Bot)(num=i - 1, name=pl_name, role=ROLES[i - 1])
 if DEBUG_MODE:
     print(*list(map(repr, PLAYERS)), sep='\n')
 
 for i in range(count):
-    if i not in bots_places:
+    if i in bots_places:
         continue
     print(f"[{INPUT_COLOR}{PLAYERS[i]}{END}], come here to get your role!")
     show_only_to_one(f"Your role is: {INPUT_COLOR}{naming(ROLES[i])}{END}", 25)
@@ -329,7 +329,8 @@ while red < RED_WIN_NUM and black < BLACK_WIN_NUM and not Git_caput and not Git_
             if DEBUG_MODE:
                 print(f"{PURPLE}{pnc = } != {pn = } => ВнеОП{END_T}")
         else:
-            print(f"{PURPLE}{pnc = } != {pn = } but {special_election = }{END_T}")
+            if DEBUG_MODE:
+                print(f"{PURPLE}{pnc = } != {pn = } but {special_election = }{END_T}")
             pn = pnc
     else:
         pn = (pn + 1) % count
@@ -382,6 +383,8 @@ while red < RED_WIN_NUM and black < BLACK_WIN_NUM and not Git_caput and not Git_
         special_election = False
     else:
         pnc = pn
+    cn = PLAYERS[pn].choose_chancellor(cannot_be={pn, cn, gulag, killed})
+    print(f"{CYAN}President{END} [{PURPLE}{BOLD}{PLAYERS[pn]}{END}] requested [{PURPLE}{BOLD}{PLAYERS[cn]}{END}] as {YELLOW}chancellor{END}")
     if yes_or_no(f"Skip? (Skips: {skips}): "):
         skips += 1
         degov()
@@ -390,7 +393,6 @@ while red < RED_WIN_NUM and black < BLACK_WIN_NUM and not Git_caput and not Git_
     else:
         skips = 0
 
-    cn = PLAYERS[pn].choose_chancellor(cannot_be={pn, cn, gulag, killed})
     if black >= 3 and cn not in Git_not:
         if STALIN is None:
             if cn == HITLER:
@@ -425,13 +427,15 @@ while red < RED_WIN_NUM and black < BLACK_WIN_NUM and not Git_caput and not Git_
     cards = take_random(3)
     c_prs_got = ''.join(cards)
     cps, cards, is_veto = PLAYERS[pn].president(cards, PLAYERS[cn], black=black, red=red)
+    if pn in bots_places:
+        print(f"{CYAN}President{END} bot [{PURPLE}{BOLD}{PLAYERS[pn]}{END}] said {coloring(cps)}")
+        if is_veto:
+            print(f"{CYAN}President{END} bot [{PURPLE}{BOLD}{PLAYERS[pn]}{END}] requested veto")
     c_cnc_got = ''.join(cards)
     ccs, ccp = PLAYERS[cn].chancellor(cards, pn, cps, is_veto, black=black, red=red)
-    if pn in bots_places:
-        print(f"Bot said {coloring(cps)}")
     if cn in bots_places:
-        print(f"Bot said {coloring(ccs)}")
-        print(f"Bot placed {coloring(ccp)}")
+        print(f"{YELLOW}Chancellor{END} bot [{PURPLE}{BOLD}{PLAYERS[cn]}{END}] said {coloring(ccs)}")
+        print(f"{YELLOW}Chancellor{END} bot [{PURPLE}{BOLD}{PLAYERS[cn]}{END}] placed {coloring(ccp)}")
     # cpsa = input_cards(f"Cards {CYAN}president{END_T} ({players[pn]}) said after chancellor: ", q={3, 0})
     cpsa = PLAYERS[pn].president_said_after_chancellor(cnc=PLAYERS[cn], cards=c_prs_got, ccg=c_cnc_got, ccp=ccp,
                                                        cps=cps, ccs=ccs, )
@@ -517,7 +521,7 @@ while red < RED_WIN_NUM and black < BLACK_WIN_NUM and not Git_caput and not Git_
              (cpc1, PURPLE + 'CH' + END_T, PURPLE + 'K' + END_T, f'{PURPLE}PLR{END_T}')))
         normal_logs.append(
             GameLog(prs=PLAYERS[pn], cnc=PLAYERS[cn],
-                    special=f"Color of [<font color='{purple_c}'>{PLAYERS[cn]}</font>] that [<font color='{pr_c}'>{PLAYERS[pn]}</font>] said is <font color='{color_of_HTML_roles(cpc)}'>{cpc}</font>",
+                    special=f"[<font color='{pr_c}'>{PLAYERS[pn]}</font>] said, that color of [<font color='{purple_c}'>{PLAYERS[cn]}</font>] is <font color='{color_of_HTML_roles(cpc)}'>{cpc}</font>",
                     is_chancellor=False))
         checks = 3
     elif black == 3 >= checks:
