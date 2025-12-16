@@ -1,5 +1,5 @@
 from HTML_colors import red_c, norm_c, purple_c
-from globs import LOGS
+from globs import INFO_LOGS
 from standard_names_SH import X
 from user_color_settings import WARNING
 from user_settings import IS_PRINT_SMALL_INFO
@@ -24,7 +24,7 @@ class InfoLog:
             case _:
                 if print_errors:
                     print(f"{WARNING}Unknown info_name type: {self.info_type}")
-                    LOGS.append(
+                    INFO_LOGS.append(
                         InfoLog(info_type=X.ERROR, info_name=f"{WARNING}Unknown info_name type: {self.info_type}",
                                 info1=f'row= {num}, '
                                       f'info_name= {self.info_name}, <br>'

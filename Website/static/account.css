@@ -1,0 +1,77 @@
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #1a1a1a;
+    color: #f0f0f0;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+}
+
+header {
+    background-color: #900;
+    padding: 1rem;
+    border-bottom: 5px solid #ffc107;
+}
+
+header h1 {
+    margin: 0;
+    font-size: 2.5rem;
+    color: #ffc107;
+    text-shadow: 2px 2px 4px #000;
+}
+
+main {
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#game-board {
+    display: flex;
+    justify-content: space-around;
+    width: 80%;
+    margin-bottom: 2rem;
+}
+
+#liberal-track, #fascist-track {
+    background-color: #333;
+    padding: 1rem;
+    border-radius: 10px;
+    width: 45%;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+}
+
+#player-info, #game-log {
+    background-color: #333;
+    padding: 1.5rem;
+    border-radius: 10px;
+    margin-bottom: 2rem;
+    width: 80%;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+}
+
+h2 {
+    color: #ffc107;
+    border-bottom: 2px solid #900;
+    padding-bottom: 0.5rem;
+    margin-top: 0;
+}
+
+#log-content {
+    height: 200px;
+    overflow-y: auto;
+    background-color: #1a1a1a;
+    border: 1px solid #900;
+    padding: 1rem;
+    text-align: left;
+}
+
+footer {
+    background-color: #333;
+    padding: 1rem;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    border-top: 2px solid #900;
+}

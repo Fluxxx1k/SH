@@ -10,7 +10,7 @@ from user_settings import TIME_FORMAT, DATE_FORMAT, IS_PRINT_SMALL_INFO
 if TYPE_CHECKING:
     from player import Player
 
-from globs import PLAYERS, LOGS
+from globs import PLAYERS, INFO_LOGS
 from standard_classes import POSSIBLE_CARDS
 from standard_names_SH import X
 from standard_functions import color_clear, my_input
@@ -110,7 +110,7 @@ def weighted_random(a, weights):
     if sum(weights) <= 0 or len(weights) != len(a):
         if IS_PRINT_SMALL_INFO:
             print(f"{RED}{BOLD}{UNDERLINE}Sum of weights <= 0 or wrong length, using random choice{END}")
-        LOGS.append(InfoLog.InfoLog(X.ERROR, "Sum of weights <= 0 or wrong length, using random choice", info1=f"{a= } {weights= }", info2=datetime.strftime(datetime.now(), f"{DATE_FORMAT} {TIME_FORMAT}")))
+        INFO_LOGS.append(InfoLog.InfoLog(X.ERROR, "Sum of weights <= 0 or wrong length, using random choice", info1=f"{a= } {weights= }", info2=datetime.strftime(datetime.now(), f"{DATE_FORMAT} {TIME_FORMAT}")))
         return random.choice(a)
     return random.choices(a, weights, k=1)[0]
 
@@ -120,7 +120,7 @@ def weighted_random_for_indexes(weights) -> int:
     if sum(weights) <= 0 or len(weights) != globs.COUNT_PLAYERS:
         if IS_PRINT_SMALL_INFO:
             print(f"{RED}{BOLD}{UNDERLINE}Sum of weights <= 0 or wrong length, using random choice{END}")
-        LOGS.append(InfoLog.InfoLog(X.ERROR, "Sum of weights <= 0 or wrong length, using random choice", info1=f"{weights= }", info2=datetime.strftime(datetime.now(), f"{DATE_FORMAT} {TIME_FORMAT}")))
+        INFO_LOGS.append(InfoLog.InfoLog(X.ERROR, "Sum of weights <= 0 or wrong length, using random choice", info1=f"{weights= }", info2=datetime.strftime(datetime.now(), f"{DATE_FORMAT} {TIME_FORMAT}")))
         return random.choice(range(globs.COUNT_PLAYERS))
     return random.choices(range(globs.COUNT_PLAYERS), weights, k=1)[0]
 

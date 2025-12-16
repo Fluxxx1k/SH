@@ -1,8 +1,10 @@
 import os
 import time as t
+
+import globs
 from GameLog import GameLog
 from InfoLog import InfoLog
-from globs import LOGS, ROLES
+from globs import INFO_LOGS, ROLES
 from standard_functions import color_clear, yes_or_no
 from standard_names_SH import X
 from colors import RESET
@@ -167,15 +169,15 @@ def create_HTML_info(print_errors: bool = IS_PRINT_FULL_INFO) -> str:
     table_body = ''
     try:
         rows = []
-        logs = LOGS[:99]
-        if len(LOGS) > 99:
-            print(f"{CRITICAL}ATTENTION! \n{WARNING}Too many errors, len of info_name is {len(LOGS)} (You still can play? may be){RESET}")
+        logs = INFO_LOGS[:99]
+        if len(INFO_LOGS) > 99:
+            print(f"{CRITICAL}ATTENTION! \n{WARNING}Too many errors, len of info_name is {len(INFO_LOGS)} (You still can play? may be){RESET}")
         for log in logs:
             try:
                 row = log.to_HTML_row()
                 rows.append(row)
             except Exception as err:
-                LOGS.append(
+                INFO_LOGS.append(
                     InfoLog(info_type=X.ERROR, info_name="Error occurred while creating HTML logs info_name",
                             info1=f"{repr(err)}"))
                 if print_errors:
@@ -186,7 +188,7 @@ def create_HTML_info(print_errors: bool = IS_PRINT_FULL_INFO) -> str:
         rows.append(InfoLog(X.INFO, 'Log creating moment', t.strftime("%d.%m.%y %H:%M:%S"), t.time()).to_HTML_row())
         table_body = "\t<tbody>\n" + ''.join(rows) + "\n\t</tbody>"
     except Exception as err:
-        LOGS.append(
+        INFO_LOGS.append(
             InfoLog(info_type=X.ERROR, info_name="Error occurred while creating HTML logs", info1=f"{repr(err)}"))
         if print_errors:
             print(f"{WARNING}Error occurred while creating HTML info_name: {err}{RESET}")
@@ -233,8 +235,73 @@ def create_HTML_logs_cards(logs, print_errors = IS_PRINT_FULL_INFO, is_print = I
             print(f"{CRITICAL}Error occurred while creating HTML logs about cards: {err}{RESET}")
         elif is_print:
             print(f"{CRITICAL}Error occurred while creating HTML logs about cards{RESET}")
-        LOGS.append(InfoLog(info_type=X.ERROR, info_name="Error occurred while creating HTML logs about cards",
-                            info1=f"{repr(err)}"))
+        INFO_LOGS.append(InfoLog(info_type=X.ERROR, info_name="Error occurred while creating HTML logs about cards",
+                                 info1=f"{repr(err)}"))
+        return ''
+
+def create_HTML_logs_cards_for_Website(logs=None, print_errors = IS_PRINT_FULL_INFO, is_print = IS_PRINT_SMALL_INFO) -> str:
+    head = """
+                 <style>
+                     .table1 {
+                         border:5px solid """ + norm_c + """;
+                         bgcolor: #222;
+                         padding: 10px;
+                         cellpadding: 10px;
+                         cellspacing: 2px;
+                         border-collapse: collapse;
+                         width: 100%;
+                         margin-bottom: 20px;
+                     }
+                     .table1 th {
+                         border: 3px """ + norm_c + """ solid;
+                     }
+                     .table1 td {
+                         border: 2px """ + norm_c + """ solid;
+                     }
+                 </style>
+             """
+    if logs is None:
+        logs = globs.GAME_LOGS
+    try:
+        # table_caption = ("<caption><h1><strong>"
+        #                  "Таблица событий игры"
+        #                  "<br>"
+        #                  "Logs of the game"
+        #                  "</strong></h1></caption>\n")
+        table_head = (f"<thead>"
+                        f"\t<tr>"
+                        f"\t\t<th style=\"color: {num_c}\">N</th>"
+                        f"\t\t<th style=\"color: {pr_c}\">President</th>"
+                        f"\t\t<th style=\"color: {ch_c}\">Chancellor</th>"
+                        # f"\t\t<th>Cards <font color=\"{pr_c}\">President</font> Got</th>"
+                        f"\t\t<th>Cards <font color=\"{pr_c}\">President</font> Said</th>"
+                        # f"\t\t<th>Cards <font color=\"{ch_c}\">Chancellor</font> Got</th>"
+                        f"\t\t<th>Cards <font color=\"{ch_c}\">Chancellor</font> Said</th>"
+                        f"\t\t<th>Card <font color=\"{ch_c}\">Chancellor</font> Placed</th>"
+                        f"\t\t<th>Cards <font color=\"{pr_c}\">President</font> Said After <font color=\"{ch_c}\">Chancellor</font></th>"
+                        f"\t\t<th><font color=\"{special_c}\">Special</font></th>"
+                        f"\t</tr>"
+                        f"</thead>")
+
+        table_body = "<tbody>"
+        rows = []
+        for i in range(len(logs)):
+            log = logs[i]
+            number = f'\t\t<td style="color: {num_c}">{i + 1}</td>\n'
+            cooked = log.to_HTML_row()
+            row = "\t<tr>" + number + cooked + '</tr>'
+            rows.append(row)
+        table_body += '\n'.join(rows)
+        table_body += '\n</tbody>'
+        table = head+ f"<table class=\"table1\">\n" + table_head + '\n' + table_body + '\n</table>'
+        return table
+    except Exception as err:
+        if print_errors:
+            print(f"{CRITICAL}Error occurred while creating HTML logs about cards: {err}{RESET}")
+        elif is_print:
+            print(f"{CRITICAL}Error occurred while creating HTML logs about cards{RESET}")
+        INFO_LOGS.append(InfoLog(info_type=X.ERROR, info_name="Error occurred while creating HTML logs about cards",
+                                 info1=f"{repr(err)}"))
         return ''
 
 def create_HTML_logs(path: str, logs: list[GameLog], players: list[Player] = None, *args, **kwargs) -> str:
@@ -244,15 +311,15 @@ def create_HTML_logs(path: str, logs: list[GameLog], players: list[Player] = Non
                 print(f"{WARNING}Too many arguments provided: {args}{RESET}")
             elif IS_PRINT_SMALL_INFO:
                 print(f"{WARNING}too many arguments{RESET}")
-            LOGS.append(
+            INFO_LOGS.append(
                 InfoLog(info_type=X.ERROR, info_name=f"Too many arguments provided", info1=' '.join(args)))
         if kwargs:
             if IS_PRINT_FULL_INFO:
                 print(f"{WARNING}Too many keyword arguments provided: {kwargs}{RESET}")
             elif IS_PRINT_SMALL_INFO:
                 print(f"{WARNING}Too many keyword arguments{RESET}")
-            LOGS.append(InfoLog(info_type=X.ERROR, info_name=f"Too many keyword arguments provided",
-                                info1=' '.join([f"({i}: {j})" for i, j in kwargs.items()])))
+            INFO_LOGS.append(InfoLog(info_type=X.ERROR, info_name=f"Too many keyword arguments provided",
+                                     info1=' '.join([f"({i}: {j})" for i, j in kwargs.items()])))
         if not os.path.exists(path):
             print(f"{CRITICAL}Path is wrong!{RESET}")
             if yes_or_no(f"Create path ({path}) to file? "):
@@ -260,11 +327,11 @@ def create_HTML_logs(path: str, logs: list[GameLog], players: list[Player] = Non
                     os.makedirs(path)
                 except PermissionError as err:
                     print(f"{CRITICAL}Error occurred while creating path: {type(err)}({err}){RESET}")
-                    LOGS.append(InfoLog(info_type=X.ERROR, info_name="Error occurred while creating all HTML logs",
-                                        info1=f"{repr(err)}"))
+                    INFO_LOGS.append(InfoLog(info_type=X.ERROR, info_name="Error occurred while creating all HTML logs",
+                                             info1=f"{repr(err)}"))
                 except Exception as err:
-                    LOGS.append(InfoLog(info_type=X.ERROR, info_name="Error occurred while creating HTML logs",
-                                        info1=f"{repr(err)}"))
+                    INFO_LOGS.append(InfoLog(info_type=X.ERROR, info_name="Error occurred while creating HTML logs",
+                                             info1=f"{repr(err)}"))
                     print(f"{CRITICAL}Error occurred while creating path: {type(err)}({err}){RESET}")
                     return ''
             else:
@@ -314,16 +381,16 @@ def create_HTML_logs(path: str, logs: list[GameLog], players: list[Player] = Non
         try:
             table_info = create_HTML_info()
         except Exception as err:
-            LOGS.append(InfoLog(info_type=X.ERROR, info_name="Error occurred while creating HTML info_name logs",
-                                info1=f"{repr(err)}"))
+            INFO_LOGS.append(InfoLog(info_type=X.ERROR, info_name="Error occurred while creating HTML info_name logs",
+                                     info1=f"{repr(err)}"))
             table_info = ''
             print(f"Oops, something went wrong: {err}")
             print(f"{WARNING}Table with information could not be created{RESET}")
         try:
             table_logs = create_HTML_logs_cards(logs)
         except Exception as err:
-            LOGS.append(InfoLog(info_type=X.ERROR, info_name="Error occurred while creating HTML cards logs",
-                                info1=f"{repr(err)}"))
+            INFO_LOGS.append(InfoLog(info_type=X.ERROR, info_name="Error occurred while creating HTML cards logs",
+                                     info1=f"{repr(err)}"))
             table_logs = ''
             print(f"Oops, something went wrong: {err}")
             print(f"{CRITICAL}Table of logs with cards could not be created{RESET}")
@@ -345,7 +412,7 @@ def create_HTML_logs(path: str, logs: list[GameLog], players: list[Player] = Non
             print(s, file=f)
         return s
     except Exception as err:
-        LOGS.append(
+        INFO_LOGS.append(
             InfoLog(info_type=X.ERROR, info_name="Error occurred while creating all HTML logs", info1=f"{repr(err)}"))
         print(f"Oops, something went wrong: {err}")
         print(f"{CRITICAL}HTML Table of logs could not be created!!!{RESET}")
