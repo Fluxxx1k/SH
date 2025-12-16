@@ -9,13 +9,14 @@ if TYPE_CHECKING:
 
 INFO_LOGS: list[InfoLog] = []
 GAME_LOGS: list[GameLog] = []
+# noinspection PyTypeChecker
 COUNT_PLAYERS:int = None
 PLAYERS: list[AbstractPlayer] = []
 ROLES: list[str] = []
-HITLER:int = None
-STALIN:int = None
+HITLER:int|None = None
+STALIN:int|None = None
 PURGED: set[AbstractPlayer] = set()
-GULAG: int = None
-KILLED: int = None
+GULAG: int|None = None
+KILLED: int|None = None
 CARDS: dict[str, int] = {"BLACK":0, "RED":0}
 BOTS: list[int] = []

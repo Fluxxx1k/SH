@@ -25,13 +25,13 @@ def start_logging(log_directory=DIRECTORY_FOR_CONSOLE_LOGS,
     log_name_prefix=NAME_FOR_CONSOLE_LOGS,
     log_extension=EXTENSION_FOR_CONSOLE_LOGS,
     date_format=DATE_FORMAT):
+    global check_logs
     date = datetime.now().strftime(date_format)
     try:
         os.makedirs(log_directory, exist_ok=True)
         check_logs = os.listdir(log_directory)
     except Exception as e:
         sys.stderr.write(f"Error creating log directory: {e}\nLogs won't be created\n")
-        return
 
     try:
         logs_nums = []

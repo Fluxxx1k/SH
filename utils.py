@@ -47,24 +47,8 @@ def coloring(s, sort=True, is_print=True):
 
 
 
-def naming(s:str) -> str:
-    if s in {"R", X.RED}:
-        return RED + "RED" + END_T
-    if s in {"H", X.HITLER}:
-        return BLACK + "HITLER" + END_T
-    if s in {"B", X.BLACK}:
-        return BLACK + "BLACK" + END_T
-    if s in {"S", X.STALIN}:
-        return RED + "STALIN" + END_T
-    if s in {"M", X.MOLOTOV}:
-        return RED + "MOLOTOV" + END_T
-    if s in {"RIB", X.RIBBENTROP}:
-        return BLACK + "RIBBENTROP" + END_T
-    if s in {"A", "ANARCHY", X.ANARCHIST}:
-        return PURPLE + "ANARCHIST" + END_T
-    if s in {"X", "UNKNOWN", "IDK"}:
-        return "UNKNOWN"
-    return X.ERROR
+def naming(role:str) -> str:
+    return get_color_for_role(role) + role + END_T
 
 
 def get_color(x:str, out_type=''):
@@ -190,3 +174,12 @@ def out(c:int = None, file=sys.stdout):
     for player_num in range(c):
         print(f"№{player_num + 1}) {PLAYERS[player_num].out()}", file=file)
 
+def get_color_for_role(role: str) -> str:
+    if role in {X.BLACK, X.HITLER, X.RIBBENTROP}:
+        return BLACK
+    elif role in {X.RED, X.STALIN, X.MOLOTOV}:
+        return RED
+    elif role == X.ANARCHIST:
+        return PURPLE
+    else:
+        return RESET_TEXT

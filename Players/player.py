@@ -1,25 +1,20 @@
+from __future__ import annotations
 from typing import Iterable
 
 from Players.abstract_player import AbstractPlayer
-from globs import PLAYERS, ROLES
-from user_color_settings import (INPUT_COLOR,
-                                 BLACK_PLAYER_COLOR as BLACK,
-                                 RED_PLAYER_COLOR as RED,
-                                 PURPLE_PLAYER_COLOR as PURPLE, WARNING)
-from user_settings import MAX_PLAYER_NUM, MAX_NAME_LEN, IS_PRINT_SMALL_INFO
-from colors import (YELLOW_BACKGROUND_BRIGHT as GULAG,
-                    RED_BACKGROUND_BRIGHT as DEAD,
-                    RESET_BACKGROUND as END_BG,
-                    )
-from utils import get_color, coloring, naming, input_cards, preproc_votes, weighted_random_for_indexes
-from standard_names_SH import X
-from standard_functions import show_only_to_one, yes_or_no, is_x_in_y, my_input
-from colors import (BLUE_TEXT_BRIGHT as BLUE,
-                    CYAN_TEXT_BRIGHT as CYAN,
+from colors import (CYAN_TEXT_BRIGHT as CYAN,
                     YELLOW_TEXT_BRIGHT as YELLOW,
                     RESET_TEXT as END_T,
                     END, UP,
                     )
+from globs import PLAYERS, ROLES, CARDS
+from standard_functions import show_only_to_one, yes_or_no, is_x_in_y, my_input
+from standard_names_SH import X
+from user_color_settings import (INPUT_COLOR,
+                                 BLACK_PLAYER_COLOR as BLACK,
+                                 RED_PLAYER_COLOR as RED,
+                                 PURPLE_PLAYER_COLOR as PURPLE, WARNING)
+from utils import get_color, coloring, naming, input_cards
 
 
 class Player(AbstractPlayer):
@@ -27,7 +22,7 @@ class Player(AbstractPlayer):
 
     def __init__(self, num: int, name: str, role: str):
         super().__init__(num=num, name=name, role=role)
-    def president(self, cards: str | list[str], cnc: "Player", *, black, red):
+    def president(self, cards: str | list[str], cnc: "AbstractPlayer"):
         cards = ''.join(sorted(cards)).upper()
         show_only_to_one(f"Remember, your role is {naming(self.role)}, color is {self.colored_color}.", hide_len=60)
         card1 = coloring(cards.upper())
@@ -46,9 +41,9 @@ class Player(AbstractPlayer):
         print(f'{UP * 3}' + "#" * len(cards))  # ⣿
         print()
         print(phrase1 + '#' * len(to_cnc))
-        return words, to_cnc, yes_or_no("Veto? ") if black == 5 else False
+        return words, to_cnc, yes_or_no("Veto? ") if CARDS[X.BLACK] == 5 else False
 
-    def chancellor(self, cards: str, prs: "Player", words, veto, *, black, red):
+    def chancellor(self, cards: str, prs: "AbstractPlayer", words, veto):
         show_only_to_one(f"Remember, your role is {naming(self.role)}, color is {self.colored_color}.", hide_len=60)
         card1 = coloring(cards)
         print(card1)
@@ -67,7 +62,7 @@ class Player(AbstractPlayer):
         print(phrase1 + coloring(placed))
         return words_ch, placed
 
-    def president_said_after_chancellor(self, *, cards: str, cnc: "Player", ccg: str, cps: str, ccs: str,
+    def president_said_after_chancellor(self, *, cards: str, cnc: "AbstractPlayer", ccg: str, cps: str, ccs: str,
                                         ccp: str) -> str:
         phrase = f"Cards {CYAN}president{END_T} ({self}) said after chancellor ({cnc}): "
         cpsa = input_cards(phrase, q={3, 0})

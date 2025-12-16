@@ -1,28 +1,22 @@
 from __future__ import annotations
-
+from typing import Iterable
 import datetime
-from typing import TYPE_CHECKING
 
 from InfoLog import InfoLog
-from globs import INFO_LOGS
-
-if TYPE_CHECKING:
-    from Players.player import Player
+from globs import INFO_LOGS, PLAYERS
 from abc import abstractmethod, ABC
-from typing import Iterable
 
 from colors import (BLUE_TEXT_BRIGHT as BLUE,
                     CYAN_TEXT_BRIGHT as CYAN,
                     YELLOW_TEXT_BRIGHT as YELLOW,
                     RESET_TEXT as END_T,
-                    )
-from colors import (YELLOW_BACKGROUND_BRIGHT as GULAG,
+                    YELLOW_BACKGROUND_BRIGHT as GULAG,
                     RED_BACKGROUND_BRIGHT as DEAD,
                     RESET_BACKGROUND as END_BG,
                     )
 from standard_names_SH import X
 from user_settings import MAX_NAME_LEN
-from utils import get_color
+from utils import get_color, naming
 
 
 class AbstractPlayer(ABC):
@@ -155,13 +149,13 @@ class AbstractPlayer(ABC):
         return self.gov_pref + self.purge_pref + self.prefix + self.name + self.gov_suff + self.purge_suff + self.suffix
 
     @abstractmethod
-    def president(self, cards: str | list[str], cnc: "Player", *, black, red):
+    def president(self, cards: str | list[str], cnc: "AbstractPlayer"):
         pass
     @abstractmethod
-    def chancellor(self, cards: str, prs: "Player", words, veto, *, black, red):
+    def chancellor(self, cards: str, prs: "AbstractPlayer", words, veto):
         pass
     @abstractmethod
-    def president_said_after_chancellor(self, *, cards: str, cnc: "Player", ccg: str, cps: str, ccs: str,
+    def president_said_after_chancellor(self, *, cards: str, cnc: "AbstractPlayer", ccg: str, cps: str, ccs: str,
                                         ccp: str) -> str:
         pass
     @abstractmethod
@@ -180,3 +174,11 @@ class AbstractPlayer(ABC):
     @abstractmethod
     def choose_chancellor(self, cannot_be: Iterable[int] = frozenset(), votes: dict[int, int] = None) -> int:
         pass
+
+    def print_short_info(self) -> None:
+        print(f"№{self.num}) {self.out()}\n"
+              f"Role: {naming(self.role)}\n"
+              f"Darkness= {self.dark}\n"
+              f"Definitely now who is black: {', '.join( f'№{i.num} [{i.out()}]' for i in sorted([PLAYERS[i] for i in self.black], key=lambda p: p.num)) or 'No one'}")
+
+

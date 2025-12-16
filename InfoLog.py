@@ -1,4 +1,6 @@
-from HTML_colors import red_c, norm_c, purple_c, orange_c, yellow_c
+from __future__ import annotations
+
+from HTML_colors import red_c, norm_c, purple_c, orange_c, yellow_c, num_c
 from globs import INFO_LOGS
 from standard_names_SH import X
 from user_color_settings import WARNING
@@ -36,11 +38,17 @@ class InfoLog:
                 return another_color
 
 
-    def to_HTML_row(self, num: int = None) -> str:
-        row: str
-        info_type       = f'\t\t\t<td style="color: {self.get_color_for_type()}"><b>{self.info_type}</b></td>\n'
-        info_name           = f'\t\t\t<td><b>{self.info_name}</b></td>\n'
-        info1 = f'\t\t\t<td>{self.info1}</td>\n'
-        info2 = f'\t\t\t<td>{self.info2}</td>\n'
-        row = f"\t\t<tr>\n{info_type}{info_name}{info1}{info2}</tr>\n"
+    def to_HTML_row(self, num: int | None = None) -> str:
+        info_num   = f'<td style="color: {num_c}"><b>{num}</b></td>'
+        info_type  = f'<td style="color: {self.get_color_for_type()}"><b>{self.info_type}</b></td>\n'
+        info_name  = f'<td><b>{self.info_name}</b></td>'
+        info1      = f'<td>{self.info1}</td>'
+        info2      = f'<td>{self.info2}</td>'
+        row        = (f"\t\t<tr>\n"
+                      f"\t\t\t{info_num}\n"
+                      f"\t\t\t{info_type}\n"
+                      f"\t\t\t{info_name}\n"
+                      f"\t\t\t{info1}\n"
+                      f"\t\t\t{info2}\n"
+                      f"\t\t</tr>\n")
         return row

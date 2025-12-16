@@ -5,7 +5,7 @@ import random as rnd
 import time as t
 from atexit import register as atexit
 from HTML_logs import create_HTML_logs, color_of_HTML_roles, GameLog, pr_c, purple_c, InfoLog
-from Players.bot import Bot
+from Players.bot2 import Bot2 as Bot
 from colors import (YELLOW_TEXT_BRIGHT as YELLOW,
                     BLUE_TEXT_BRIGHT as BLUE,
                     CYAN_TEXT_BRIGHT as CYAN,
@@ -184,6 +184,10 @@ def dbg(s:str) -> bool:
     print(f"{WARNING}Wrong parameters: {s}{END}")
     return True
 
+@atexit
+def print_all_at_exit() -> None:
+    for player in PLAYERS:
+        player.print_short_info()
 
 @atexit
 def logs_out():
@@ -338,7 +342,7 @@ else:
         else:
             if yes_or_no(f"Are you sure that number ({INPUT_COLOR}{pn + 1}{END}) is right (it's [{INPUT_COLOR}{PLAYERS[pn]}{END}]): "):
                 break
-previous_president:int = None
+previous_president:int|None = None
 pn -= 1
 pnc = pn
 cn = None
@@ -465,14 +469,14 @@ while red < RED_WIN_NUM and black < BLACK_WIN_NUM and not Git_caput and not Git_
     out()
     cards = take_random(3)
     c_prs_got = ''.join(cards)
-    cps, cards, is_veto = PLAYERS[pn].president(cards, PLAYERS[cn], black=black, red=red)
+    cps, cards, is_veto = PLAYERS[pn].president(cards, PLAYERS[cn])
     if pn in bots_places:
         print(f"{CYAN}President{END} bot [{PURPLE}{BOLD}{PLAYERS[pn]}{END}] said {coloring(cps)}")
         if is_veto:
             print(f"{CYAN}President{END} bot [{PURPLE}{BOLD}{PLAYERS[pn]}{END}] requested veto")
     c_cnc_got = ''.join(cards)
 
-    ccs, ccp = PLAYERS[cn].chancellor(cards, pn, cps, is_veto, black=black, red=red)
+    ccs, ccp = PLAYERS[cn].chancellor(cards, pn, cps, is_veto)
     if cn in bots_places:
         print(f"{YELLOW}Chancellor{END} bot [{PURPLE}{BOLD}{PLAYERS[cn]}{END}] said {coloring(ccs)}")
         print(f"{YELLOW}Chancellor{END} bot [{PURPLE}{BOLD}{PLAYERS[cn]}{END}] placed {coloring(ccp)}")
@@ -546,6 +550,8 @@ while red < RED_WIN_NUM and black < BLACK_WIN_NUM and not Git_caput and not Git_
         checks = 2
     elif black == 2 >= checks:
         pc, cpc = PLAYERS[pn].check_player()
+        if cpc != PLAYERS[pc].color:
+            PLAYERS[pc].black.add(pn)
         cpc1 = cpc
         match cpc:
             case X.BLACK:

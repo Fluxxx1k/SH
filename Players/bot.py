@@ -10,7 +10,7 @@ import time
 import user_settings
 from HTML_logs import InfoLog
 from Players.abstract_player import AbstractPlayer
-from globs import INFO_LOGS, PLAYERS, ROLES
+from globs import INFO_LOGS, PLAYERS, ROLES, CARDS
 from standard_classes import Cards
 from standard_names_SH import X
 from user_settings import DATE_FORMAT, TIME_FORMAT, IS_PRINT_SMALL_INFO,IS_PRINT_FULL_INFO
@@ -47,15 +47,15 @@ class Bot(AbstractPlayer):
             self.black.add(self.num)
 
 
-    def president(self, cards, cnc, *, black, red) -> tuple[str, list[str], bool]:
+    def president(self, cards, cnc) -> tuple[str, list[str], bool]:
         cards = sorted(cards)
         if self.bot_mind == X.HITLER:
             if cards == ["R", "R", "R"]:
-                return "XXX", ["R", "R"], black == 5
+                return "XXX", ["R", "R"], CARDS[X.BLACK] == 5
             if cards == ["B", "R", "R"]:
                 return "XXX", ["B", "R"], False
             if cards == ["B", "B", "R"]:
-                if rnd.random() < 0.9 or red == 4 or black == 5:
+                if rnd.random() < 0.9 or CARDS[X.RED] == 4 or CARDS[X.BLACK] == 5:
                     return "XXX", ["B", "B"], False
                 else:
                     return "XXX", ["B", "R"], False
@@ -73,14 +73,14 @@ class Bot(AbstractPlayer):
             if cards == ["B", "R", "R"]:
                 return "XXX", ["B", "R"], False
             if cards == ["B", "B", "R"]:
-                if rnd.random() < 0.96 or red == 4 or black == 5:
+                if rnd.random() < 0.96 or CARDS[X.RED] == 4 or CARDS[X.BLACK] == 5:
                     return "XXX", ["B", "B"], False
                 else:
                     return "XXX", ["B", "R"], False
             if cards == ["B", "B", "B"]:
                 return "XXX", ["B", "B"], False
             if cards == ["R", "R", "R"]:
-                return "XXX", ["R", "R"], black == 5
+                return "XXX", ["R", "R"], CARDS[X.BLACK] == 5
             if user_settings.IS_PRINT_FULL_INFO:
                 print(f"Unknown situation {cards= }")
             elif IS_PRINT_SMALL_INFO:
@@ -90,10 +90,10 @@ class Bot(AbstractPlayer):
                                      info1=f"{self.bot_mind= } {cards= }",
                                      info2=f"{datetime.datetime.now().strftime(f'{DATE_FORMAT} {TIME_FORMAT}')}"))
 
-            return "XXX", cards[:2], black == 5
+            return "XXX", cards[:2], CARDS[X.BLACK] == 5
         if self.bot_mind == X.RED:
             if cards == ["B", "R", "R"]:
-                if red == 4 or black == 5:
+                if CARDS[X.RED] == 4 or CARDS[X.BLACK] == 5:
                     return "XXX", ["R", "R"], False
                 else:
                     if cnc in self.black:
@@ -104,7 +104,7 @@ class Bot(AbstractPlayer):
             if cards == ["R"] * 3:
                 return "XXX", ["R"] * 2, False
             if cards == ["B"] * 3:
-                return "XXX", ["B"] * 2, black == 5
+                return "XXX", ["B"] * 2, CARDS[X.BLACK] == 5
             if user_settings.IS_PRINT_FULL_INFO:
                 print(f"Unknown situation {cards= }")
             elif IS_PRINT_SMALL_INFO:
@@ -113,12 +113,12 @@ class Bot(AbstractPlayer):
                                      info_name=f"Unknown situation",
                                      info1=f"{self.bot_mind= } {cards=}",
                                      info2=f"{datetime.datetime.now().strftime(f'{DATE_FORMAT} {TIME_FORMAT}')}"))
-            return "XXX", cards[1:], black == 5
+            return "XXX", cards[1:], CARDS[X.BLACK] == 5
         if self.bot_mind == X.NRH:
             if "B" in cards and "R" in cards:
-                return "XXX", ["B", "R"], black == 5
+                return "XXX", ["B", "R"], CARDS[X.BLACK] == 5
             else:
-                return "XXX", cards[1:], black == 5
+                return "XXX", cards[1:], CARDS[X.BLACK] == 5
         else:
             if user_settings.IS_PRINT_FULL_INFO:
                 print(f"Unknown bot mind {self.bot_mind= } {cards= }")
@@ -129,11 +129,11 @@ class Bot(AbstractPlayer):
                                      info1=f"{self.bot_mind= }{cards= }",
                                      info2=f"{datetime.datetime.now().strftime(f'{DATE_FORMAT} {TIME_FORMAT}')}"))
             if "B" in cards and "R" in cards:
-                return "XXX", ["B", "R"], black == 5
+                return "XXX", ["B", "R"], CARDS[X.BLACK] == 5
             else:
-                return "XXX", cards[1:], black == 5
+                return "XXX", cards[1:], CARDS[X.BLACK] == 5
 
-    def chancellor(self, cards:str|list[str], prs:int, words:str, veto:bool, *, black:int, red:int) -> tuple[str, str]:
+    def chancellor(self, cards:str|list[str], prs:int, words:str, veto:bool) -> tuple[str, str]:
         cards = sorted(cards)
         if self.bot_mind == X.RED:
             if "R" in cards:
@@ -143,7 +143,7 @@ class Bot(AbstractPlayer):
             else:
                 return "XX", 'B'
         if self.bot_mind == X.HITLER:
-            if red == 4 or black == 5:
+            if CARDS[X.RED] == 4 or CARDS[X.BLACK] == 5:
                 if "B" in cards:
                     return "XX", "B"
                 if veto:
@@ -161,11 +161,11 @@ class Bot(AbstractPlayer):
                 if veto:
                     return "XX", 'X'
                 return "XX", "R"
-            if red == 4 or black == 5:
+            if CARDS[X.RED] == 4 or CARDS[X.BLACK] == 5:
                 return "XX", "B"
             if prs in self.black and (words == "BBB" or words == "XXX"):
                 return "XX", "B"
-            if red == 3:
+            if CARDS[X.RED] == 3:
                 if rnd.random() < 0.69:
                     return "XX", "R"
                 return "XX", "B"
@@ -178,7 +178,7 @@ class Bot(AbstractPlayer):
                     print(f"Unknown role")
                 INFO_LOGS.append(InfoLog(info_type=X.ERROR, info_name=f"Unknown bot mind",
                                          info1=f"№{self.num} [{self}] {self.bot_mind= }"))
-            if red <= black:
+            if CARDS[X.RED] <= CARDS[X.BLACK]:
                 if "R" in cards:
                     return "XX", "R"
                 return "XX", "B"
