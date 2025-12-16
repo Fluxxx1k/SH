@@ -4,9 +4,6 @@ import os
 import random as rnd
 import time as t
 from atexit import register as atexit
-
-from PIL.ImImagePlugin import split
-
 from HTML_logs import create_HTML_logs, color_of_HTML_roles, GameLog, pr_c, purple_c, InfoLog
 from bot import Bot
 from colors import (YELLOW_TEXT_BRIGHT as YELLOW,
@@ -21,7 +18,7 @@ from colors import (YELLOW_TEXT_BRIGHT as YELLOW,
                     END, BOLD, UNDERLINE,
                     )
 from player import Player
-from globs import PLAYERS, ROLES, LOGS
+from globs import PLAYERS, ROLES, INFO_LOGS
 import globs
 from standard_functions import show_only_to_one, yes_or_no, my_input
 from standard_names_SH import X
@@ -30,7 +27,7 @@ from utils import coloring, naming, input_cards, out
 from user_settings import *
 
 code_start_time = t.time()
-LOGS.append(InfoLog(info_type=X.INFO, info_name="Code start time", info1=t.strftime(f"{DATE_FORMAT} {TIME_FORMAT}"), info2=code_start_time))
+INFO_LOGS.append(InfoLog(info_type=X.INFO, info_name="Code start time", info1=t.strftime(f"{DATE_FORMAT} {TIME_FORMAT}"), info2=code_start_time))
 saved = []
 path = f"{DIRECTORY_FOR_GAME_LOGS}\\"
 date = t.strftime(DATE_FORMAT) + ' '
@@ -39,7 +36,7 @@ special_election = False
 skips = 0
 logs: list[tuple[tuple[str, str], tuple[str, str, str, str]]] = []
 Git_not = set()
-normal_logs: list[GameLog] = []
+normal_logs: list[GameLog] = globs.GAME_LOGS
 
 
 while True:
@@ -146,7 +143,7 @@ globs.COUNT_PLAYERS = count
 start_time = t.time()
 start_time_f = t.strftime(f"{DATE_FORMAT} {TIME_FORMAT}")
 print(start_time_f)
-LOGS.append(InfoLog(info_type=X.INFO, info_name="Game start time", info1=start_time_f, info2=start_time))
+INFO_LOGS.append(InfoLog(info_type=X.INFO, info_name="Game start time", info1=start_time_f, info2=start_time))
 red = black = 0
 checks = 1
 Git_caput = False
@@ -608,7 +605,7 @@ while red < RED_WIN_NUM and black < BLACK_WIN_NUM and not Git_caput and not Git_
 
 end_time_f = t.strftime(f"{DATE_FORMAT} {TIME_FORMAT}")
 end_time = t.time()
-LOGS.append(InfoLog(info_type=X.INFO, info_name="Game end time", info1=end_time_f, info2=end_time))
+INFO_LOGS.append(InfoLog(info_type=X.INFO, info_name="Game end time", info1=end_time_f, info2=end_time))
 print("Game start time: " + start_time_f)
 print("Game over time: " + end_time_f)
 

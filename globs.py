@@ -5,8 +5,10 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from InfoLog import InfoLog
     from player import Player
+    from GameLog import GameLog
 
-LOGS: list[InfoLog] = []
+INFO_LOGS: list[InfoLog] = []
+GAME_LOGS: list[GameLog] = []
 COUNT_PLAYERS:int = None
 PLAYERS: list[Player] = []
 ROLES: list[str] = []

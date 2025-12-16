@@ -7,7 +7,7 @@ import time
 
 import user_settings
 from HTML_logs import InfoLog
-from globs import LOGS, PLAYERS, ROLES
+from globs import INFO_LOGS, PLAYERS, ROLES
 from player import Player
 from standard_classes import Cards
 from standard_names_SH import X
@@ -38,9 +38,9 @@ class Bot(Player):
             except Exception as e:
                 if user_settings.IS_PRINT_FULL_INFO:
                     print(repr(e))
-                LOGS.append(InfoLog(info_type=X.ERROR,
-                                    info_name=f"Cannot add Hitler to black list: {repr(e)}",
-                                    info1=f"{globs.HITLER= } {self.bot_mind= }"))
+                INFO_LOGS.append(InfoLog(info_type=X.ERROR,
+                                         info_name=f"Cannot add Hitler to black list: {repr(e)}",
+                                         info1=f"{globs.HITLER= } {self.bot_mind= }"))
         if self.bot_mind == X.HITLER:
             self.black.add(self.num)
 
@@ -63,10 +63,10 @@ class Bot(Player):
                 print(f"Unknown situation {cards= }")
             elif IS_PRINT_SMALL_INFO:
                 print(f"Unknown situation")
-            LOGS.append(InfoLog(info_type=X.ERROR,
-                                info_name=f"Unknown situation",
-                                info1=f"{self.bot_mind= } {cards= }",
-                                info2=f"{datetime.datetime.now().strftime(f'{DATE_FORMAT} {TIME_FORMAT}')}"))
+            INFO_LOGS.append(InfoLog(info_type=X.ERROR,
+                                     info_name=f"Unknown situation",
+                                     info1=f"{self.bot_mind= } {cards= }",
+                                     info2=f"{datetime.datetime.now().strftime(f'{DATE_FORMAT} {TIME_FORMAT}')}"))
         if self.bot_mind == X.BLACK:
             if cards == ["B", "R", "R"]:
                 return "XXX", ["B", "R"], False
@@ -83,10 +83,10 @@ class Bot(Player):
                 print(f"Unknown situation {cards= }")
             elif IS_PRINT_SMALL_INFO:
                 print(f"Unknown situation")
-            LOGS.append(InfoLog(info_type=X.ERROR,
-                                info_name=f"Unknown situation",
-                                info1=f"{self.bot_mind= } {cards= }",
-                                info2=f"{datetime.datetime.now().strftime(f'{DATE_FORMAT} {TIME_FORMAT}')}"))
+            INFO_LOGS.append(InfoLog(info_type=X.ERROR,
+                                     info_name=f"Unknown situation",
+                                     info1=f"{self.bot_mind= } {cards= }",
+                                     info2=f"{datetime.datetime.now().strftime(f'{DATE_FORMAT} {TIME_FORMAT}')}"))
 
             return "XXX", cards[:2], black == 5
         if self.bot_mind == X.RED:
@@ -107,10 +107,10 @@ class Bot(Player):
                 print(f"Unknown situation {cards= }")
             elif IS_PRINT_SMALL_INFO:
                 print(f"Unknown situation")
-            LOGS.append(InfoLog(info_type=X.ERROR,
-                                info_name=f"Unknown situation",
-                                info1=f"{self.bot_mind= } {cards=}",
-                                info2=f"{datetime.datetime.now().strftime(f'{DATE_FORMAT} {TIME_FORMAT}')}"))
+            INFO_LOGS.append(InfoLog(info_type=X.ERROR,
+                                     info_name=f"Unknown situation",
+                                     info1=f"{self.bot_mind= } {cards=}",
+                                     info2=f"{datetime.datetime.now().strftime(f'{DATE_FORMAT} {TIME_FORMAT}')}"))
             return "XXX", cards[1:], black == 5
         if self.bot_mind == X.NRH:
             if "B" in cards and "R" in cards:
@@ -122,10 +122,10 @@ class Bot(Player):
                 print(f"Unknown bot mind {self.bot_mind= } {cards= }")
             elif IS_PRINT_SMALL_INFO:
                 print(f"Unknown bot mind")
-            LOGS.append(InfoLog(info_type=X.ERROR,
-                                info_name=f"Unknown bot mind",
-                                info1=f"{self.bot_mind= }{cards= }",
-                                info2=f"{datetime.datetime.now().strftime(f'{DATE_FORMAT} {TIME_FORMAT}')}"))
+            INFO_LOGS.append(InfoLog(info_type=X.ERROR,
+                                     info_name=f"Unknown bot mind",
+                                     info1=f"{self.bot_mind= }{cards= }",
+                                     info2=f"{datetime.datetime.now().strftime(f'{DATE_FORMAT} {TIME_FORMAT}')}"))
             if "B" in cards and "R" in cards:
                 return "XXX", ["B", "R"], black == 5
             else:
@@ -174,8 +174,8 @@ class Bot(Player):
             if self.bot_mind != X.NRH:
                 if IS_PRINT_SMALL_INFO:
                     print(f"Unknown role")
-                LOGS.append(InfoLog(info_type=X.ERROR, info_name=f"Unknown bot mind",
-                                    info1=f"№{self.num} [{self}] {self.bot_mind= }"))
+                INFO_LOGS.append(InfoLog(info_type=X.ERROR, info_name=f"Unknown bot mind",
+                                         info1=f"№{self.num} [{self}] {self.bot_mind= }"))
             if red <= black:
                 if "R" in cards:
                     return "XX", "R"
@@ -223,9 +223,9 @@ class Bot(Player):
             case X.ANARCHIST:
                 return Cards(cps)
             case _:
-                LOGS.append(InfoLog(X.ERROR, info_name="Unknown bot mind",
-                                    info1=f"№{self.num} [{self}] {self.bot_mind= }",
-                                    info2=datetime.datetime.now().strftime(f"{DATE_FORMAT} {TIME_FORMAT}")))
+                INFO_LOGS.append(InfoLog(X.ERROR, info_name="Unknown bot mind",
+                                         info1=f"№{self.num} [{self}] {self.bot_mind= }",
+                                         info2=datetime.datetime.now().strftime(f"{DATE_FORMAT} {TIME_FORMAT}")))
                 if IS_PRINT_FULL_INFO:
                     print(f"Unknown {self.bot_mind= }")
                 elif IS_PRINT_SMALL_INFO:
@@ -261,9 +261,9 @@ class Bot(Player):
 
         if IS_PRINT_SMALL_INFO:
             print(f"Unknown bot_mind")
-        LOGS.append(InfoLog(info_type=X.ERROR, info_name=f"Unknown bot_mind",
-                            info1=f"№{self.num} [{self}] {self.bot_mind= }",
-                            info2=time.strftime(f"{DATE_FORMAT} {TIME_FORMAT}")))
+        INFO_LOGS.append(InfoLog(info_type=X.ERROR, info_name=f"Unknown bot_mind",
+                                 info1=f"№{self.num} [{self}] {self.bot_mind= }",
+                                 info2=time.strftime(f"{DATE_FORMAT} {TIME_FORMAT}")))
         return Cards("XXX")
 
     def check_player(self, votes: list[int] = None) -> tuple[int, str]:
@@ -287,9 +287,9 @@ class Bot(Player):
             ppv[self.num] = 0
             chosen = weighted_random_for_indexes(ppv)
         except Exception as e:
-            LOGS.append(InfoLog(info_type=X.ERROR, info_name=f"Error while checking another",
-                                info1=f"{votes= } {repr(e)}",
-                                info2=time.strftime(f"{DATE_FORMAT} {TIME_FORMAT}")))
+            INFO_LOGS.append(InfoLog(info_type=X.ERROR, info_name=f"Error while checking another",
+                                     info1=f"{votes= } {repr(e)}",
+                                     info2=time.strftime(f"{DATE_FORMAT} {TIME_FORMAT}")))
             chosen = rnd.randint(0, len(PLAYERS) - 1)
             while chosen == self.num:
                 chosen = rnd.randint(0, len(PLAYERS) - 1)
@@ -324,8 +324,8 @@ class Bot(Player):
                 case _:
                     if IS_PRINT_SMALL_INFO:
                         print("Unknown bot mind")
-                    LOGS.append(InfoLog(info_type=X.ERROR, info_name=f"Unknown bot mind", info1=f"{self= } {self.bot_mind= }",
-                                        info2=time.strftime(f"{DATE_FORMAT} {TIME_FORMAT}")))
+                    INFO_LOGS.append(InfoLog(info_type=X.ERROR, info_name=f"Unknown bot mind", info1=f"{self= } {self.bot_mind= }",
+                                             info2=time.strftime(f"{DATE_FORMAT} {TIME_FORMAT}")))
                     ppv = preproc_votes(votes)
             ppv[self.num] = 0
             if globs.GULAG is not None:
@@ -342,16 +342,16 @@ class Bot(Player):
             x = weighted_random_for_indexes(ppv)
             return x
         except Exception as err:
-            LOGS.append(InfoLog(info_type=X.ERROR, info_name=f"Error while purging another",
-                                info1=f"{self.bot_mind= } {repr(err)}",
-                                info2=time.strftime(f"{DATE_FORMAT} {TIME_FORMAT}")))
+            INFO_LOGS.append(InfoLog(info_type=X.ERROR, info_name=f"Error while purging another",
+                                     info1=f"{self.bot_mind= } {repr(err)}",
+                                     info2=time.strftime(f"{DATE_FORMAT} {TIME_FORMAT}")))
 
         if IS_PRINT_SMALL_INFO:
             print("Unknown bot mind")
         if user_settings.IS_PRINT_FULL_INFO:
             print(f"{self.bot_mind= }")
-        LOGS.append(InfoLog(info_type=X.ERROR, info_name=f"Unknown bot mind", info1=f"{self.bot_mind= }",
-                            info2=time.strftime(f"{DATE_FORMAT} {TIME_FORMAT}")))
+        INFO_LOGS.append(InfoLog(info_type=X.ERROR, info_name=f"Unknown bot mind", info1=f"{self.bot_mind= }",
+                                 info2=time.strftime(f"{DATE_FORMAT} {TIME_FORMAT}")))
         return weighted_random_for_indexes([0])
     def choose_chancellor(self, cannot_be: set[int] = frozenset(), votes: dict[int, int] = None, gov_type=X.CHANCELLOR) -> int:
         print(f"{cannot_be= }")
@@ -376,14 +376,14 @@ class Bot(Player):
                     ppv[globs.HITLER] >>= 1
                 else:
                     print(f"Unknown government type {gov_type= }")
-                    LOGS.append(InfoLog(info_type=X.ERROR, info_name=f"Unknown government type", info1=f"{self= } {gov_type= }",
-                                        info2=time.strftime(f"{DATE_FORMAT} {TIME_FORMAT}")))
+                    INFO_LOGS.append(InfoLog(info_type=X.ERROR, info_name=f"Unknown government type", info1=f"{self= } {gov_type= }",
+                                             info2=time.strftime(f"{DATE_FORMAT} {TIME_FORMAT}")))
             except Exception as e:
                 if user_settings.IS_PRINT_FULL_INFO:
                     print(f"Can't find {globs.HITLER= }: {e}")
-                LOGS.append(InfoLog(info_type=X.ERROR, info_name=f"Error while choosing chancellor",
-                                    info1=f"{self= } {self.bot_mind= } {globs.HITLER= } {repr(e)}",
-                                    info2=time.strftime(f"{DATE_FORMAT} {TIME_FORMAT}")))
+                INFO_LOGS.append(InfoLog(info_type=X.ERROR, info_name=f"Error while choosing chancellor",
+                                         info1=f"{self= } {self.bot_mind= } {globs.HITLER= } {repr(e)}",
+                                         info2=time.strftime(f"{DATE_FORMAT} {TIME_FORMAT}")))
         elif self.bot_mind == X.RED:
             ppv = preproc_votes(votes, self.black, times_smalling=float('inf'))
         elif self.bot_mind == X.HITLER:
@@ -393,15 +393,15 @@ class Bot(Player):
         else:
             if IS_PRINT_SMALL_INFO:
                 print("Unknown bot mind")
-            LOGS.append(InfoLog(info_type=X.ERROR, info_name=f"Unknown bot mind", info1=f"{self= } {self.bot_mind= }",
-                                info2=time.strftime(f"{DATE_FORMAT} {TIME_FORMAT}")))
+            INFO_LOGS.append(InfoLog(info_type=X.ERROR, info_name=f"Unknown bot mind", info1=f"{self= } {self.bot_mind= }",
+                                     info2=time.strftime(f"{DATE_FORMAT} {TIME_FORMAT}")))
             ppv = preproc_votes(votes)
         ppv[self.num] = 0
         if sum(ppv) == 0:
             if IS_PRINT_SMALL_INFO:
                 print("votes empty, so choose random player")
-            LOGS.append(InfoLog(info_type=X.INFO, info_name=f"votes empty, so choose random player", info1=f"{self= } {votes= } {cannot_be= }",
-                                info2=time.strftime(f"{DATE_FORMAT} {TIME_FORMAT}")))
+            INFO_LOGS.append(InfoLog(info_type=X.INFO, info_name=f"votes empty, so choose random player", info1=f"{self= } {votes= } {cannot_be= }",
+                                     info2=time.strftime(f"{DATE_FORMAT} {TIME_FORMAT}")))
 
             import globs
             ppv = [1] * globs.COUNT_PLAYERS
