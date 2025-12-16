@@ -1,5 +1,6 @@
 from typing import Iterable
 
+from Players.abstract_player import AbstractPlayer
 from globs import PLAYERS, ROLES
 from user_color_settings import (INPUT_COLOR,
                                  BLACK_PLAYER_COLOR as BLACK,
@@ -21,122 +22,11 @@ from colors import (BLUE_TEXT_BRIGHT as BLUE,
                     )
 
 
-class Player:
+class Player(AbstractPlayer):
     base_name = "Player"
 
     def __init__(self, num: int, name: str, role: str):
-        self.gov_pref: str = ''
-        self.gov_suff: str = ''
-        self.purge_pref: str = ''
-        self.purge_suff: str = ''
-        self.num: int = num
-        self.role: str = role
-        self.color = get_color(self.role, out_type=X.BOT)
-        if self.color == X.HITLER:
-            self.color = X.BLACK
-        self.colored_color: str = get_color(self.role)
-        self.prefix: str = ''
-        self.suffix: str = ''
-        if name == '' or not isinstance(name, str):
-            self.name: str = Player.base_name + str(num)
-        else:
-            self.name: str = name
-        self.tablet_name: str = f"{self.name: <{MAX_NAME_LEN}}"
-        self.dark: float = 0
-        self.black: set[int] = set()
-
-    def __repr__(self):
-        s = '[Info: '
-        for name, value in self.__dict__.items():
-            s += f"({name}: {repr(value)}) "
-        s = s[:-1] + ']'
-        return s
-
-    def __hash__(self):
-        return hash(self.name)
-
-    # def __add__(self, s):
-    #     self.suffix += s
-    #     return self
-    #
-    # def __radd__(self, s):
-    #     self.prefix += s
-    #     return self
-    def __or__(self, other):
-        return None
-
-    def __str__(self):
-        return self.name
-
-    def __eq__(self, other: "Player str"):
-        if type(other) == str:
-            if self.name == other:
-                return True
-            return False
-        if self.name == other.name:
-            return True
-        return False
-
-    def __lt__(self, other):
-        if self.dark < other.dark:
-            return True
-        return False
-
-    def __le__(self, other):
-        if self.dark <= other.dark:
-            return True
-        return False
-
-    def __gt__(self, other):
-        if self.dark > other.dark:
-            return True
-        return False
-
-    def __ge__(self, other):
-        if self.dark >= other.dark:
-            return True
-        return False
-
-    def __format__(self, *args, **kwargs):
-        return str(self).format(*args, **kwargs)
-
-    def degov(self):
-        self.gov_suff = ''
-        self.gov_pref = ''
-
-    # def president(self, card, cnc):
-    #def get_color(self):
-    #    return self.colored_color
-
-    def free(self):
-        x = self.purge_pref == GULAG
-        if x:
-            print(f"{self.name} freed")
-            self.purge_pref = self.purge_suff = ''
-        else:
-            print(f"{self.name} wasn't in gulag!!")
-        return MAX_PLAYER_NUM
-
-    def chosen_gov(self, gov_type):
-        if gov_type == X.PRESIDENT:
-            self.gov_pref = CYAN
-        elif gov_type == X.CHANCELLOR:
-            self.gov_pref = YELLOW
-        else:
-            self.gov_pref = BLUE
-            print(f"Unknown government type: {gov_type}")
-        self.gov_suff = END_T
-
-    def purge(self, purge_type):
-        self.degov()
-        if purge_type == X.GULAG:
-            self.purge_pref = GULAG
-        elif purge_type == X.KILLED:
-            self.purge_pref = DEAD
-        else:
-            self.purge_pref = BLUE
-        self.purge_suff = END_BG
-
+        super().__init__(num=num, name=name, role=role)
     def president(self, cards: str | list[str], cnc: "Player", *, black, red):
         cards = ''.join(sorted(cards)).upper()
         show_only_to_one(f"Remember, your role is {naming(self.role)}, color is {self.colored_color}.", hide_len=60)

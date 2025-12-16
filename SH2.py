@@ -5,7 +5,7 @@ import random as rnd
 import time as t
 from atexit import register as atexit
 from HTML_logs import create_HTML_logs, color_of_HTML_roles, GameLog, pr_c, purple_c, InfoLog
-from bot import Bot
+from Players.bot import Bot
 from colors import (YELLOW_TEXT_BRIGHT as YELLOW,
                     BLUE_TEXT_BRIGHT as BLUE,
                     CYAN_TEXT_BRIGHT as CYAN,
@@ -17,7 +17,7 @@ from colors import (YELLOW_TEXT_BRIGHT as YELLOW,
                     YELLOW_BACKGROUND as GULAG,
                     END, BOLD, UNDERLINE,
                     )
-from player import Player
+from Players.player import Player
 from globs import PLAYERS, ROLES, INFO_LOGS
 import globs
 from standard_functions import show_only_to_one, yes_or_no, my_input
@@ -279,8 +279,7 @@ def take_random(c:int) ->  list[str]:
         deck.remove(card)
     return sorted(chosen)
 
-
-bots_places = get_bot_places(bots_count)
+globs.BOTS = bots_places = get_bot_places(bots_count)
 # (bots_places := list(range(count))).remove(HITLER)
 if IS_BOT_ONLY:
     for i in range(count):
@@ -358,6 +357,16 @@ while red < RED_WIN_NUM and black < BLACK_WIN_NUM and not Git_caput and not Git_
             if DEBUG_MODE:
                 print(f"{PURPLE}{pnc = } != {pn = } but {special_election = }{END_T}")
             pn = (pnc + 1) % count
+            pn = (pn + 1) % count
+            if pn == gulag:
+                print(f"{PURPLE}President can't be in gulag, next{END_T}")
+                pn = (pn + 1) % count
+            if pn == killed:
+                print(f"{PURPLE}President can't be dead, next{END_T}")
+                pn = (pn + 1) % count
+            if pn == gulag:
+                print(f"{PURPLE}President can't be in gulag, next{END_T}")
+                pn = (pn + 1) % count
     else:
         pn = (pn + 1) % count
         if pn == gulag:
@@ -403,7 +412,7 @@ while red < RED_WIN_NUM and black < BLACK_WIN_NUM and not Git_caput and not Git_
                 print(f"{PURPLE}{PLAYERS[gulag]} was de-Gulag-ed{END_T}")
                 normal_logs.append(GameLog(prs="ANARCHY", cnc="ANARCHY", special=f"Anarchy, {PLAYERS[gulag]} freed", is_chancellor=False, is_president=False))
                 PLAYERS[gulag].free()
-                gulag = MAX_PLAYER_NUM
+                gulag = None
             logs_out()
     PLAYERS[pn].chosen_gov(X.PRESIDENT)
     out()
@@ -581,7 +590,7 @@ while red < RED_WIN_NUM and black < BLACK_WIN_NUM and not Git_caput and not Git_
     elif black == 5 >= checks:
         killed = PLAYERS[pn].purge_another(X.SHOUT)
         if gulag == killed:
-            gulag = MAX_PLAYER_NUM
+            gulag = None
         PLAYERS[killed].purge(X.KILLED)
         logs.append(((PLAYERS[pn].table(), PLAYERS[killed].table()),
                      (PURPLE + 'KIL' + END_T, PURPLE + 'LE' + END_T, PURPLE + 'D' + END_T, '   ')))

@@ -8,7 +8,7 @@ import InfoLog
 from user_settings import TIME_FORMAT, DATE_FORMAT, IS_PRINT_SMALL_INFO
 
 if TYPE_CHECKING:
-    from player import Player
+    from Players.player import Player
 
 from globs import PLAYERS, INFO_LOGS
 from standard_classes import POSSIBLE_CARDS

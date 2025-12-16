@@ -1,4 +1,4 @@
-from HTML_colors import red_c, norm_c, purple_c
+from HTML_colors import red_c, norm_c, purple_c, orange_c, yellow_c
 from globs import INFO_LOGS
 from standard_names_SH import X
 from user_color_settings import WARNING
@@ -17,6 +17,10 @@ class InfoLog:
         match self.info_type:
             case X.ERROR:
                 return red_c
+            case X.WEAK_WARNING:
+                return yellow_c
+            case X.WARNING:
+                return orange_c
             case X.INFO:
                 return norm_c
             case X.DBG:

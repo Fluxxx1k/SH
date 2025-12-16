@@ -1,14 +1,15 @@
 from __future__ import annotations
-from player import Player
+
+from Players.abstract_player import AbstractPlayer
 from standard_classes import Cards
 
 from standard_functions import color_clear
 
 
 class GameLog:
-    def __init__(self, prs: str | Player = '', cnc: str | Player = '', c_prs_got: str | Cards = '', c_prs_said: str | Cards = '', c_cnc_got: str | Cards = '', c_cnc_said: str | Cards = '', c_cnc_placed: str | Cards = '', c_prs_said_after: str | Cards = '', special: str = '', reserve: str = '',
+    def __init__(self, prs: str | AbstractPlayer = '', cnc: str | AbstractPlayer = '', c_prs_got: str | Cards = '', c_prs_said: str | Cards = '', c_cnc_got: str | Cards = '', c_cnc_said: str | Cards = '', c_cnc_placed: str | Cards = '', c_prs_said_after: str | Cards = '', special: str = '', reserve: str = '',
                  is_cards: bool = True, is_president: bool = True, is_chancellor: bool = True):
-        if isinstance(prs, Player):
+        if isinstance(prs, AbstractPlayer):
             self.prs = prs.name
         elif isinstance(prs, str):
             self.prs = color_clear(prs)
@@ -16,7 +17,7 @@ class GameLog:
             self.prs = str(prs)
             print(f"Strange president name ({type(prs)= }): {prs=}")
 
-        if isinstance(cnc, Player):
+        if isinstance(cnc, AbstractPlayer):
             self.cnc = cnc.name
         elif isinstance(cnc, str):
             self.cnc = color_clear(cnc)

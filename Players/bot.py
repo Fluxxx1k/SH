@@ -1,5 +1,7 @@
 from __future__ import annotations
-
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from Players.player import Player
 import datetime
 import random as rnd
 import time
@@ -7,15 +9,15 @@ import time
 
 import user_settings
 from HTML_logs import InfoLog
+from Players.abstract_player import AbstractPlayer
 from globs import INFO_LOGS, PLAYERS, ROLES
-from player import Player
 from standard_classes import Cards
 from standard_names_SH import X
 from user_settings import DATE_FORMAT, TIME_FORMAT, IS_PRINT_SMALL_INFO,IS_PRINT_FULL_INFO
 from utils import get_color, weighted_random_for_indexes, preproc_votes
 
 
-class Bot(Player):
+class Bot(AbstractPlayer):
     base_name = X.BOT
 
     def __init__(self, num: int, name:str, role: str):
@@ -198,7 +200,7 @@ class Bot(Player):
         :param ccp: Cards chancellor placed
         :return: Cards of president said after chancellor movement
         """
-        if isinstance(cnc, Player):
+        if isinstance(cnc, AbstractPlayer):
             cnc = cnc.num
         match self.bot_mind:
             case X.RED:
@@ -270,7 +272,11 @@ class Bot(Player):
         from globs import PLAYERS
         if votes is None:
             votes = {}
-            print("Sorry, You forgot about \"votes\"... It isn't available here...")
+            if IS_PRINT_SMALL_INFO:
+                print("Sorry, You forgot about \"votes\"... It isn't available here...")
+            INFO_LOGS.append(InfoLog(info_type=X.WEAK_WARNING, info_name=f"You forgot about vote in Bot.check_player",
+                                     info1=f"№{self.num} [{self}] {self.bot_mind= }",
+                                     info2=time.strftime(f"{DATE_FORMAT} {TIME_FORMAT}")))
         if self.bot_mind == X.BLACK:
             if rnd.random() < 0.25:
                 import globs
@@ -307,6 +313,9 @@ class Bot(Player):
             votes = {}
             if IS_PRINT_SMALL_INFO:
                 print("Sorry, coder forgot about \"votes\"... It isn't available here...")
+            INFO_LOGS.append(InfoLog(info_type=X.WEAK_WARNING, info_name=f"You forgot about vote in Bot.purge_another",
+                                     info1=f"№{self.num} [{self}] {self.bot_mind= }",
+                                     info2=time.strftime(f"{DATE_FORMAT} {TIME_FORMAT}")))
         try:
             import globs
             ppv = [1] * globs.COUNT_PLAYERS
@@ -314,7 +323,7 @@ class Bot(Player):
                 case X.RED:
                     if self.black:
                         return list(self.black)[rnd.randint(0, len(self.black) - 1)]
-                    return weighted_random_for_indexes(preproc_votes(votes))
+                    ppv = preproc_votes(votes)
                 case X.BLACK:
                     ppv = preproc_votes(votes, self.black, times_smalling=float('inf'))
                 case X.HITLER:
@@ -354,18 +363,30 @@ class Bot(Player):
                                  info2=time.strftime(f"{DATE_FORMAT} {TIME_FORMAT}")))
         return weighted_random_for_indexes([0])
     def choose_chancellor(self, cannot_be: set[int] = frozenset(), votes: dict[int, int] = None, gov_type=X.CHANCELLOR) -> int:
-        print(f"{cannot_be= }")
+        if user_settings.DEBUG_MODE:
+            print(f"{cannot_be= }")
         if votes is None:
             votes = {}
             if IS_PRINT_SMALL_INFO:
                 print("Sorry, You forgot about \"votes\"... It isn't available here...")
+            INFO_LOGS.append(InfoLog(info_type=X.WEAK_WARNING, info_name=f"You forgot about vote in Bot.choose_chancellor",
+                                     info1=f"№{self.num} [{self}] {self.bot_mind= }",
+                                     info2=time.strftime(f"{DATE_FORMAT} {TIME_FORMAT}")))
         if self.bot_mind == X.BLACK:
             ppv = preproc_votes(votes, self.black, times_smalling=0.5)
             ppv[self.num] = 0
             for i in cannot_be:
-                print(i)
+                if user_settings.DEBUG_MODE:
+                    print(i)
                 if i is not None:
-                    ppv[i] = 0
+                    try:
+                        ppv[i] = 0
+                    except Exception as e:
+                        if user_settings.IS_PRINT_FULL_INFO:
+                            print(f"Can't set {i= } to 0: {e}")
+                        INFO_LOGS.append(InfoLog(info_type=X.ERROR, info_name=f"Error while setting ppv[i]=0",
+                                                 info1=f"{self= } {i= } {repr(e)}",
+                                                 info2=time.strftime(f"{DATE_FORMAT} {TIME_FORMAT}")))
             import globs
             try:
                 if gov_type == X.CHANCELLOR:
@@ -407,11 +428,20 @@ class Bot(Player):
             ppv = [1] * globs.COUNT_PLAYERS
         ppv[self.num] = 0
         for i in cannot_be:
-            print(i)
+            if user_settings.DEBUG_MODE:
+                print(i)
             if i is not None:
-                ppv[i] = 0
+                try:
+                    ppv[i] = 0
+                except Exception as e:
+                    if user_settings.IS_PRINT_FULL_INFO:
+                        print(f"Can't set {i= } to 0: {e}")
+                    INFO_LOGS.append(InfoLog(info_type=X.ERROR, info_name=f"Error while setting ppv[i]=0",
+                                             info1=f"{self= } {i= } {repr(e)}",
+                                             info2=time.strftime(f"{DATE_FORMAT} {TIME_FORMAT}")))
         x = weighted_random_for_indexes(ppv)
-        print(f"{ppv= }")
+        if user_settings.DEBUG_MODE:
+            print(f"{ppv= }")
         return x
     place_another = choose_chancellor
 

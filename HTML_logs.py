@@ -10,7 +10,7 @@ from standard_names_SH import X
 from colors import RESET
 from user_color_settings import WARNING, CRITICAL
 from HTML_colors import *
-from player import Player
+from Players.player import Player
 from user_settings import IS_PRINT_SMALL_INFO, IS_PRINT_FULL_INFO
 
 
@@ -312,7 +312,7 @@ def create_HTML_logs(path: str, logs: list[GameLog], players: list[Player] = Non
             elif IS_PRINT_SMALL_INFO:
                 print(f"{WARNING}too many arguments{RESET}")
             INFO_LOGS.append(
-                InfoLog(info_type=X.ERROR, info_name=f"Too many arguments provided", info1=' '.join(args)))
+                InfoLog(info_type=X.WARNING, info_name=f"Too many arguments provided", info1=' '.join(args)))
         if kwargs:
             if IS_PRINT_FULL_INFO:
                 print(f"{WARNING}Too many keyword arguments provided: {kwargs}{RESET}")

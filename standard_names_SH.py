@@ -19,6 +19,8 @@ class X:
     KILLED = "KILLED"
     BOT = "Bot"
     ERROR = "ERROR"
+    WEAK_WARNING = "WEAK_WARNING"
+    WARNING = "WARNING"
     OK = "OK"
     INFO = "INFO"
     DBG = "DBG"
