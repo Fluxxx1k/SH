@@ -26,6 +26,10 @@ from user_color_settings import INPUT_COLOR, CRITICAL, WARNING, GOOD
 from utils import coloring, naming, input_cards, out
 from user_settings import *
 
+if WEBSITE_USING:
+    from Website.sh2_integration import update_website_logs
+
+
 code_start_time = t.time()
 INFO_LOGS.append(InfoLog(info_type=X.INFO, info_name="Code start time", info1=t.strftime(f"{DATE_FORMAT} {TIME_FORMAT}"), info2=code_start_time))
 saved = []
@@ -638,6 +642,8 @@ while red < RED_WIN_NUM and black < BLACK_WIN_NUM and not Git_caput and not Git_
         for i in sorted(Git_not):
             print(f'№{i + 1}) {PLAYERS[i]}')
         print('\n')
+    if WEBSITE_USING:
+        update_website_logs(globs.GAME_LOGS)
 
 
 end_time_f = t.strftime(f"{DATE_FORMAT} {TIME_FORMAT}")

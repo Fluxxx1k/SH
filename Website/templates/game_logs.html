@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Логи игры - Тайный Гитлер</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='game_logs.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <h1>Логи игры</h1>
+        <p>Текущее состояние игры</p>
+    </header>
+
+    <main>
+        <section id="game-table-section">
+            <h2>Таблица событий</h2>
+            <div id="game-table-container">
+                {{ game_table|safe }}
+            </div>
+        </section>
+
+        <section id="voting-section">
+            <h2>Голосование</h2>
+            <div id="voting-form">
+                <h3>Выберите действие:</h3>
+                <div class="voting-buttons">
+                    <button class="vote-btn vote-yes" onclick="castVote('yes')">Да</button>
+                    <button class="vote-btn vote-no" onclick="castVote('no')">Нет</button>
+                    <button class="vote-btn vote-abstain" onclick="castVote('abstain')">Воздержаться</button>
+                </div>
+                <div id="vote-result"></div>
+            </div>
+        </section>
+
+        <section id="refresh-section">
+            <button id="refreshBtn" onclick="refreshLogs()">Обновить логи</button>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2024. Создано для консольной версии игры.</p>
+    </footer>
+
+    <script src="{{ url_for('static', filename='game_logs.js') }}"></script>
+</body>
+</html>

@@ -74,3 +74,6 @@ BOT_NUM: int = 7
 
 VOTE_BY_ONE: bool = True
 VOTE_ANONYMOUS: bool = False
+
+
+WEBSITE_USING: bool = True

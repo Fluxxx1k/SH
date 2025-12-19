@@ -44,20 +44,29 @@ main {
     margin-bottom: 1rem;
 }
 
+#start-game {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
 #start-game button {
     background-color: #900;
     color: #ffc107;
     border: 2px solid #ffc107;
     padding: 1rem 2rem;
-    font-size: 1.5rem;
+    font-size: 1.2rem;
     cursor: pointer;
     border-radius: 5px;
-    transition: background-color 0.3s, color 0.3s;
+    transition: all 0.3s ease;
+    min-width: 200px;
 }
 
 #start-game button:hover {
     background-color: #ffc107;
     color: #900;
+    transform: scale(1.05);
 }
 
 footer {
