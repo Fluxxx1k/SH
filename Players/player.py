@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Iterable
+from typing import Iterable, Literal
 
 from Players.abstract_player import AbstractPlayer
 from colors import (CYAN_TEXT_BRIGHT as CYAN,
@@ -188,4 +188,15 @@ class Player(AbstractPlayer):
                         f"Are you sure that number {INPUT_COLOR}{chancellor + 1}{END} is right (it's [{INPUT_COLOR}{PLAYERS[chancellor]}{END}]): "):
                     break
         return chancellor
+
+    def vote_for_pair(self, prs: AbstractPlayer, cnc: AbstractPlayer) -> Literal[-1, 0, 1]:
+        vote = ''
+        while vote not in {-1, 0, 1}:
+            vote = input(f"Do you vote for {CYAN}{prs.name}{END} and {YELLOW}{cnc.name}{END} as chancellor? ")
+            if vote.isdigit() or vote == '-1':
+                vote = int(vote)
+        return vote
+
+
+
 

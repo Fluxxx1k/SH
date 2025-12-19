@@ -186,8 +186,8 @@ def dbg(s:str) -> bool:
 
 @atexit
 def print_all_at_exit() -> None:
-    for player in PLAYERS:
-        player.print_short_info()
+    for plr in PLAYERS:
+        plr.print_short_info()
 
 @atexit
 def logs_out():
@@ -427,14 +427,36 @@ while red < RED_WIN_NUM and black < BLACK_WIN_NUM and not Git_caput and not Git_
     cn = PLAYERS[pn].choose_chancellor(cannot_be={previous_president if (count & 1) == 0 else None,
                                                   pn, cn, gulag, killed})
     print(f"{CYAN}President{END} [{PURPLE}{BOLD}{PLAYERS[pn]}{END}] requested [{PURPLE}{BOLD}{PLAYERS[cn]}{END}] as {YELLOW}chancellor{END}")
-    if not IS_BOT_ONLY:
+    if not VOTE_BY_ONE:
         if yes_or_no(f"Skip? (Skips: {skips}): "):
             skips += 1
             degov()
             print("\n\n\n")
+            INFO_LOGS.append(InfoLog(X.DBG, "Vote info", f"{PLAYERS[pn]} with {PLAYERS[cn]} disaccepted",
+                                     info2=t.strftime(f"{DATE_FORMAT} {TIME_FORMAT}")))
             continue
         else:
+            INFO_LOGS.append(InfoLog(X.DBG, "Vote info", f"{PLAYERS[pn]} with {PLAYERS[cn]} accepted",
+                                     info2=t.strftime(f"{DATE_FORMAT} {TIME_FORMAT}")))
             skips = 0
+    else:
+        acceptable = 0
+        for player in PLAYERS:
+            vote = player.vote_for_pair(PLAYERS[pn], PLAYERS[cn])
+            INFO_LOGS.append(InfoLog(X.DBG, "Vote info" ,f"{player} voted {vote} for {PLAYERS[pn]} with {PLAYERS[cn]}",
+                             info2=t.strftime(f"{DATE_FORMAT} {TIME_FORMAT}")))
+            acceptable += vote
+        if acceptable > 0:
+            INFO_LOGS.append(InfoLog(X.DBG, "Vote info", f"{PLAYERS[pn]} with {PLAYERS[cn]} accepted",
+                                     info2=t.strftime(f"{DATE_FORMAT} {TIME_FORMAT}")))
+            skips = 0
+        else:
+            INFO_LOGS.append(InfoLog(X.DBG, "Vote info", f"{PLAYERS[pn]} with {PLAYERS[cn]} disaccepted",
+                                     info2=t.strftime(f"{DATE_FORMAT} {TIME_FORMAT}")))
+            skips += 1
+            degov()
+            print("\n\n\n")
+            continue
 
     if black >= 3 and cn not in Git_not:
         if STALIN is None:

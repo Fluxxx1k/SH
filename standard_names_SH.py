@@ -26,6 +26,7 @@ class X:
     DBG = "DBG"
     COORDINATION = 'coordination'
     CHOOSE_ONE = "choose"
+    TEST = "TEST" # For test purposes
 # class HTML(str):
 #     pass
 class MyErr(Exception):

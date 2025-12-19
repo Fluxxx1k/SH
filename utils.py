@@ -4,7 +4,7 @@ from datetime import datetime
 import sys
 from typing import Iterable, TYPE_CHECKING
 
-import InfoLog
+import infolog
 from user_settings import TIME_FORMAT, DATE_FORMAT, IS_PRINT_SMALL_INFO
 
 if TYPE_CHECKING:
@@ -112,9 +112,12 @@ def preproc_votes(votes: dict[int, int], smalling:Iterable[int]=(), times_smalli
     import globs
     x = [1]*globs.COUNT_PLAYERS
     for i in votes:
-        x[i] += votes[i]
-        if i in smalling:
-            x[i] //= times_smalling
+        try:
+            x[i] += votes[i]
+            if i in smalling:
+                x[i] //= times_smalling
+        except Exception as e:
+            INFO_LOGS.append(InfoLog.InfoLog(X.ERROR, "Error in preproc_votes", info1=f"{e= } {i= } {votes= } {smalling= } {times_smalling= } {x= }", info2=datetime.strftime(datetime.now(), f"{DATE_FORMAT} {TIME_FORMAT}")))
     return x
 
 def input_cards(text=f"{WARNING}Some input: {END_T}", q: int | set[int] = 0, c_p:bool=False, veto=False) -> str:

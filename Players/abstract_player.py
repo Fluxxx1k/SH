@@ -1,8 +1,8 @@
 from __future__ import annotations
-from typing import Iterable
+from typing import Iterable, Literal
 import datetime
 
-from InfoLog import InfoLog
+from infolog import InfoLog
 from globs import INFO_LOGS, PLAYERS
 from abc import abstractmethod, ABC
 
@@ -42,6 +42,7 @@ class AbstractPlayer(ABC):
         self.tablet_name: str = f"{self.name: <{MAX_NAME_LEN}}"
         self.dark: float = 0
         self.black: set[int] = set()
+        self.contr: int = 0
 
     def __repr__(self):
         s = '[Info: '
@@ -180,5 +181,10 @@ class AbstractPlayer(ABC):
               f"Role: {naming(self.role)}\n"
               f"Darkness= {self.dark}\n"
               f"Definitely now who is black: {', '.join( f'№{i.num} [{i.out()}]' for i in sorted([PLAYERS[i] for i in self.black], key=lambda p: p.num)) or 'No one'}")
+
+    @abstractmethod
+    def vote_for_pair(self, prs: AbstractPlayer, cnc: AbstractPlayer) -> Literal[-1, 0, 1]:
+        pass
+
 
 

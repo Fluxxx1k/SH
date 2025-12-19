@@ -2,8 +2,8 @@ import os
 import time as t
 
 import globs
-from GameLog import GameLog
-from InfoLog import InfoLog
+from gamelog import GameLog
+from infolog import InfoLog
 from globs import INFO_LOGS, ROLES
 from standard_functions import color_clear, yes_or_no
 from standard_names_SH import X

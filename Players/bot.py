@@ -13,7 +13,7 @@ from Players.abstract_player import AbstractPlayer
 from globs import INFO_LOGS, PLAYERS, ROLES, CARDS
 from standard_classes import Cards
 from standard_names_SH import X
-from user_settings import DATE_FORMAT, TIME_FORMAT, IS_PRINT_SMALL_INFO,IS_PRINT_FULL_INFO
+from user_settings import DATE_FORMAT, TIME_FORMAT, IS_PRINT_SMALL_INFO, IS_PRINT_FULL_INFO, DEBUG_MODE
 from utils import get_color, weighted_random_for_indexes, preproc_votes
 
 
@@ -322,12 +322,20 @@ class Bot(AbstractPlayer):
             match self.bot_mind:
                 case X.RED:
                     if self.black:
-                        return list(self.black)[rnd.randint(0, len(self.black) - 1)]
-                    ppv = preproc_votes(votes)
+                        ppv = preproc_votes(dict.fromkeys(self.black, 100), (set(range(globs.COUNT_PLAYERS)) - self.black) | {globs.GULAG, globs.KILLED}, times_smalling=float('inf'))
+                        ppv[self.num] = 0
+                        if sum(votes) == 0:
+                            ppv = preproc_votes(votes)
+                    else:
+                        ppv = preproc_votes(votes)
                 case X.BLACK:
                     ppv = preproc_votes(votes, self.black, times_smalling=float('inf'))
+                    for i in self.black:
+                        ppv[i] = 0
                 case X.HITLER:
                     ppv = preproc_votes(votes, self.black, times_smalling=float('inf'))
+                    for i in self.black:
+                        ppv[i] = 0
                 case X.ANARCHIST:
                     ppv = preproc_votes(votes)
                 case _:
@@ -349,6 +357,9 @@ class Bot(AbstractPlayer):
                 if globs.KILLED is not None:
                     ppv[globs.KILLED] = 0
             x = weighted_random_for_indexes(ppv)
+            if DEBUG_MODE:
+                print(f"{votes= }")
+                print(f"{ppv= }")
             return x
         except Exception as err:
             INFO_LOGS.append(InfoLog(info_type=X.ERROR, info_name=f"Error while purging another",
@@ -445,3 +456,7 @@ class Bot(AbstractPlayer):
         return x
     place_another = choose_chancellor
 
+    def vote_for_pair(self, prs: AbstractPlayer, cnc: AbstractPlayer) -> bool:
+        if IS_PRINT_SMALL_INFO:
+            print("Error, using unrealised method vote_for_pair in Bot")
+        return rnd.random() < 0.5

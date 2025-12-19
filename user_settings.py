@@ -12,8 +12,8 @@ RED_WIN_NUM: int = 5
 BLACK_WIN_NUM: int = 6
 
 ANARCHY_SKIP_NUM: int = 3
-DEBUG_MODE: bool = False
-IS_PROMT_ENTERING_COMMAND: bool = DEBUG_MODE
+DEBUG_MODE: bool = True
+IS_PROMT_ENTERING_COMMAND: bool = False
 LOG_CONSOLE: bool = DEBUG_MODE
 IS_PRINT_FULL_INFO: bool = DEBUG_MODE
 IS_PRINT_SMALL_INFO: bool = False
@@ -47,7 +47,8 @@ def get_roles(length: int) -> tuple[list[str], bool]:
                           integer=True))
     molotov = []
     ribbentrop = []
-    roles = hitler + black + molotov + ribbentrop
+    anarchist = [X.ANARCHIST]
+    roles = hitler + black + molotov + ribbentrop + anarchist
     red = [X.RED] * (length - len(roles))
     roles.extend(red)
     random.shuffle(roles)
@@ -68,4 +69,8 @@ def get_bot_places(length: int) -> list[int]:
 # made for debug
 IS_BOT_ONLY: bool = False
 BOT_BASE_NAME = "Bot"
-BOT_NUM: int = 6
+BOT_NUM: int = 7
+
+
+VOTE_BY_ONE: bool = True
+VOTE_ANONYMOUS: bool = False

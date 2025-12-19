@@ -60,7 +60,8 @@ def is_x_in_y(x: set | list | str, y: set | list | str) -> bool:
 
 def yes_or_no(text='Input for something (If you see it, you should understand what should be asked): ',
               yes: set = frozenset({'Y', 'YES'}),
-              no: set = frozenset({'N', "NO"})) -> bool:
+              no: set = frozenset({'N', "NO"}),
+              hide_answer: bool = False) -> bool:
     dbg_y = "DEBUG_YES"
     dbg_n = "DEBUG_NO"
     text = str(text).strip()
@@ -72,7 +73,7 @@ def yes_or_no(text='Input for something (If you see it, you should understand wh
         text += ": "
     else:
         text += " "
-    inp = my_input(text, upper=True, possible=yes|no|{dbg_n, dbg_y})
+    inp = my_input(text, upper=True, possible=yes|no|{dbg_n, dbg_y}, )
     if inp in no or inp == "DEBUG_NO":
         return False
     elif inp in yes or inp == "DEBUG_YES":
@@ -103,7 +104,9 @@ def show_only_to_one(text: str, hide_len: int = None) -> None:
 
 
 def my_input(prompt, color:str= RESET_TEXT + RESET_BACKGROUND, input_color=PURPLE_TEXT, *,
-             possible: "set[str] | Callable"=None, strip=True, upper=False, lower=False, integer: bool=False) -> str:
+             possible: "set[str] | Callable"=None, strip=True,
+             upper=False, lower=False, integer: bool=False,
+             hide_answer: bool = False) -> str:
     if possible is None:
         possible = lambda alpha: True
     x = input('\b' + color + prompt + input_color)
