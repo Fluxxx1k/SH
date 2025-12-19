@@ -45,10 +45,12 @@ def index():
 def update_website_logs(new_logs):
     """Функция для обновления логов игры из SH2"""
     global game_logs_cache
+    print(f"DEBUG: update_website_logs called with {len(new_logs) if new_logs else 0} logs")
     if new_logs and isinstance(new_logs, list):
         # If the logs are already GameLog objects, use them directly
         if len(new_logs) > 0 and hasattr(new_logs[0], 'to_HTML_row_Website'):
             game_logs_cache = new_logs.copy()  # Просто копируем список, без пересоздания объектов
+            print(f"DEBUG: Using existing GameLog objects, cache now has {len(game_logs_cache)} logs")
         else:
             # If they're dictionaries, create GameLog objects with proper parameter mapping
             game_logs_cache = []
@@ -70,7 +72,10 @@ def update_website_logs(new_logs):
                     is_chancellor=log_data.get('is_chancellor', True)
                 )
                 game_logs_cache.append(game_log)
+            print(f"DEBUG: Created new GameLog objects, cache now has {len(game_logs_cache)} logs")
         return True
+    else:
+        print(f"DEBUG: No logs to update")
     return False
 
 @app.route('/game')
@@ -104,8 +109,16 @@ def game_logs():
 def get_game_logs():
     """Функция для AJAX запросов на получение обновленных логов"""
     game_table = ""
-    # Используем кэшированные логи или globs.GAME_LOGS
-    logs_source = game_logs_cache if game_logs_cache else (globs.GAME_LOGS if hasattr(globs, 'GAME_LOGS') else [])
+    
+    # Проверяем все возможные источники логов
+    logs_source = []
+    
+    # 1. Приоритет: кэшированные логи из update_game_logs
+    if game_logs_cache:
+        logs_source = game_logs_cache
+    # 2. Альтернатива: логи из globs.GAME_LOGS
+    elif hasattr(globs, 'GAME_LOGS') and globs.GAME_LOGS:
+        logs_source = globs.GAME_LOGS
     
     if logs_source:
         recent_logs = logs_source[-20:]  # Показываем последние 20 записей
