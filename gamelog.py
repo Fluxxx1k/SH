@@ -61,5 +61,5 @@ class GameLog:
         c_cnc_placed = f"\t<td><b>{coloring_HTML_cards(self.ccp) if self.is_cards else self.ccp}</b></td>\n"
         c_prs_said_after = f"\t<td><b>{coloring_HTML_cards(self.cpsa) if self.is_cards else self.cpsa}</b></td>\n"
         special = f'\t<td style="color: {special_c}"><b>{self.special}</b></td>\n'
-        row = president + chancellor + c_prs_said + c_cnc_said + c_cnc_placed + c_prs_said_after + special
+        row = '\t<tr>' + president + chancellor + c_prs_said + c_cnc_said + c_cnc_placed + c_prs_said_after + special + '\t</tr>\n'
         return row

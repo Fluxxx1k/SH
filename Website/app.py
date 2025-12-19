@@ -3,6 +3,8 @@ from jinja2 import Undefined
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), '..'))
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), '..', '..'))
 
 try:
     import globs
@@ -44,7 +46,30 @@ def update_website_logs(new_logs):
     """Функция для обновления логов игры из SH2"""
     global game_logs_cache
     if new_logs and isinstance(new_logs, list):
-        game_logs_cache = new_logs
+        # If the logs are already GameLog objects, use them directly
+        if len(new_logs) > 0 and hasattr(new_logs[0], 'to_HTML_row_Website'):
+            game_logs_cache = new_logs.copy()  # Просто копируем список, без пересоздания объектов
+        else:
+            # If they're dictionaries, create GameLog objects with proper parameter mapping
+            game_logs_cache = []
+            for log_data in new_logs:
+                # Map the dictionary keys to constructor parameters
+                game_log = GameLog(
+                    prs=log_data.get('prs', ''),
+                    cnc=log_data.get('cnc', ''),
+                    c_prs_got=log_data.get('cpg', ''),
+                    c_prs_said=log_data.get('cps', ''),
+                    c_cnc_got=log_data.get('ccg', ''),
+                    c_cnc_said=log_data.get('ccs', ''),
+                    c_cnc_placed=log_data.get('ccp', ''),
+                    c_prs_said_after=log_data.get('cpsa', ''),
+                    special=log_data.get('special', ''),
+                    reserve=log_data.get('reserve', ''),
+                    is_cards=log_data.get('is_cards', True),
+                    is_president=log_data.get('is_president', True),
+                    is_chancellor=log_data.get('is_chancellor', True)
+                )
+                game_logs_cache.append(game_log)
         return True
     return False
 
@@ -66,13 +91,10 @@ def game_logs():
     if logs_source:
         recent_logs = logs_source[-20:]  # Показываем последние 20 записей
         game_table = "<table>"
-        game_table += "<thead><tr><th>N</th><th>Президент</th><th>Канцлер</th><th>Карты президента</th><th>Сказал президент</th><th>Карты канцлера</th><th>Сказал канцлер</th><th>Положил канцлер</th><th>Особое действие</th></tr></thead>"
+        game_table += "<thead><tr><th>Президент</th><th>Канцлер</th><th>Сказал президент</th><th>Сказал канцлер</th><th>Положил канцлер</th><th>Сказал президент<br>после канцлера</th><th>Особое действие</th></tr></thead>"
         game_table += "<tbody>"
         for log in recent_logs:
-            if hasattr(log, 'to_HTML_row_Website'):
-                game_table += log.to_HTML_row_Website()
-            else:
-                game_table += f"<tr><td colspan='9'>Лог: {str(log)}</td></tr>"
+            game_table += log.to_HTML_row_Website()
         game_table += "</tbody></table>"
     else:
         game_table = '<div class="no-logs"><h3>🎮 Логи игры пока не доступны</h3><p>Игра ещё не началась или логи ещё не были загружены.</p><p>Логи появятся здесь автоматически, как только начнётся игра.</p></div>'
@@ -88,7 +110,7 @@ def get_game_logs():
     if logs_source:
         recent_logs = logs_source[-20:]  # Показываем последние 20 записей
         game_table = "<table>"
-        game_table += "<thead><tr><th>N</th><th>Президент</th><th>Канцлер</th><th>Карты президента</th><th>Сказал президент</th><th>Карты канцлера</th><th>Сказал канцлер</th><th>Положил канцлер</th><th>Особое действие</th></tr></thead>"
+        game_table += "<thead><tr><th>Президент</th><th>Канцлер</th><th>Сказал президент</th><th>Сказал канцлер</th><th>Положил канцлер</th><th>Сказал президент<br>после канцлера</th><th>Особое действие</th></tr></thead>"
         game_table += "<tbody>"
         for log in recent_logs:
             if hasattr(log, 'to_HTML_row_Website'):
@@ -101,17 +123,12 @@ def get_game_logs():
     return jsonify({"success": True, "game_table": game_table})
 
 @app.route('/update_game_logs', methods=['POST'])
-def update_game_logs():
-    """Маршрут для обновления логов игры из SH2"""
-    try:
-        data = request.get_json()
-        if data and 'logs' in data:
-            success = update_website_logs(data['logs'])
-            return jsonify({"success": success, "message": "Логи обновлены" if success else "Ошибка при обновлении логов"})
-        else:
-            return jsonify({"success": False, "message": "Нет данных для обновления"})
-    except Exception as e:
-        return jsonify({"success": False, "message": f"Ошибка: {str(e)}"})
+def update_game_logs_route():
+    data = request.get_json()
+    if data and 'logs' in data:
+        if update_website_logs(data['logs']):
+            return jsonify({'success': True})
+    return jsonify({'success': False})
 
 if __name__ == '__main__':
     app.run(debug=True)

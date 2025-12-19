@@ -19,18 +19,7 @@ def update_website_logs(game_logs: List[Any]) -> bool:
     """
     try:
         # Подготавливаем данные для отправки
-        logs_data = []
-        for log in game_logs:
-            if hasattr(log, 'to_HTML_row_Website'):
-                logs_data.append({
-                    'html_row': log.to_HTML_row_Website(),
-                    'data': str(log)
-                })
-            else:
-                logs_data.append({
-                    'html_row': f"<tr><td colspan='9'>Лог: {str(log)}</td></tr>",
-                    'data': str(log)
-                })
+        logs_data = [log.__dict__ for log in game_logs]
         
         # Отправляем POST запрос на сервер Flask
         response = requests.post(

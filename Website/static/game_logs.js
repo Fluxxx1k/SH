@@ -70,7 +70,7 @@ function refreshLogs() {
 }
 
 // Автоматическое обновление каждые 5 секунд
-setInterval(refreshLogs, 5000);
+// setInterval(refreshLogs, 5000);
 
 // Функция для вызова из SH2 для обновления логов
 function updateGameLogs(newLogs) {
