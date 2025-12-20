@@ -27,12 +27,32 @@
                 </div>
 
                 <div class="available-games">
-                    <h2>Доступные игры</h2>
+                    <div class="games-header">
+                        <h2>Доступные игры</h2>
+                        <button class="btn btn-refresh" onclick="refreshGames()" title="Обновить список игр">
+                            <span class="refresh-icon">🔄</span> Обновить
+                        </button>
+                    </div>
                     <div id="gamesList" class="games-list">
-                        <!-- Список игр будет загружаться динамически -->
-                        <div class="no-games-message">
-                            <p>Нет доступных игр. Создайте новую игру!</p>
-                        </div>
+                        {% if games %}
+                            {% for game_name, current_players, max_players, status, has_password in games %}
+                                <div class="game-item" data-game-name="{{ game_name }}">
+                                    <div class="game-name">{{ game_name }}</div>
+                                    <div class="game-info">
+                                        <span class="game-status">Статус: {% if status == 'waiting' %}Ожидание игроков{% else %}В процессе{% endif %}</span>
+                                        <span class="game-password-status">{% if has_password %}🔒{% else %}🔓{% endif %}</span>
+                                    </div>
+                                    <div class="game-players">
+                                        <span class="player-count">Игроки: {{ current_players }}/{{ max_players }}</span>
+                                        <button class="join-btn" onclick="quickJoinGame('{{ game_name }}', {% if has_password %}true{% else %}false{% endif %})">Присоединиться</button>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="no-games-message">
+                                <p>Нет доступных игр. Создайте новую игру!</p>
+                            </div>
+                        {% endif %}
                     </div>
                 </div>
 

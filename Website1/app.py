@@ -90,7 +90,10 @@ def lobby():
     if 'username' not in session:
         return redirect(url_for('login'))
     
-    return render_template('lobby.html', username=session['username'])
+    # Get list of available games
+    games = list(get_games_list())
+    
+    return render_template('lobby.html', username=session['username'], games=games)
 
 @app.route('/logout')
 def logout():
@@ -145,11 +148,20 @@ def join_game_route():
     if not game_name:
         return jsonify({'success': False, 'error': 'Game name is required'})
     
-    success, message = verify_game(game_name, game_password, session['username'], 'dummy_password')
+    success, message = verify_game(game_name, game_password, session['username'])
     if success:
         return jsonify({'success': True, 'message': 'Joined game successfully'})
     else:
         return jsonify({'success': False, 'error': message})
+
+@app.route('/api/games')
+def api_games():
+    """API endpoint to get list of available games"""
+    if 'username' not in session:
+        return jsonify({'success': False, 'error': 'Not logged in'})
+    
+    games = list(get_games_list())
+    return jsonify({'success': True, 'games': games})
 
 if __name__ == '__main__':
     app.run(debug=True, port=20050, host='0.0.0.0')

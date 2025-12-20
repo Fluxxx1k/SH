@@ -6,7 +6,8 @@ import os, sys
 import re
 from typing import Any, Generator
 
-from Website1.web_logger import error_log
+from web_logger import error_log
+from server_settings import MIN_PLAYER_NUM
 
 
 game_data_dir = "data/game_data"
@@ -25,7 +26,7 @@ cashed_games = []
 
 def find_game_data(game_name: str) -> dict[str, Any] | Exception:
     try:
-        with open(f'{game_data_dir}{game_name}.json', 'r', encoding='utf-8') as file:
+        with open(f'{game_data_dir}/{game_name}.json', 'r', encoding='utf-8') as file:
             data = json.load(file)
             return data
     except FileNotFoundError as e:
@@ -103,15 +104,13 @@ def create_player(player_name: str, password: str) -> Exception | None:
         return e
 
 
-def verify_game(game_name: str, password: str, player_name:str, player_password: str) -> tuple[bool, str]:
+def verify_game(game_name: str, password: str, player_name:str) -> tuple[bool, str]:
     game_data = find_game_data(game_name)
     if isinstance(game_data, FileNotFoundError):
         return False, "Game not found"
     if isinstance(game_data, Exception):
         return False, repr(game_data)
-    verifying_player = verify_player(player_name, player_password)
-    if not verifying_player[0]:
-        return verifying_player
+
     if game_data.get("password") == password:
         if player_name not in game_data.get("players"):
             game_data['players'].append(player_name)
@@ -134,9 +133,16 @@ def create_game(game_name: str, game_data: dict, player_name: str) -> Exception 
         return e
 
 
-def get_games_list() -> Generator[tuple[str, int]]:
-    for file in os.listdir(game_data_dir):
+def get_games_list() -> Generator[tuple[str, int, int, str, bool]]:
+    for file in (temp := os.listdir(game_data_dir)):
         if file.endswith(".json"):
-            yield file[len(game_data_dir):-5], len(find_game_data(file[len(game_data_dir):-5])['players'])
-
-    
+            # print(f"{file= }")
+            game_name = file[:-5]  # Remove .json extension
+            game_data = find_game_data(game_name)
+            if not isinstance(game_data, Exception):
+                current_players = len(game_data.get('players', []))
+                max_players = game_data.get('max_players', MIN_PLAYER_NUM)
+                status = game_data.get('status', 'waiting')
+                has_password = bool(game_data.get('password', ''))
+                yield (game_name, current_players, max_players, status, has_password)
+    # print(f"{temp= }")

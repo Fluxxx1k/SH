@@ -184,60 +184,74 @@ function joinGame(joinData) {
 
 // Загрузка доступных игр
 function loadAvailableGames() {
-    // Это можно расширить для получения реальных данных с сервера
-    // Пока используем демонстрационные данные
-    const gamesList = document.getElementById('gamesList');
-    
-    // Пример данных (в реальном приложении это будет запрос к серверу)
-    const availableGames = [
-        {
-            name: 'Игра 1',
-            players: '3/8',
-            hasPassword: false,
-            status: 'waiting'
-        },
-        {
-            name: 'Игра 2',
-            players: '5/6',
-            hasPassword: true,
-            status: 'waiting'
-        }
-    ];
-    
-    if (availableGames.length === 0) {
-        gamesList.innerHTML = `
-            <div class="no-games-message">
-                <p>Нет доступных игр. Создайте новую игру!</p>
-            </div>
-        `;
+    // Получаем реальные данные с сервера
+    fetch('/api/games')
+        .then(response => response.json())
+        .then(data => {
+            const gamesList = document.getElementById('gamesList');
+            
+            if (data.success && data.games && data.games.length > 0) {
+                gamesList.innerHTML = data.games.map(game => {
+                    const [name, currentPlayers, maxPlayers, status, hasPassword] = game;
+                    return `
+                        <div class="game-item" data-game-name="${name}">
+                            <div class="game-name">${name}</div>
+                            <div class="game-info">
+                                <span class="game-status">Статус: ${status === 'waiting' ? 'Ожидание игроков' : 'В процессе'}</span>
+                                <span class="game-password-status">${hasPassword ? '🔒' : '🔓'}</span>
+                            </div>
+                            <div class="game-players">
+                                <span class="player-count">Игроки: ${currentPlayers}/${maxPlayers}</span>
+                                <button class="join-btn" onclick="quickJoinGame('${name}', ${hasPassword})">Присоединиться</button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } else {
+                gamesList.innerHTML = `
+                    <div class="no-games-message">
+                        <p>Нет доступных игр. Создайте новую игру!</p>
+                    </div>
+                `;
+            }
+        })
+        .catch(error => {
+            console.error('Ошибка при загрузке игр:', error);
+            showNotification('Ошибка при загрузке списка игр', 'error');
+        });
+}
+
+// Быстрое присоединение к игре
+function quickJoinGame(gameName, hasPassword) {
+    if (hasPassword) {
+        const password = prompt(`Введите пароль для игры "${gameName}":`);
+        if (password === null) return;
+        
+        const joinData = {
+            game_name: gameName,
+            game_password: password
+        };
+        joinGame(joinData);
     } else {
-        gamesList.innerHTML = availableGames.map(game => `
-            <div class="game-item">
-                <div class="game-name">${game.name} ${game.hasPassword ? '🔒' : ''}</div>
-                <div class="game-info">Статус: ${game.status === 'waiting' ? 'Ожидание игроков' : 'В процессе'}</div>
-                <div class="game-players">
-                    <span class="player-count">Игроки: ${game.players}</span>
-                    <button class="join-btn" onclick="quickJoinGame('${game.name}')">Присоединиться</button>
-                </div>
-            </div>
-        `).join('');
+        const joinData = {
+            game_name: gameName,
+            game_password: ''
+        };
+        joinGame(joinData);
     }
 }
 
-// Быстрое присоединение к игре (без пароля)
-function quickJoinGame(gameName) {
-    const joinData = {
-        game_name: gameName,
-        game_password: ''
-    };
-    
-    joinGame(joinData);
-}
-
-// Обновление списка игр каждые 10 секунд
+// Загрузка списка игр при загрузке страницы
 document.addEventListener('DOMContentLoaded', function() {
     loadAvailableGames();
-    setInterval(loadAvailableGames, 10000);
+    
+    // Добавляем обработчик для кнопки обновления
+    const refreshBtn = document.getElementById('refreshGamesBtn');
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', function() {
+            loadAvailableGames();
+        });
+    }
 });
 
 // Обработка ошибок и предупреждений
