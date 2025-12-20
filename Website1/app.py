@@ -171,5 +171,123 @@ def api_games():
     games = list(get_games_list())
     return jsonify({'success': True, 'games': games})
 
+@app.route('/game/<game_name>')
+def game(game_name):
+    """Game page for playing Secret Hitler"""
+    if 'username' not in session:
+        return redirect(safe_url_for('login'))
+    
+    # Get game data
+    game_data = find_game_data(game_name)
+    if not game_data:
+        return redirect(safe_url_for('lobby'))
+    
+    # Get list of players in the game
+    players = game_data.get('players', [])
+    if session['username'] not in players:
+        return redirect(safe_url_for('lobby'))
+    
+    return render_template('game.html', 
+                         username=session['username'],
+                         game_name=game_name,
+                         players=players,
+                         current_turn=game_data.get('current_turn', ''),
+                         game_phase=game_data.get('phase', 'waiting'),
+                         player_count=len(players))
+
+@app.route('/api/game/vote', methods=['POST'])
+def api_game_vote():
+    """API endpoint for voting in game"""
+    if 'username' not in session:
+        return jsonify({'success': False, 'error': 'Not logged in'})
+    
+    game_name = request.json.get('game_name')
+    vote = request.json.get('vote')
+    
+    if not game_name or not vote:
+        return jsonify({'success': False, 'error': 'Game name and vote are required'})
+    
+    # Get current game data
+    game_data = find_game_data(game_name)
+    if not game_data:
+        return jsonify({'success': False, 'error': 'Game not found'})
+    
+    # Check if player is in the game
+    if session['username'] not in game_data.get('players', []):
+        return jsonify({'success': False, 'error': 'Player not in game'})
+    
+    # Process vote (this is a simplified version)
+    if 'votes' not in game_data:
+        game_data['votes'] = {}
+    
+    game_data['votes'][session['username']] = vote
+    game_data['last_action'] = f"{session['username']} voted {vote}"
+    
+    # Save updated game data
+    save_game_data(game_name, game_data)
+    
+    return jsonify({
+        'success': True,
+        'message': 'Vote recorded',
+        'game_data': game_data
+    })
+
+@app.route('/api/game/select_player', methods=['POST'])
+def api_game_select_player():
+    """API endpoint for selecting a player in game"""
+    if 'username' not in session:
+        return jsonify({'success': False, 'error': 'Not logged in'})
+    
+    game_name = request.json.get('game_name')
+    selected_player = request.json.get('selected_player')
+    
+    if not game_name or not selected_player:
+        return jsonify({'success': False, 'error': 'Game name and selected player are required'})
+    
+    # Get current game data
+    game_data = find_game_data(game_name)
+    if not game_data:
+        return jsonify({'success': False, 'error': 'Game not found'})
+    
+    # Check if player is in the game
+    if session['username'] not in game_data.get('players', []):
+        return jsonify({'success': False, 'error': 'Player not in game'})
+    
+    # Check if selected player is in the game
+    if selected_player not in game_data.get('players', []):
+        return jsonify({'success': False, 'error': 'Selected player not in game'})
+    
+    # Process player selection (this is a simplified version)
+    game_data['selected_player'] = selected_player
+    game_data['last_action'] = f"{session['username']} selected {selected_player}"
+    
+    # Save updated game data
+    save_game_data(game_name, game_data)
+    
+    return jsonify({
+        'success': True,
+        'message': 'Player selected',
+        'game_data': game_data
+    })
+
+@app.route('/api/game/<game_name>')
+def api_game_data(game_name):
+    """API endpoint to get game data"""
+    if 'username' not in session:
+        return jsonify({'success': False, 'error': 'Not logged in'})
+    
+    game_data = find_game_data(game_name)
+    if not game_data:
+        return jsonify({'success': False, 'error': 'Game not found'})
+    
+    # Check if player is in the game
+    if session['username'] not in game_data.get('players', []):
+        return jsonify({'success': False, 'error': 'Player not in game'})
+    
+    return jsonify({
+        'success': True,
+        'game_data': game_data
+    })
+
 if __name__ == '__main__':
     app.run(debug=True, port=20050, host='0.0.0.0')
