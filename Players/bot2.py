@@ -107,16 +107,18 @@ class Bot2(Bot):
 
 
     def _chancellor_hitler(self, cards: str | list[str], prs: int, words: str, veto: bool) -> tuple[str, str]:
+        cards = ''.join(list(cards))
         if CARDS[X.RED] == RED_WIN_NUM - 1 or CARDS[X.BLACK] == BLACK_WIN_NUM - 1:
             if "B" in cards:
-                return ''.join(cards), "B"
+                return cards, "B"
             if veto:
                 return "BB", 'X'
+            return cards, 'R'
         if "B" in cards and prs in self.black and (words == "BBB" or words == "XXX"):
             return "BB", "B"
         if 'R' in cards:
             return ''.join(cards), "R"
-        return ''.join(cards), "R"
+        return ''.join(cards), "B"
 
     def _chancellor_black(self, cards: str | list[str], prs: int, words: str, veto: bool) -> tuple[str, str]:
         if cards == ["B"] * 2:
