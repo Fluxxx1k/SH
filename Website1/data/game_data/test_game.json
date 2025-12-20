@@ -8,7 +8,6 @@
     "players": [
         "test_user",
         "player2",
-        "player3",
-        "null"
+        "player3"
     ]
 }

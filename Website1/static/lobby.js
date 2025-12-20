@@ -26,6 +26,11 @@ function closeJoinGameModal() {
     document.getElementById('joinGameForm').reset();
 }
 
+// Обновление списка игр
+function refreshGames() {
+    loadAvailableGames();
+}
+
 // Закрытие модальных окон при клике вне их
 document.addEventListener('DOMContentLoaded', function() {
     const createModal = document.getElementById('createGameModal');
@@ -244,14 +249,6 @@ function quickJoinGame(gameName, hasPassword) {
 // Загрузка списка игр при загрузке страницы
 document.addEventListener('DOMContentLoaded', function() {
     loadAvailableGames();
-    
-    // Добавляем обработчик для кнопки обновления
-    const refreshBtn = document.getElementById('refreshGamesBtn');
-    if (refreshBtn) {
-        refreshBtn.addEventListener('click', function() {
-            loadAvailableGames();
-        });
-    }
 });
 
 // Обработка ошибок и предупреждений
