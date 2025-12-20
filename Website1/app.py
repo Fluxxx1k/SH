@@ -1,4 +1,5 @@
-from flask import Flask, render_template, request, redirect, url_for, session, jsonify
+import flask
+from flask import Flask, render_template, request, redirect, session, jsonify
 import os
 import sys
 
@@ -26,6 +27,13 @@ class SilentUndefined(Undefined):
 
 app.jinja_env.undefined = SilentUndefined
 
+def safe_url_for(endpoint, **values):
+    """Helper function to generate safe URLs"""
+    try:
+        return flask.url_for(endpoint, _external=True, **values)
+    except Exception as e:
+        print(f"Error in safe_url_for: {e}")
+        return '/'
 
 @app.route('/')
 def index():
@@ -47,7 +55,7 @@ def login():
         success, message = verify_player(username, password)
         if success:
             session['username'] = username
-            return redirect(url_for('lobby'))
+            return redirect(safe_url_for('lobby'))
         else:
             return render_template('login.html', error=message, 
                                  min_name_len=MIN_NAME_LEN, max_name_len=MAX_NAME_LEN)
@@ -77,7 +85,7 @@ def register():
         error = create_player(username, password)
         if error is None:
             session['username'] = username
-            return redirect(url_for('lobby'))
+            return redirect(safe_url_for('lobby'))
         else:
             return render_template('register.html', error=str(error),
                                  min_name_len=MIN_NAME_LEN, max_name_len=MAX_NAME_LEN)
@@ -88,7 +96,7 @@ def register():
 def lobby():
     """Game lobby page"""
     if 'username' not in session:
-        return redirect(url_for('login'))
+        return redirect(safe_url_for('login'))
     
     # Get list of available games
     games = list(get_games_list())
@@ -99,7 +107,7 @@ def lobby():
 def logout():
     """Logout route"""
     session.pop('username', None)
-    return redirect(url_for('index'))
+    return redirect(safe_url_for('index'))
 
 @app.route('/create_game', methods=['POST'])
 def create_game_route():
