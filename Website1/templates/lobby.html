@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Лобби - Secret Hitler</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='lobby.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1 class="game-title">Secret Hitler</h1>
+            <nav class="nav">
+                <span class="welcome-message">Добро пожаловать, {{ username }}!</span>
+                <a href="{{ url_for('logout') }}" class="nav-link logout-link">Выйти</a>
+            </nav>
+        </header>
+
+        <main class="main-content">
+            <div class="lobby-container">
+                <div class="game-actions">
+                    <h2>Действия</h2>
+                    <div class="action-buttons">
+                        <button class="btn btn-primary" onclick="showCreateGameModal()">Создать игру</button>
+                        <button class="btn btn-secondary" onclick="showJoinGameModal()">Присоединиться к игре</button>
+                    </div>
+                </div>
+
+                <div class="available-games">
+                    <h2>Доступные игры</h2>
+                    <div id="gamesList" class="games-list">
+                        <!-- Список игр будет загружаться динамически -->
+                        <div class="no-games-message">
+                            <p>Нет доступных игр. Создайте новую игру!</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="player-info">
+                    <h2>Ваш профиль</h2>
+                    <div class="player-stats">
+                        <p><strong>Имя пользователя:</strong> {{ username }}</p>
+                        <p><strong>Статус:</strong> <span class="status-online">Онлайн</span></p>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Модальное окно для создания игры -->
+        <div id="createGameModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeCreateGameModal()">&times;</span>
+                <h2>Создать новую игру</h2>
+                <form id="createGameForm" class="game-form">
+                    <div class="form-group">
+                        <label for="gameName">Название игры:</label>
+                        <input type="text" id="gameName" name="game_name" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="gamePassword">Пароль игры (необязательно):</label>
+                        <input type="password" id="gamePassword" name="game_password">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="maxPlayers">Максимальное количество игроков:</label>
+                        <select id="maxPlayers" name="max_players" required>
+                            <option value="5">5 игроков</option>
+                            <option value="6">6 игроков</option>
+                            <option value="7">7 игроков</option>
+                            <option value="8" selected>8 игроков</option>
+                            <option value="9">9 игроков</option>
+                            <option value="10">10 игроков</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-buttons">
+                        <button type="submit" class="btn btn-primary">Создать игру</button>
+                        <button type="button" class="btn btn-secondary" onclick="closeCreateGameModal()">Отмена</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Модальное окно для присоединения к игре -->
+        <div id="joinGameModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeJoinGameModal()">&times;</span>
+                <h2>Присоединиться к игре</h2>
+                <form id="joinGameForm" class="game-form">
+                    <div class="form-group">
+                        <label for="joinGameName">Название игры:</label>
+                        <input type="text" id="joinGameName" name="game_name" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="joinGamePassword">Пароль игры (если есть):</label>
+                        <input type="password" id="joinGamePassword" name="game_password">
+                    </div>
+                    
+                    <div class="form-buttons">
+                        <button type="submit" class="btn btn-primary">Присоединиться</button>
+                        <button type="button" class="btn btn-secondary" onclick="closeJoinGameModal()">Отмена</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <footer class="footer">
+            <p>&copy; 2024 Secret Hitler Online. Все права защищены.</p>
+        </footer>
+    </div>
+
+    <script src="{{ url_for('static', filename='lobby.js') }}"></script>
+</body>
+</html>

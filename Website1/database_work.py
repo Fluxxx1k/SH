@@ -119,10 +119,7 @@ def verify_game(game_name: str, password: str, player_name:str, player_password:
         return True, "Successfully verified"
     return False, "Incorrect password"
 
-def create_game(game_name: str, game_data: dict, player_name: str, password: str) -> Exception | None:
-    verifying_player = verify_player(player_name, password)
-    if not verifying_player[0]:
-        return UserWarning(verifying_player[1])
+def create_game(game_name: str, game_data: dict, player_name: str) -> Exception | None:
     if os.path.exists(f'{game_data_dir}/{game_name}.json'):
         return FileExistsError(f"Game {game_name} already exists")
     if not os.path.exists(f'{player_data_dir}/{player_name}.json'):
@@ -137,8 +134,9 @@ def create_game(game_name: str, game_data: dict, player_name: str, password: str
         return e
 
 
-
-
-
+def get_games_list() -> Generator[tuple[str, int]]:
+    for file in os.listdir(game_data_dir):
+        if file.endswith(".json"):
+            yield file[len(game_data_dir):-5], len(find_game_data(file[len(game_data_dir):-5])['players'])
 
     
