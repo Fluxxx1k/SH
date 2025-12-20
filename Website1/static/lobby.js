@@ -70,7 +70,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const gameData = {
                 game_name: formData.get('game_name'),
                 game_password: formData.get('game_password') || '',
-                max_players: parseInt(formData.get('max_players'))
+                max_players: formData.get('max_players')
             };
             
             // Валидация

@@ -9,11 +9,13 @@
         "test_user",
         "player2",
         "player3",
-        "null"
+        "null",
+        "1"
     ],
     "votes": {
-        "null": "abstain"
+        "null": "abstain",
+        "1": "abstain"
     },
-    "last_action": "null selected test_user",
+    "last_action": "1 voted abstain",
     "selected_player": "test_user"
 }

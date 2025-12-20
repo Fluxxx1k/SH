@@ -54,15 +54,15 @@
                 <h3>Статистика</h3>
                 <div class="stats-grid">
                     <div class="stat-item">
-                        <span class="stat-number">{{ stats.active_games|default(0) }}</span>
+                        <span class="stat-number">{{ stats.active_games|default('N/A') }}</span>
                         <span class="stat-label">Активных игр</span>
                     </div>
                     <div class="stat-item">
-                        <span class="stat-number">{{ stats.online_players|default(0) }}</span>
+                        <span class="stat-number">{{ stats.online_players|default('N/A') }}</span>
                         <span class="stat-label">Игроков онлайн</span>
                     </div>
                     <div class="stat-item">
-                        <span class="stat-number">{{ stats.total_players|default(0) }}</span>
+                        <span class="stat-number">{{ stats.total_players|default('N/A') }}</span>
                         <span class="stat-label">Всего игроков</span>
                     </div>
                 </div>
@@ -95,10 +95,10 @@
 
             <h3>Исполнительные действия</h3>
             <ul>
-                <li><strong>1 фашистский закон:</strong> Проверка партийной принадлежности игрока.</li>
+                <li><strong>1 фашистский закон:</strong> Проверка следующих 3 законов из колоды.</li>
                 <li><strong>2 фашистских закона:</strong> Проверка партийной принадлежности игрока.</li>
-                <li><strong>3 фашистских закона:</strong> Убийство игрока.</li>
-                <li><strong>4 фашистских закона:</strong> Убийство игрока.</li>
+                <li><strong>3 фашистских закона:</strong> Посадка в гулаг игрока.</li>
+                <li><strong>4 фашистских закона:</strong> Внеочередное президентство.</li>
                 <li><strong>5 фашистских закона:</strong> Убийство игрока.</li>
             </ul>
 

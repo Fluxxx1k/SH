@@ -38,8 +38,8 @@ def safe_url_for(endpoint, **values):
 @app.route('/')
 def index():
     """Main page for Secret Hitler online game"""
-    stats = {'active_games': list(get_games_list())}
-    return render_template('index.html')
+    stats = {'active_games': len(list(get_games_list()))}
+    return render_template('index.html', stats=stats)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
