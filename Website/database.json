@@ -1,0 +1,27 @@
+{
+    "users": {
+        "testuser": {
+            "username": "testuser",
+            "password_hash": "scrypt:32768:8:1$ZxqHj8kP8vXqJmKk$8a8f8c8e8d8b8a898887868584838281807f7e7d7c7b7a797877767574737271706f6e6d6c6b6a696867666564636261605f5e5d5c5b5a595857565554535251504f4e4d4c4b4a494847464544434241403f3e3d3c3b3a393837363534333231302f2e2d2c2b2a292827262524232221201f1e1d1c1b1a191817161514131211100f0e0d0c0b0a09080706050403020100",
+            "email": "test@example.com",
+            "created_at": "2025-01-01T00:00:00",
+            "stats": {
+                "total_games": 10,
+                "wins": 6,
+                "losses": 4
+            }
+        }
+    },
+    "sessions": {},
+    "games": [
+        {
+            "id": 1,
+            "date": "2025-01-01T12:00:00",
+            "players": ["testuser", "player2", "player3", "player4", "player5"],
+            "winner": "liberals",
+            "roles": {
+                "testuser": "liberal"
+            }
+        }
+    ]
+}

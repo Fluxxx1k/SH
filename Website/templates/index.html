@@ -11,6 +11,15 @@
     <header>
         <h1>Тайный Гитлер</h1>
         <p>Раскройте заговор или установите диктатуру</p>
+        <div class="auth-buttons">
+            {% if current_user %}
+                <a href="{{ url_for('account') }}" class="btn-account">{{ current_user }}</a>
+                <a href="{{ url_for('logout') }}" class="btn-logout">Выйти</a>
+            {% else %}
+                <a href="{{ url_for('login') }}" class="btn-login">Войти</a>
+                <a href="{{ url_for('register') }}" class="btn-register">Регистрация</a>
+            {% endif %}
+        </div>
     </header>
 
     <main>

@@ -1,4 +1,4 @@
-from flask import Flask, render_template, jsonify, request
+from flask import Flask, render_template, jsonify, request, session, redirect, url_for
 from jinja2 import Undefined
 import sys
 import os
@@ -9,13 +9,16 @@ sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__f
 try:
     import globs
     from HTML_logs import GameLog, create_HTML_logs_cards_for_Website
+    from database import db
 except ImportError:
     # Заглушки для тестирования без SH2 модулей
     globs = None
     GameLog = None
     create_HTML_logs_cards_for_Website = lambda: "<p>Логи временно недоступны</p>"
+    db = None
 
 app = Flask(__name__, static_folder='static')
+app.secret_key = 'your-secret-key-here-change-in-production'  # Для сессий
 
 # Глобальная переменная для кэширования логов
 game_logs_cache = []
@@ -38,8 +41,62 @@ app.jinja_env.undefined = SilentUndefined
 @app.route('/main.html')
 @app.route('/main')
 def index():
-    return render_template('index.html',
-                           )
+    # Проверяем, авторизован ли пользователь
+    if 'username' in session:
+        return redirect(url_for('account'))
+    return render_template('index.html', current_user=None)
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+        
+        if db and db.authenticate_user(username, password):
+            session['username'] = username
+            return jsonify({'success': True, 'redirect': url_for('account')})
+        else:
+            return jsonify({'success': False, 'error': 'Неверное имя пользователя или пароль'})
+    
+    return render_template('login.html')
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+        email = request.form.get('email', '')
+        
+        if not username or not password:
+            return jsonify({'success': False, 'error': 'Имя пользователя и пароль обязательны'})
+        
+        if db and db.create_user(username, password, email):
+            session['username'] = username
+            return jsonify({'success': True, 'redirect': url_for('account')})
+        else:
+            return jsonify({'success': False, 'error': 'Пользователь с таким именем уже существует'})
+    
+    return render_template('register.html')
+
+@app.route('/logout')
+def logout():
+    session.pop('username', None)
+    return redirect(url_for('index'))
+
+@app.route('/account')
+def account():
+    if 'username' not in session:
+        return redirect(url_for('login'))
+    
+    username = session['username']
+    user_stats = db.get_user_stats(username) if db else None
+    user_games = db.get_user_games(username) if db else []
+    
+    return render_template('account.html', 
+                         username=username, 
+                         user_stats=user_stats,
+                         user_games=user_games,
+                         safelog=create_HTML_logs_cards_for_Website())
 
 # Функция для обновления логов с внешнего источника (SH2)
 def update_website_logs(new_logs):
