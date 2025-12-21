@@ -1,15 +1,15 @@
 import os
 import time as t
 
-import globs
-from gamelog import GameLog
-from infolog import InfoLog
-from globs import INFO_LOGS, ROLES
-from standard_functions import color_clear, yes_or_no
-from standard_names_SH import X
-from colors import RESET
-from user_color_settings import WARNING, CRITICAL
-from HTML_colors import *
+from core import globs
+from core.gamelog import GameLog
+from core.infolog import InfoLog
+from core.globs import INFO_LOGS, ROLES
+from core.standard_functions import color_clear, yes_or_no
+from core.standard_names_SH import X
+from cli.colors import RESET
+from cli.user_color_settings import WARNING, CRITICAL
+from core.HTML_colors import *
 from Players.abstract_player import AbstractPlayer
 from user_settings import IS_PRINT_SMALL_INFO, IS_PRINT_FULL_INFO
 

@@ -2,19 +2,19 @@ from __future__ import annotations
 from typing import Iterable, Literal
 
 from Players.abstract_player import AbstractPlayer
-from colors import (CYAN_TEXT_BRIGHT as CYAN,
-                    YELLOW_TEXT_BRIGHT as YELLOW,
-                    RESET_TEXT as END_T,
-                    END, UP,
-                    )
-from globs import PLAYERS, ROLES, CARDS
-from standard_functions import show_only_to_one, yes_or_no, is_x_in_y, my_input
-from standard_names_SH import X
-from user_color_settings import (INPUT_COLOR,
-                                 BLACK_PLAYER_COLOR as BLACK,
-                                 RED_PLAYER_COLOR as RED,
-                                 PURPLE_PLAYER_COLOR as PURPLE, WARNING)
-from utils import get_color, coloring, naming, input_cards
+from cli.colors import (CYAN_TEXT_BRIGHT as CYAN,
+                        YELLOW_TEXT_BRIGHT as YELLOW,
+                        RESET_TEXT as END_T,
+                        END, UP,
+                        )
+from core.globs import PLAYERS, ROLES, CARDS
+from core.standard_functions import show_only_to_one, yes_or_no, is_x_in_y, my_input
+from core.standard_names_SH import X
+from cli.user_color_settings import (INPUT_COLOR,
+                                     BLACK_PLAYER_COLOR as BLACK,
+                                     RED_PLAYER_COLOR as RED,
+                                     PURPLE_PLAYER_COLOR as PURPLE, WARNING)
+from core.utils import get_color, coloring, naming, input_cards
 
 
 class Player(AbstractPlayer):
@@ -84,7 +84,7 @@ class Player(AbstractPlayer):
             try:
                 pc = int(input(f"{CYAN}President{END} will check number (not index): {INPUT_COLOR}")) - 1
                 print(END, end='')
-                from globs import COUNT_PLAYERS
+                from core.globs import COUNT_PLAYERS
                 if pc >= COUNT_PLAYERS or pc < 0:
                     raise ValueError(f"Wrong number: {pc + 1}")
                 if pc == self.num:
@@ -113,7 +113,7 @@ class Player(AbstractPlayer):
                         gulag = int(
                             input(f"{CYAN}President{END} will place in gulag number (not index): {INPUT_COLOR}")) - 1
                         print(END, end='')
-                        from globs import COUNT_PLAYERS
+                        from core.globs import COUNT_PLAYERS
                         if gulag < 1 or gulag >= COUNT_PLAYERS:
                             raise ValueError(f"Wrong number: {gulag + 1}")
                         if gulag == self.num:
@@ -130,7 +130,7 @@ class Player(AbstractPlayer):
                     try:
                         killed = int(input(f"{CYAN}President{END} will kill number (not index): {INPUT_COLOR}")) - 1
                         print(END, end='')
-                        from globs import COUNT_PLAYERS
+                        from core.globs import COUNT_PLAYERS
                         if killed < 0 or killed >= COUNT_PLAYERS:
                             raise ValueError(f"Wrong number: {killed + 1}")
                         elif killed == self.num:
@@ -152,7 +152,7 @@ class Player(AbstractPlayer):
                 placed = int(
                     input(f"{CYAN}President{END} will place number (not index): {INPUT_COLOR}")) - 1
                 print(END, end='')
-                from globs import COUNT_PLAYERS
+                from core.globs import COUNT_PLAYERS
                 if placed < 0 or placed >= COUNT_PLAYERS:
                     raise ValueError(f"Wrong number: {placed + 1}")
                 if placed in cannot_be:
@@ -174,7 +174,7 @@ class Player(AbstractPlayer):
                 chancellor = int(
                     input(f"{CYAN}President{END} will choose number (not index): {INPUT_COLOR}")) - 1
                 print(END, end='')
-                from globs import COUNT_PLAYERS
+                from core.globs import COUNT_PLAYERS
                 if chancellor < 0 or chancellor >= COUNT_PLAYERS:
                     raise ValueError(f"Wrong number: {chancellor + 1}")
                 if chancellor in cannot_be:

@@ -4,24 +4,23 @@ from datetime import datetime
 import sys
 from typing import Iterable, TYPE_CHECKING
 
-import infolog
 from user_settings import TIME_FORMAT, DATE_FORMAT, IS_PRINT_SMALL_INFO
 
 if TYPE_CHECKING:
     from Players.player import Player
 
-from globs import PLAYERS, INFO_LOGS
-from standard_classes import POSSIBLE_CARDS
-from standard_names_SH import X
-from standard_functions import color_clear, my_input
-from HTML_colors import *
-from colors import (GREEN_TEXT_BRIGHT as BLACK,
-                    RESET_TEXT as END_T,
-                    RED_TEXT as RED,
-                    PURPLE_TEXT as PURPLE,
-                    BOLD, END, UNDERLINE, RESET_TEXT, UP
-                    )
-from user_color_settings import INPUT_COLOR, WARNING, CRITICAL
+from core.globs import PLAYERS, INFO_LOGS
+from core.standard_classes import POSSIBLE_CARDS
+from core.standard_names_SH import X
+from core.standard_functions import color_clear, my_input
+from core.HTML_colors import *
+from cli.colors import (GREEN_TEXT_BRIGHT as BLACK,
+                        RESET_TEXT as END_T,
+                        RED_TEXT as RED,
+                        PURPLE_TEXT as PURPLE,
+                        BOLD, END, UNDERLINE, RESET_TEXT, UP
+                        )
+from cli.user_color_settings import INPUT_COLOR, WARNING, CRITICAL
 
 
 def coloring(s, sort=True, is_print=True):
@@ -100,7 +99,7 @@ def weighted_random(a, weights):
 
 def weighted_random_for_indexes(weights) -> int:
     import random
-    import globs
+    from core import globs
     if sum(weights) <= 0 or len(weights) != globs.COUNT_PLAYERS:
         if IS_PRINT_SMALL_INFO:
             print(f"{RED}{BOLD}{UNDERLINE}Sum of weights <= 0 or wrong length, using random choice{END}")
@@ -109,8 +108,8 @@ def weighted_random_for_indexes(weights) -> int:
     return random.choices(range(globs.COUNT_PLAYERS), weights, k=1)[0]
 
 def preproc_votes(votes: dict[int, int], smalling:Iterable[int]=(), times_smalling:int|float=2) -> list[int]:
-    import globs
-    x = [1]*globs.COUNT_PLAYERS
+    from core import globs
+    x = [1] * globs.COUNT_PLAYERS
     for i in votes:
         try:
             x[i] += votes[i]
@@ -172,7 +171,7 @@ def voting_human(theme: str = f"{WARNING}Voting, U forgot to add text{END}", who
 
 def out(c:int = None, file=sys.stdout):
     if c is None:
-        import globs
+        from core import globs
         c = globs.COUNT_PLAYERS
     for player_num in range(c):
         print(f"№{player_num + 1}) {PLAYERS[player_num].out()}", file=file)

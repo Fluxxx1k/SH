@@ -8,13 +8,13 @@ import time
 
 
 import user_settings
-from HTML_logs import InfoLog
+from core.HTML_logs import InfoLog
 from Players.abstract_player import AbstractPlayer
-from globs import INFO_LOGS, PLAYERS, ROLES, CARDS
-from standard_classes import Cards
-from standard_names_SH import X
+from core.globs import INFO_LOGS, PLAYERS, ROLES, CARDS
+from core.standard_classes import Cards
+from core.standard_names_SH import X
 from user_settings import DATE_FORMAT, TIME_FORMAT, IS_PRINT_SMALL_INFO, IS_PRINT_FULL_INFO, DEBUG_MODE
-from utils import get_color, weighted_random_for_indexes, preproc_votes
+from core.utils import get_color, weighted_random_for_indexes, preproc_votes
 
 
 class Bot(AbstractPlayer):
@@ -31,7 +31,7 @@ class Bot(AbstractPlayer):
             self.risk: float = rnd.random() * 0.7 + 0.25
         self.black: set[int] = set()
         if self.bot_mind == X.BLACK:
-            import globs
+            from core import globs
             for i in range(globs.COUNT_PLAYERS):
                 if ROLES[i] == X.BLACK or ROLES[i] == X.RIBBENTROP:
                     self.black.add(i)
@@ -42,7 +42,7 @@ class Bot(AbstractPlayer):
                     print(repr(e))
                 INFO_LOGS.append(InfoLog(info_type=X.ERROR,
                                          info_name=f"Cannot add Hitler to black list: {repr(e)}",
-                                         info1=f"{globs.HITLER= } {self.bot_mind= }"))
+                                         info1=f"{ globs.HITLER= } {self.bot_mind= }"))
         if self.bot_mind == X.HITLER:
             self.black.add(self.num)
 
@@ -243,14 +243,14 @@ class Bot(AbstractPlayer):
                 return Cards(cards) if rnd.random() < self.risk else Cards("BBB")
             case X.BLACK:
                 if cards == 'BBR':
-                    from globs import COUNT_PLAYERS
+                    from core.globs import COUNT_PLAYERS
                     if PLAYERS[self.num%COUNT_PLAYERS].color == X.RED:
                         return Cards(cards) if rnd.random() < self.risk else Cards("BBB")
                     else:
                         return Cards("BBB")
                 if cards == 'BRR':
                     if cards == 'BBR':
-                        from globs import COUNT_PLAYERS
+                        from core.globs import COUNT_PLAYERS
                         if PLAYERS[self.num % COUNT_PLAYERS].color == X.RED:
                             return Cards(cards) if rnd.random() < self.risk else Cards("BBB")
                         else:
@@ -269,7 +269,7 @@ class Bot(AbstractPlayer):
         return Cards("XXX")
 
     def check_player(self, votes: list[int] = None) -> tuple[int, str]:
-        from globs import PLAYERS
+        from core.globs import PLAYERS
         if votes is None:
             votes = {}
             if IS_PRINT_SMALL_INFO:
@@ -279,7 +279,7 @@ class Bot(AbstractPlayer):
                                      info2=time.strftime(f"{DATE_FORMAT} {TIME_FORMAT}")))
         if self.bot_mind == X.BLACK:
             if rnd.random() < 0.25:
-                import globs
+                from core import globs
                 chosen = globs.HITLER
                 PLAYERS[globs.HITLER].black.add(self.num)
                 return chosen, X.RED
@@ -288,7 +288,7 @@ class Bot(AbstractPlayer):
                     chosen = list(self.black)[rnd.randint(0, len(self.black) - 1)]
                     return chosen, X.RED
         try:
-            from globs import COUNT_PLAYERS
+            from core.globs import COUNT_PLAYERS
             ppv = preproc_votes(votes)
             ppv[self.num] = 0
             chosen = weighted_random_for_indexes(ppv)
@@ -317,12 +317,13 @@ class Bot(AbstractPlayer):
                                      info1=f"№{self.num} [{self}] {self.bot_mind= }",
                                      info2=time.strftime(f"{DATE_FORMAT} {TIME_FORMAT}")))
         try:
-            import globs
+            from core import globs
             ppv = [1] * globs.COUNT_PLAYERS
             match self.bot_mind:
                 case X.RED:
                     if self.black:
-                        ppv = preproc_votes(dict.fromkeys(self.black, 100), (set(range(globs.COUNT_PLAYERS)) - self.black) | {globs.GULAG, globs.KILLED}, times_smalling=float('inf'))
+                        ppv = preproc_votes(dict.fromkeys(self.black, 100), (set(range(
+                            globs.COUNT_PLAYERS)) - self.black) | {globs.GULAG, globs.KILLED}, times_smalling=float('inf'))
                         ppv[self.num] = 0
                         if sum(votes) == 0:
                             ppv = preproc_votes(votes)
@@ -398,7 +399,7 @@ class Bot(AbstractPlayer):
                         INFO_LOGS.append(InfoLog(info_type=X.ERROR, info_name=f"Error while setting ppv[i]=0",
                                                  info1=f"{self= } {i= } {repr(e)}",
                                                  info2=time.strftime(f"{DATE_FORMAT} {TIME_FORMAT}")))
-            import globs
+            from core import globs
             try:
                 if gov_type == X.CHANCELLOR:
                     if globs.HITLER is not None and globs.HITLER not in cannot_be:
@@ -412,9 +413,9 @@ class Bot(AbstractPlayer):
                                              info2=time.strftime(f"{DATE_FORMAT} {TIME_FORMAT}")))
             except Exception as e:
                 if user_settings.IS_PRINT_FULL_INFO:
-                    print(f"Can't find {globs.HITLER= }: {e}")
+                    print(f"Can't find { globs.HITLER= }: {e}")
                 INFO_LOGS.append(InfoLog(info_type=X.ERROR, info_name=f"Error while choosing chancellor",
-                                         info1=f"{self= } {self.bot_mind= } {globs.HITLER= } {repr(e)}",
+                                         info1=f"{self= } {self.bot_mind= } { globs.HITLER= } {repr(e)}",
                                          info2=time.strftime(f"{DATE_FORMAT} {TIME_FORMAT}")))
         elif self.bot_mind == X.RED:
             ppv = preproc_votes(votes, self.black, times_smalling=float('inf'))
@@ -435,7 +436,7 @@ class Bot(AbstractPlayer):
             INFO_LOGS.append(InfoLog(info_type=X.INFO, info_name=f"votes empty, so choose random player", info1=f"{self= } {votes= } {cannot_be= }",
                                      info2=time.strftime(f"{DATE_FORMAT} {TIME_FORMAT}")))
 
-            import globs
+            from core import globs
             ppv = [1] * globs.COUNT_PLAYERS
         ppv[self.num] = 0
         for i in cannot_be:

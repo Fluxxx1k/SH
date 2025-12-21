@@ -30,7 +30,7 @@ def get_roles(length: int) -> tuple[list[str], bool]:
     :param length: len of list
     """
     import random
-    from standard_names_SH import X
+    from core.standard_names_SH import X
     hitler = [X.HITLER]
     black = [X.BLACK]
     if length <= 4:
@@ -42,7 +42,7 @@ def get_roles(length: int) -> tuple[list[str], bool]:
     elif length <= 10:
         black *= 3
     else:
-        from standard_functions import my_input
+        from core.standard_functions import my_input
         black *= int(my_input("Too many players, input how many fascists will be in game",
                           integer=True))
     molotov = []
@@ -58,7 +58,7 @@ def get_bot_places(length: int) -> list[int]:
     creates list of places for bots
     :param length: number of bots
     """
-    from globs import COUNT_PLAYERS
+    from core.globs import COUNT_PLAYERS
     import random
     bot_places = random.sample(range(COUNT_PLAYERS), length)
     return bot_places

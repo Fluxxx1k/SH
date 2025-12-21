@@ -1,27 +1,20 @@
-from flask import Flask, render_template, jsonify, request, session, redirect, url_for
-from jinja2 import Undefined
-import sys
+import flask
+from flask import Flask, render_template, request, redirect, session, jsonify
 import os
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), '..'))
-sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), '..', '..'))
+import sys
 
-try:
-    import globs
-    from HTML_logs import GameLog, create_HTML_logs_cards_for_Website
-    from database import db
-except ImportError:
-    # Заглушки для тестирования без SH2 модулей
-    globs = None
-    GameLog = None
-    create_HTML_logs_cards_for_Website = lambda: "<p>Логи временно недоступны</p>"
-    db = None
+from jinja2 import Undefined
 
-app = Flask(__name__, static_folder='static')
-app.secret_key = 'your-secret-key-here-change-in-production'  # Для сессий
+from Website.database_work import get_games_count, get_complete_games_count, get_players_count, get_players_list
 
-# Глобальная переменная для кэширования логов
-game_logs_cache = []
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+from database_work import verify_player, create_player, create_game, verify_game, find_game_data, save_game_data, \
+    get_games_list
+from server_settings import MIN_PLAYER_NUM, MAX_PLAYER_NUM, MIN_NAME_LEN, MAX_NAME_LEN
+
+app = Flask(__name__)
+app.secret_key = 'your-secret-key-here-change-in-production'
+
 class SilentUndefined(Undefined):
     def _fail_with_undefined_error(self, *args, **kwargs):
         return 'error'
@@ -35,170 +28,442 @@ class SilentUndefined(Undefined):
 
 
 app.jinja_env.undefined = SilentUndefined
+
+def safe_url_for(endpoint, **values):
+    """Helper function to generate safe URLs"""
+    try:
+        return flask.url_for(endpoint, _external=True, **values)
+    except Exception as e:
+        print(f"Error in safe_url_for: {e}")
+        return '/'
+
 @app.route('/')
-@app.route('/index.html')
-@app.route('/index')
-@app.route('/main.html')
-@app.route('/main')
 def index():
-    # Проверяем, авторизован ли пользователь
-    if 'username' in session:
-        return redirect(url_for('account'))
-    return render_template('index.html', current_user=None)
+    """Main page for Secret Hitler online game"""
+    stats = {'active_games': get_games_count(),
+             'complete_games': get_complete_games_count(),
+             'total_players': get_players_count(),
+             # 'players_list': list(get_players_list()),
+             }
+    return render_template('index.html', stats=stats)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    """Player login page"""
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
         
-        if db and db.authenticate_user(username, password):
+        if not username or not password:
+            return render_template('login.html', error='Please fill in all fields', 
+                                 min_name_len=MIN_NAME_LEN, max_name_len=MAX_NAME_LEN)
+        
+        success, message = verify_player(username, password)
+        if success:
             session['username'] = username
-            return jsonify({'success': True, 'redirect': url_for('account')})
+            return redirect(safe_url_for('lobby'))
         else:
-            return jsonify({'success': False, 'error': 'Неверное имя пользователя или пароль'})
+            return render_template('login.html', error=message, 
+                                 min_name_len=MIN_NAME_LEN, max_name_len=MAX_NAME_LEN)
     
-    return render_template('login.html')
+    return render_template('login.html', min_name_len=MIN_NAME_LEN, max_name_len=MAX_NAME_LEN)
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
+    """Player registration page"""
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
-        email = request.form.get('email', '')
+        confirm_password = request.form.get('confirm_password')
         
         if not username or not password:
-            return jsonify({'success': False, 'error': 'Имя пользователя и пароль обязательны'})
+            return render_template('register.html', error='Please fill in all fields',
+                                 min_name_len=MIN_NAME_LEN, max_name_len=MAX_NAME_LEN)
         
-        if db and db.create_user(username, password, email):
+        if len(username) < MIN_NAME_LEN or len(username) > MAX_NAME_LEN:
+            return render_template('register.html', error=f'Username must be between {MIN_NAME_LEN} and {MAX_NAME_LEN} characters',
+                                 min_name_len=MIN_NAME_LEN, max_name_len=MAX_NAME_LEN)
+        
+        if password != confirm_password:
+            return render_template('register.html', error='Passwords do not match',
+                                 min_name_len=MIN_NAME_LEN, max_name_len=MAX_NAME_LEN)
+        
+        error = create_player(username, password)
+        if error is None:
             session['username'] = username
-            return jsonify({'success': True, 'redirect': url_for('account')})
+            return redirect(safe_url_for('lobby'))
         else:
-            return jsonify({'success': False, 'error': 'Пользователь с таким именем уже существует'})
+            return render_template('register.html', error=str(error),
+                                 min_name_len=MIN_NAME_LEN, max_name_len=MAX_NAME_LEN)
     
-    return render_template('register.html')
+    return render_template('register.html', min_name_len=MIN_NAME_LEN, max_name_len=MAX_NAME_LEN)
+
+@app.route('/lobby')
+def lobby():
+    """Game lobby page"""
+    if 'username' not in session:
+        return redirect(safe_url_for('login'))
+    
+    # Get list of available games
+    games = list(get_games_list())
+    
+    return render_template('lobby.html', username=session['username'], games=games)
 
 @app.route('/logout')
 def logout():
+    """Logout route"""
     session.pop('username', None)
-    return redirect(url_for('index'))
+    return redirect(safe_url_for('index'))
 
-@app.route('/account')
-def account():
+@app.route('/create_game', methods=['POST'])
+def create_game_route():
+    """Create new game"""
     if 'username' not in session:
-        return redirect(url_for('login'))
+        return jsonify({'success': False, 'error': 'Not logged in'})
     
-    username = session['username']
-    user_stats = db.get_user_stats(username) if db else None
-    user_games = db.get_user_games(username) if db else []
+    game_name = request.json.get('game_name')
+    game_password = request.json.get('game_password', '')
+    max_players = request.json.get('max_players', MIN_PLAYER_NUM)
     
-    return render_template('account.html', 
-                         username=username, 
-                         user_stats=user_stats,
-                         user_games=user_games,
-                         safelog=create_HTML_logs_cards_for_Website())
-
-# Функция для обновления логов с внешнего источника (SH2)
-def update_website_logs(new_logs):
-    """Функция для обновления логов игры из SH2"""
-    global game_logs_cache
-    print(f"DEBUG: update_website_logs called with {len(new_logs) if new_logs else 0} logs")
-    if new_logs and isinstance(new_logs, list):
-        # If the logs are already GameLog objects, use them directly
-        if len(new_logs) > 0 and hasattr(new_logs[0], 'to_HTML_row_Website'):
-            game_logs_cache = new_logs.copy()  # Просто копируем список, без пересоздания объектов
-            print(f"DEBUG: Using existing GameLog objects, cache now has {len(game_logs_cache)} logs")
-        else:
-            # If they're dictionaries, create GameLog objects with proper parameter mapping
-            game_logs_cache = []
-            for log_data in new_logs:
-                # Map the dictionary keys to constructor parameters
-                game_log = GameLog(
-                    prs=log_data.get('prs', ''),
-                    cnc=log_data.get('cnc', ''),
-                    c_prs_got=log_data.get('cpg', ''),
-                    c_prs_said=log_data.get('cps', ''),
-                    c_cnc_got=log_data.get('ccg', ''),
-                    c_cnc_said=log_data.get('ccs', ''),
-                    c_cnc_placed=log_data.get('ccp', ''),
-                    c_prs_said_after=log_data.get('cpsa', ''),
-                    special=log_data.get('special', ''),
-                    reserve=log_data.get('reserve', ''),
-                    is_cards=log_data.get('is_cards', True),
-                    is_president=log_data.get('is_president', True),
-                    is_chancellor=log_data.get('is_chancellor', True)
-                )
-                game_logs_cache.append(game_log)
-            print(f"DEBUG: Created new GameLog objects, cache now has {len(game_logs_cache)} logs")
-        return True
+    if not game_name:
+        return jsonify({'success': False, 'error': 'Game name is required'})
+    
+    try:
+        max_players = int(max_players)
+        if max_players < MIN_PLAYER_NUM or max_players > MAX_PLAYER_NUM:
+            return jsonify({'success': False, 'error': f'Players must be between {MIN_PLAYER_NUM} and {MAX_PLAYER_NUM}'})
+    except ValueError:
+        return jsonify({'success': False, 'error': 'Invalid player count'})
+    
+    game_data = {
+        'name': game_name,
+        'password': game_password,
+        'max_players': max_players,
+        'current_players': 1,
+        'status': 'waiting',
+        'created_by': session['username']
+    }
+    
+    error = create_game(game_name, game_data, session['username'])
+    if error is None:
+        return jsonify({'success': True, 'message': 'Game created successfully'})
     else:
-        print(f"DEBUG: No logs to update")
-    return False
+        return jsonify({'success': False, 'error': str(error)})
 
-@app.route('/game')
-@app.route('/game.html')
-def game():
-    return render_template('account.html',
-                           safelog = create_HTML_logs_cards_for_Website(),
-
-
-    )
-
-@app.route('/game_logs')
-def game_logs():
-    game_table = ""
-    # Используем кэшированные логи или globs.GAME_LOGS
-    logs_source = game_logs_cache if game_logs_cache else (globs.GAME_LOGS if hasattr(globs, 'GAME_LOGS') else [])
+@app.route('/join_game', methods=['POST'])
+def join_game_route():
+    """Join existing game"""
+    if 'username' not in session:
+        return jsonify({'success': False, 'error': 'Not logged in'})
     
-    if logs_source:
-        recent_logs = logs_source[-20:]  # Показываем последние 20 записей
-        game_table = "<table>"
-        game_table += "<thead><tr><th>Президент</th><th>Канцлер</th><th>Сказал президент</th><th>Сказал канцлер</th><th>Положил канцлер</th><th>Сказал президент<br>после канцлера</th><th>Особое действие</th></tr></thead>"
-        game_table += "<tbody>"
-        for log in recent_logs:
-            game_table += log.to_HTML_row_Website()
-        game_table += "</tbody></table>"
+    game_name = request.json.get('game_name')
+    game_password = request.json.get('game_password', '')
+    
+    if not game_name:
+        return jsonify({'success': False, 'error': 'Game name is required'})
+    
+    success, message = verify_game(game_name, game_password, session['username'])
+    if success:
+        return jsonify({'success': True, 'message': 'Joined game successfully'})
     else:
-        game_table = '<div class="no-logs"><h3>🎮 Логи игры пока не доступны</h3><p>Игра ещё не началась или логи ещё не были загружены.</p><p>Логи появятся здесь автоматически, как только начнётся игра.</p></div>'
-    return render_template('game_logs.html', game_table=game_table)
+        return jsonify({'success': False, 'error': message})
 
-@app.route('/get_game_logs')
-def get_game_logs():
-    """Функция для AJAX запросов на получение обновленных логов"""
-    game_table = ""
+@app.route('/api/games')
+def api_games():
+    """API endpoint to get list of available games"""
+    if 'username' not in session:
+        return jsonify({'success': False, 'error': 'Not logged in'})
     
-    # Проверяем все возможные источники логов
-    logs_source = []
+    games = list(get_games_list())
+    return jsonify({'success': True, 'games': games})
+
+@app.route('/game/<game_name>')
+def game(game_name):
+    """Game page for playing Secret Hitler"""
+    if 'username' not in session:
+        return redirect(safe_url_for('login'))
     
-    # 1. Приоритет: кэшированные логи из update_game_logs
-    if game_logs_cache:
-        logs_source = game_logs_cache
-    # 2. Альтернатива: логи из globs.GAME_LOGS
-    elif hasattr(globs, 'GAME_LOGS') and globs.GAME_LOGS:
-        logs_source = globs.GAME_LOGS
+    # Get game data
+    game_data = find_game_data(game_name)
+    if not game_data:
+        return redirect(safe_url_for('lobby'))
     
-    if logs_source:
-        recent_logs = logs_source[-20:]  # Показываем последние 20 записей
-        game_table = "<table>"
-        game_table += "<thead><tr><th>Президент</th><th>Канцлер</th><th>Сказал президент</th><th>Сказал канцлер</th><th>Положил канцлер</th><th>Сказал президент<br>после канцлера</th><th>Особое действие</th></tr></thead>"
-        game_table += "<tbody>"
-        for log in recent_logs:
-            if hasattr(log, 'to_HTML_row_Website'):
-                game_table += log.to_HTML_row_Website()
-            else:
-                game_table += f"<tr><td colspan='9'>Лог: {str(log)}</td></tr>"
-        game_table += "</tbody></table>"
+    # Get list of players in the game
+    if isinstance(game_data, Exception):
+        if isinstance(game_data, FileNotFoundError):
+            return redirect(safe_url_for('error',
+                                         error_code=404,
+                                         error_message='Game not found',
+                                         error_description='Game data file not found',
+                                         suggestion='Contact administrator if you sure if game is valid',
+                                         debug_info=repr(game_data)))
+        return redirect(safe_url_for('error',
+                                     error_code=500,
+                                     error_message=repr(game_data),
+                                     error_description='Game data error',
+                                     error_comment='Game data is corrupted or doesn\'t exist',
+                                     suggestion='Contact administrator if you sure if game is valid',
+                                     debug_info=repr(game_data)))
+    if isinstance(game_data.get('players'), list):
+        players = game_data.get('players', [])
     else:
-        game_table = '<div class="no-logs"><h3>🎮 Логи игры пока не доступны</h3><p>Игра ещё не началась или логи ещё не были загружены.</p><p>Логи появятся здесь автоматически, как только начнётся игра.</p></div>'
-    return jsonify({"success": True, "game_table": game_table})
+        players = []
+    if session['username'] not in players:
+        return redirect(safe_url_for('error',
+                                     error_code=403,
+                                     error_message='Forbidden',
+                                     error_description='Player not in game',
+                                     error_comment='You are not part of this game',
+                                     suggestion='Contact administrator if you sure if game is valid',
+                                     debug_info=f'Player {session["username"]} not in game {game_name}'))
+    
+    return render_template('game.html', 
+                         username=session['username'],
+                         game_name=game_name,
+                         players=players,
+                         current_turn=game_data.get('current_turn', ''),
+                         game_phase=game_data.get('phase', 'waiting'),
+                         player_count=len(players))
 
-@app.route('/update_game_logs', methods=['POST'])
-def update_game_logs_route():
-    data = request.get_json()
-    if data and 'logs' in data:
-        if update_website_logs(data['logs']):
-            return jsonify({'success': True})
-    return jsonify({'success': False})
+@app.route('/api/game/vote', methods=['POST'])
+def api_game_vote():
+    """API endpoint for voting in game"""
+    if 'username' not in session:
+        return jsonify({'success': False, 'error': 'Not logged in'})
+    
+    game_name = request.json.get('game_name')
+    vote = request.json.get('vote')
+    
+    if not game_name or not vote:
+        return jsonify({'success': False, 'error': 'Game name and vote are required'})
+    
+    # Get current game data
+    game_data = find_game_data(game_name)
+    if not game_data:
+        return jsonify({'success': False, 'error': 'Game not found'})
+    
+    # Check if player is in the game
+    if session['username'] not in game_data.get('players', []):
+        return jsonify({'success': False, 'error': 'Player not in game'})
+    
+    # Process vote (this is a simplified version)
+    if 'votes' not in game_data:
+        game_data['votes'] = {}
+    
+    game_data['votes'][session['username']] = vote
+    game_data['last_action'] = f"{session['username']} voted {vote}"
+    
+    # Save updated game data
+    save_game_data(game_name, game_data)
+    
+    return jsonify({
+        'success': True,
+        'message': 'Vote recorded',
+        'game_data': game_data
+    })
+
+@app.route('/api/game/select_player', methods=['POST'])
+def api_game_select_player():
+    """API endpoint for selecting a player in game"""
+    if 'username' not in session:
+        return jsonify({'success': False, 'error': 'Not logged in'})
+    
+    game_name = request.json.get('game_name')
+    selected_player = request.json.get('selected_player')
+    
+    if not game_name or not selected_player:
+        return jsonify({'success': False, 'error': 'Game name and selected player are required'})
+    
+    # Get current game data
+    game_data = find_game_data(game_name)
+    if not game_data:
+        return jsonify({'success': False, 'error': 'Game not found'})
+    
+    # Check if player is in the game
+    if session['username'] not in game_data.get('players', []):
+        return jsonify({'success': False, 'error': 'Player not in game'})
+    
+    # Check if selected player is in the game
+    if selected_player not in game_data.get('players', []):
+        return jsonify({'success': False, 'error': 'Selected player not in game'})
+    
+    # Process player selection (this is a simplified version)
+    game_data['selected_player'] = selected_player
+    game_data['last_action'] = f"{session['username']} selected {selected_player}"
+    
+    # Save updated game data
+    save_game_data(game_name, game_data)
+    
+    return jsonify({
+        'success': True,
+        'message': 'Player selected',
+        'game_data': game_data
+    })
+
+@app.route('/api/game/<game_name>')
+def api_game_data(game_name):
+    """API endpoint to get game data"""
+    if 'username' not in session:
+        return jsonify({'success': False, 'error': 'Not logged in'})
+    
+    game_data = find_game_data(game_name)
+    if not game_data:
+        return jsonify({'success': False, 'error': 'Game not found'})
+    
+    # Check if player is in the game
+    if session['username'] not in game_data.get('players', []):
+        return jsonify({'success': False, 'error': 'Player not in game'})
+    
+    return jsonify({
+        'success': True,
+        'game_data': game_data
+    })
+
+# Error handling functions
+def render_error_page(error_code, error_message=None, error_description=None, error_comment=None, suggestion=None, debug_info=None):
+    """Render error page with comprehensive error information"""
+    try:
+        return render_template('error.html',
+                             error_code=error_code,
+                             error_message=error_message,
+                             error_description=error_description,
+                             error_comment=error_comment,
+                             suggestion=suggestion,
+                             debug_info=debug_info,
+                             config={'DEBUG': app.debug})
+    except Exception as e:
+        # Fallback if error template fails
+        return f"""
+        <!DOCTYPE html>
+        <html>
+        <head><title>Критическая ошибка {error_code}</title></head>
+        <body>
+            <h1>Критическая ошибка {e}</h1>
+            <p>{error_message or 'Произошла ошибка'}</p>
+            <p>{error_description or 'Произошла ошибка'}</p>
+            <p>{error_comment or 'Нет дополнительной информации'}</p>
+            <p>{suggestion or 'Нет совета'}</p>
+            <p>{debug_info or 'Нет отладочной информации о изначальной ошибке'}</p>
+            <p>{repr(e)}</p>
+            <a href="{safe_url_for('index')}">На главную</a>
+        </body>
+        </html>
+        """, error_code
+
+# HTTP Error Handlers
+@app.errorhandler(404)
+def not_found_error(error):
+    """Handle 404 Not Found errors"""
+    return render_error_page(
+        error_code=404,
+        error_message="Страница не найдена",
+        error_description="Запрошенная страница не существует или была перемещена.",
+        error_comment="Возможно, вы ввели неправильный адрес или страница была удалена.",
+        suggestion="Проверьте правильность URL-адреса или вернитесь на главную страницу."
+    ), 404
+
+@app.errorhandler(500)
+def internal_error(handled_error: Exception):
+    """Handle 500 Internal Server errors"""
+    import traceback
+    debug_info = None
+    if app.debug:
+        debug_info = traceback.format_exc()
+    
+    return render_error_page(
+        error_code=500,
+        error_message="Внутренняя ошибка сервера",
+        error_description="Произошла ошибка на сервере при обработке вашего запроса.",
+        error_comment="Мы уже работаем над решением этой проблемы.",
+        suggestion="Попробуйте обновить страницу через несколько минут. Если ошибка повторяется, обратитесь к администратору.",
+        debug_info=f"{debug_info} | {handled_error}"
+    ), 500
+
+@app.errorhandler(403)
+def forbidden_error(error):
+    """Handle 403 Forbidden errors"""
+    return render_error_page(
+        error_code=403,
+        error_message="Доступ запрещен",
+        error_description="У вас нет прав для доступа к этой странице или ресурсу.",
+        error_comment="Возможно, вам нужно войти в систему или у вас недостаточно прав.",
+        suggestion="Попробуйте войти в систему или обратитесь к администратору для получения необходимых прав."
+    ), 403
+
+@app.errorhandler(401)
+def unauthorized_error(error):
+    """Handle 401 Unauthorized errors"""
+    return render_error_page(
+        error_code=401,
+        error_message="Необходима авторизация",
+        error_description="Для доступа к этой странице необходимо войти в систему.",
+        error_comment="Пожалуйста, авторизуйтесь, чтобы продолжить.",
+        suggestion="Используйте форму входа или зарегистрируйтесь, если у вас еще нет аккаунта."
+    ), 401
+
+@app.errorhandler(400)
+def bad_request_error(error):
+    """Handle 400 Bad Request errors"""
+    return render_error_page(
+        error_code=400,
+        error_message="Неверный запрос",
+        error_description="Запрос содержит неверные данные или параметры.",
+        error_comment="Проверьте правильность введенных данных.",
+        suggestion="Попробуйте выполнить действие еще раз, проверив все введенные данные."
+    ), 400
+
+@app.errorhandler(405)
+def method_not_allowed_error(error):
+    """Handle 405 Method Not Allowed errors"""
+    return render_error_page(
+        error_code=405,
+        error_message="Метод не разрешен",
+        error_description="Используемый метод HTTP не разрешен для этого ресурса.",
+        error_comment="Например, попытка отправить POST-запрос на страницу, которая принимает только GET-запросы.",
+        suggestion="Попробуйте использовать другой метод или обратитесь к документации API."
+    ), 405
+
+# Custom error route for manual error display
+@app.route('/error')
+def error():
+    """Manual error display route"""
+    error_code = request.args.get('error_code', request.args.get('code', 500, type=int), type=int)
+    error_message = request.args.get('error_message', request.args.get('message'))
+    error_description = request.args.get('error_description', request.args.get('description'))
+    error_comment = request.args.get('error_comment', request.args.get('comment'))
+    suggestion = request.args.get('suggestion')
+    debug_info = request.args.get('debug_info')
+    
+    return render_error_page(
+        error_code=error_code,
+        error_message=error_message,
+        error_description=error_description,
+        error_comment=error_comment,
+        suggestion=suggestion,
+        debug_info=debug_info
+    ), error_code
+
+# Application-specific error handlers
+def handle_game_error(error_message, error_code=400):
+    """Handle game-specific errors"""
+    return render_error_page(
+        error_code=error_code,
+        error_message="Ошибка в игре",
+        error_description=error_message,
+        error_comment="Проверьте правильность действий в игре.",
+        suggestion="Попробуйте вернуться в лобби и начать заново."
+    ), error_code
+
+def handle_database_error(error_message):
+    """Handle database errors"""
+    return render_error_page(
+        error_code=500,
+        error_message="Ошибка базы данных",
+        error_description="Произошла ошибка при работе с базой данных.",
+        error_comment="Возможно, проблема с соединением или данными.",
+        suggestion="Попробуйте обновить страницу. Если ошибка повторяется, обратитесь к администратору.",
+        debug_info=error_message if app.debug else None
+    ), 500
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=20050)
+    app.run(debug=True, port=20050, host='0.0.0.0')

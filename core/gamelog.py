@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 from Players.abstract_player import AbstractPlayer
-from standard_classes import Cards
+from core.standard_classes import Cards
 
-from standard_functions import color_clear
+from core.standard_functions import color_clear
 
 
 class GameLog:

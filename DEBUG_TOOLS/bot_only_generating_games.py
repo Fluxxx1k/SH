@@ -7,7 +7,7 @@ except Exception as e:
 else:
     try:
         if user_settings.LOG_CONSOLE:
-            import based_logger
+            from DEBUG_TOOLS import based_logger
         print("Will be created log of console")
     except Exception as e:
         print(repr(e))
@@ -17,5 +17,5 @@ for i in range(1):
     user_settings.IS_BOT_ONLY = True
     print(f"GAME No {i}")
     # noinspection PyTypeChecker
-    import SH2
+
 

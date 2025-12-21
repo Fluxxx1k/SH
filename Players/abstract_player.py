@@ -2,21 +2,21 @@ from __future__ import annotations
 from typing import Iterable, Literal
 import datetime
 
-from infolog import InfoLog
-from globs import INFO_LOGS, PLAYERS
+from core.infolog import InfoLog
+from core.globs import INFO_LOGS, PLAYERS
 from abc import abstractmethod, ABC
 
-from colors import (BLUE_TEXT_BRIGHT as BLUE,
-                    CYAN_TEXT_BRIGHT as CYAN,
-                    YELLOW_TEXT_BRIGHT as YELLOW,
-                    RESET_TEXT as END_T,
-                    YELLOW_BACKGROUND_BRIGHT as GULAG,
-                    RED_BACKGROUND_BRIGHT as DEAD,
-                    RESET_BACKGROUND as END_BG,
-                    )
-from standard_names_SH import X
+from cli.colors import (BLUE_TEXT_BRIGHT as BLUE,
+                        CYAN_TEXT_BRIGHT as CYAN,
+                        YELLOW_TEXT_BRIGHT as YELLOW,
+                        RESET_TEXT as END_T,
+                        YELLOW_BACKGROUND_BRIGHT as GULAG,
+                        RED_BACKGROUND_BRIGHT as DEAD,
+                        RESET_BACKGROUND as END_BG,
+                        )
+from core.standard_names_SH import X
 from user_settings import MAX_NAME_LEN
-from utils import get_color, naming
+from core.utils import get_color, naming
 
 
 class AbstractPlayer(ABC):

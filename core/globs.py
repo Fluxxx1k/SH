@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from Players.abstract_player import AbstractPlayer
     from infolog import InfoLog
-    from gamelog import GameLog
+    from core.gamelog import GameLog
 
 INFO_LOGS: list[InfoLog] = []
 GAME_LOGS: list[GameLog] = []

@@ -4,30 +4,27 @@ import os
 import random as rnd
 import time as t
 from atexit import register as atexit
-from HTML_logs import create_HTML_logs, color_of_HTML_roles, GameLog, pr_c, purple_c, InfoLog
+from core.HTML_logs import create_HTML_logs, color_of_HTML_roles, GameLog, pr_c, purple_c, InfoLog
 from Players.bot2 import Bot2 as Bot
-from colors import (YELLOW_TEXT_BRIGHT as YELLOW,
-                    BLUE_TEXT_BRIGHT as BLUE,
-                    CYAN_TEXT_BRIGHT as CYAN,
-                    PURPLE_TEXT_BRIGHT as PURPLE,
-                    RED_TEXT_BRIGHT as RED,
-                    GREEN_TEXT_BRIGHT as BLACK,
-                    RESET_TEXT as END_T,
-                    RESET_BACKGROUND as END_BG,
-                    YELLOW_BACKGROUND as GULAG,
-                    END, BOLD, UNDERLINE,
-                    )
+from cli.colors import (YELLOW_TEXT_BRIGHT as YELLOW,
+                        BLUE_TEXT_BRIGHT as BLUE,
+                        CYAN_TEXT_BRIGHT as CYAN,
+                        PURPLE_TEXT_BRIGHT as PURPLE,
+                        RED_TEXT_BRIGHT as RED,
+                        GREEN_TEXT_BRIGHT as BLACK,
+                        RESET_TEXT as END_T,
+                        RESET_BACKGROUND as END_BG,
+                        YELLOW_BACKGROUND as GULAG,
+                        END, BOLD, UNDERLINE,
+                        )
 from Players.player import Player
-from globs import PLAYERS, ROLES, INFO_LOGS
-import globs
-from standard_functions import show_only_to_one, yes_or_no, my_input
-from standard_names_SH import X
-from user_color_settings import INPUT_COLOR, CRITICAL, WARNING, GOOD
-from utils import coloring, naming, input_cards, out
+from core.globs import PLAYERS, ROLES, INFO_LOGS
+from core import globs
+from core.standard_functions import show_only_to_one, yes_or_no, my_input
+from core.standard_names_SH import X
+from cli.user_color_settings import INPUT_COLOR, CRITICAL, WARNING, GOOD
+from core.utils import coloring, naming, input_cards, out
 from user_settings import *
-
-if WEBSITE_USING:
-    from Website.sh2_integration import update_website_logs
 
 
 code_start_time = t.time()
@@ -352,11 +349,11 @@ pnc = pn
 cn = None
 while red < RED_WIN_NUM and black < BLACK_WIN_NUM and not Git_caput and not Git_cn:
     if DEBUG_MODE:
-        print(f"{globs.PLAYERS= }")
-        print(f"{globs.ROLES= }")
-        print(f"{globs.HITLER= }")
-        print(f"{globs.STALIN= }")
-        print(f"{globs.COUNT_PLAYERS= }")
+        print(f"{ globs.PLAYERS= }")
+        print(f"{ globs.ROLES= }")
+        print(f"{ globs.HITLER= }")
+        print(f"{ globs.STALIN= }")
+        print(f"{ globs.COUNT_PLAYERS= }")
     if pnc != pn:
         if special_election:
             if DEBUG_MODE:
@@ -642,9 +639,6 @@ while red < RED_WIN_NUM and black < BLACK_WIN_NUM and not Git_caput and not Git_
         for i in sorted(Git_not):
             print(f'№{i + 1}) {PLAYERS[i]}')
         print('\n')
-    if WEBSITE_USING:
-        update_website_logs(globs.GAME_LOGS)
-
 
 end_time_f = t.strftime(f"{DATE_FORMAT} {TIME_FORMAT}")
 end_time = t.time()

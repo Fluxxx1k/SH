@@ -2,9 +2,9 @@ from __future__ import annotations
 
 from typing import Callable
 
-from colors import PURPLE_TEXT, END, RESET_BACKGROUND, RESET_TEXT, UP
-from user_color_settings import WARNING
-from standard_names_SH import MyErr
+from cli.colors import PURPLE_TEXT, END, RESET_BACKGROUND, RESET_TEXT, UP
+from cli.user_color_settings import WARNING
+from core.standard_names_SH import MyErr
 def color_clear(s:str | list, print_errors=True) -> str:
     """
     Removes all colors and returns new string.

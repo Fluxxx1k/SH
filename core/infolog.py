@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from HTML_colors import red_c, norm_c, purple_c, orange_c, yellow_c, num_c
-from globs import INFO_LOGS
-from standard_names_SH import X
-from user_color_settings import WARNING
+from core.HTML_colors import red_c, norm_c, purple_c, orange_c, yellow_c, num_c
+from core.globs import INFO_LOGS
+from core.standard_names_SH import X
+from cli.user_color_settings import WARNING
 from user_settings import IS_PRINT_SMALL_INFO
 
 
