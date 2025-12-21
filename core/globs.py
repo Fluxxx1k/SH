@@ -4,8 +4,8 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from Players.abstract_player import AbstractPlayer
-    from InfoLog import InfoLog
-    from GameLog import GameLog
+    from infolog import InfoLog
+    from core.gamelog import GameLog
 
 INFO_LOGS: list[InfoLog] = []
 GAME_LOGS: list[GameLog] = []

@@ -4,27 +4,28 @@ import os
 import random as rnd
 import time as t
 from atexit import register as atexit
-from HTML_logs import create_HTML_logs, color_of_HTML_roles, GameLog, pr_c, purple_c, InfoLog
+from core.HTML_logs import create_HTML_logs, color_of_HTML_roles, GameLog, pr_c, purple_c, InfoLog
 from Players.bot2 import Bot2 as Bot
-from colors import (YELLOW_TEXT_BRIGHT as YELLOW,
-                    BLUE_TEXT_BRIGHT as BLUE,
-                    CYAN_TEXT_BRIGHT as CYAN,
-                    PURPLE_TEXT_BRIGHT as PURPLE,
-                    RED_TEXT_BRIGHT as RED,
-                    GREEN_TEXT_BRIGHT as BLACK,
-                    RESET_TEXT as END_T,
-                    RESET_BACKGROUND as END_BG,
-                    YELLOW_BACKGROUND as GULAG,
-                    END, BOLD, UNDERLINE,
-                    )
+from cli.colors import (YELLOW_TEXT_BRIGHT as YELLOW,
+                        BLUE_TEXT_BRIGHT as BLUE,
+                        CYAN_TEXT_BRIGHT as CYAN,
+                        PURPLE_TEXT_BRIGHT as PURPLE,
+                        RED_TEXT_BRIGHT as RED,
+                        GREEN_TEXT_BRIGHT as BLACK,
+                        RESET_TEXT as END_T,
+                        RESET_BACKGROUND as END_BG,
+                        YELLOW_BACKGROUND as GULAG,
+                        END, BOLD, UNDERLINE,
+                        )
 from Players.player import Player
-from globs import PLAYERS, ROLES, INFO_LOGS
-import globs
-from standard_functions import show_only_to_one, yes_or_no, my_input
-from standard_names_SH import X
-from user_color_settings import INPUT_COLOR, CRITICAL, WARNING, GOOD
-from utils import coloring, naming, input_cards, out
+from core.globs import PLAYERS, ROLES, INFO_LOGS
+from core import globs
+from core.standard_functions import show_only_to_one, yes_or_no, my_input
+from core.standard_names_SH import X
+from cli.user_color_settings import INPUT_COLOR, CRITICAL, WARNING, GOOD
+from core.utils import coloring, naming, input_cards, out
 from user_settings import *
+
 
 code_start_time = t.time()
 INFO_LOGS.append(InfoLog(info_type=X.INFO, info_name="Code start time", info1=t.strftime(f"{DATE_FORMAT} {TIME_FORMAT}"), info2=code_start_time))
@@ -186,8 +187,8 @@ def dbg(s:str) -> bool:
 
 @atexit
 def print_all_at_exit() -> None:
-    for player in PLAYERS:
-        player.print_short_info()
+    for plr in PLAYERS:
+        plr.print_short_info()
 
 @atexit
 def logs_out():
@@ -348,11 +349,11 @@ pnc = pn
 cn = None
 while red < RED_WIN_NUM and black < BLACK_WIN_NUM and not Git_caput and not Git_cn:
     if DEBUG_MODE:
-        print(f"{globs.PLAYERS= }")
-        print(f"{globs.ROLES= }")
-        print(f"{globs.HITLER= }")
-        print(f"{globs.STALIN= }")
-        print(f"{globs.COUNT_PLAYERS= }")
+        print(f"{ globs.PLAYERS= }")
+        print(f"{ globs.ROLES= }")
+        print(f"{ globs.HITLER= }")
+        print(f"{ globs.STALIN= }")
+        print(f"{ globs.COUNT_PLAYERS= }")
     if pnc != pn:
         if special_election:
             if DEBUG_MODE:
@@ -427,14 +428,36 @@ while red < RED_WIN_NUM and black < BLACK_WIN_NUM and not Git_caput and not Git_
     cn = PLAYERS[pn].choose_chancellor(cannot_be={previous_president if (count & 1) == 0 else None,
                                                   pn, cn, gulag, killed})
     print(f"{CYAN}President{END} [{PURPLE}{BOLD}{PLAYERS[pn]}{END}] requested [{PURPLE}{BOLD}{PLAYERS[cn]}{END}] as {YELLOW}chancellor{END}")
-    if not IS_BOT_ONLY:
+    if not VOTE_BY_ONE:
         if yes_or_no(f"Skip? (Skips: {skips}): "):
             skips += 1
             degov()
             print("\n\n\n")
+            INFO_LOGS.append(InfoLog(X.DBG, "Vote info", f"{PLAYERS[pn]} with {PLAYERS[cn]} disaccepted",
+                                     info2=t.strftime(f"{DATE_FORMAT} {TIME_FORMAT}")))
             continue
         else:
+            INFO_LOGS.append(InfoLog(X.DBG, "Vote info", f"{PLAYERS[pn]} with {PLAYERS[cn]} accepted",
+                                     info2=t.strftime(f"{DATE_FORMAT} {TIME_FORMAT}")))
             skips = 0
+    else:
+        acceptable = 0
+        for player in PLAYERS:
+            vote = player.vote_for_pair(PLAYERS[pn], PLAYERS[cn])
+            INFO_LOGS.append(InfoLog(X.DBG, "Vote info" ,f"{player} voted {vote} for {PLAYERS[pn]} with {PLAYERS[cn]}",
+                             info2=t.strftime(f"{DATE_FORMAT} {TIME_FORMAT}")))
+            acceptable += vote
+        if acceptable > 0:
+            INFO_LOGS.append(InfoLog(X.DBG, "Vote info", f"{PLAYERS[pn]} with {PLAYERS[cn]} accepted",
+                                     info2=t.strftime(f"{DATE_FORMAT} {TIME_FORMAT}")))
+            skips = 0
+        else:
+            INFO_LOGS.append(InfoLog(X.DBG, "Vote info", f"{PLAYERS[pn]} with {PLAYERS[cn]} disaccepted",
+                                     info2=t.strftime(f"{DATE_FORMAT} {TIME_FORMAT}")))
+            skips += 1
+            degov()
+            print("\n\n\n")
+            continue
 
     if black >= 3 and cn not in Git_not:
         if STALIN is None:
@@ -616,7 +639,6 @@ while red < RED_WIN_NUM and black < BLACK_WIN_NUM and not Git_caput and not Git_
         for i in sorted(Git_not):
             print(f'№{i + 1}) {PLAYERS[i]}')
         print('\n')
-
 
 end_time_f = t.strftime(f"{DATE_FORMAT} {TIME_FORMAT}")
 end_time = t.time()

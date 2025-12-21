@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from colors import *
+from cli.colors import *
 INPUT_COLOR = BOLD + PURPLE_TEXT_BRIGHT
 
 CRITICAL = RED_BACKGROUND_BRIGHT + CYAN_TEXT_BRIGHT + UNDERLINE + BOLD

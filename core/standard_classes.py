@@ -1,5 +1,5 @@
-from colors import RESET_TEXT, END
-from user_color_settings import WARNING, CARDS_COLORS
+from cli.colors import RESET_TEXT, END
+from cli.user_color_settings import WARNING, CARDS_COLORS
 from user_settings import IS_PRINT_SMALL_INFO, IS_PRINT_FULL_INFO
 #from utils import coloring
 

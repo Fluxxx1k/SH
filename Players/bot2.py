@@ -1,15 +1,16 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
+
 if TYPE_CHECKING:
     from Players.abstract_player import AbstractPlayer
 import datetime
 import random as rnd
-from globs import CARDS
+from core.globs import CARDS
 
-from HTML_logs import InfoLog
-from globs import INFO_LOGS
-from standard_names_SH import X
+from core.HTML_logs import InfoLog
+from core.globs import INFO_LOGS
+from core.standard_names_SH import X
 from user_settings import DATE_FORMAT, TIME_FORMAT, IS_PRINT_SMALL_INFO, IS_PRINT_FULL_INFO, BLACK_WIN_NUM, RED_WIN_NUM
 from Players.bot import Bot
 
@@ -106,16 +107,18 @@ class Bot2(Bot):
 
 
     def _chancellor_hitler(self, cards: str | list[str], prs: int, words: str, veto: bool) -> tuple[str, str]:
+        cards = ''.join(list(cards))
         if CARDS[X.RED] == RED_WIN_NUM - 1 or CARDS[X.BLACK] == BLACK_WIN_NUM - 1:
             if "B" in cards:
-                return ''.join(cards), "B"
+                return cards, "B"
             if veto:
                 return "BB", 'X'
+            return cards, 'R'
         if "B" in cards and prs in self.black and (words == "BBB" or words == "XXX"):
             return "BB", "B"
         if 'R' in cards:
             return ''.join(cards), "R"
-        return ''.join(cards), "R"
+        return ''.join(cards), "B"
 
     def _chancellor_black(self, cards: str | list[str], prs: int, words: str, veto: bool) -> tuple[str, str]:
         if cards == ["B"] * 2:
@@ -136,7 +139,7 @@ class Bot2(Bot):
             return ''.join(cards), "R"
         return "BB", "B"
 
-    def president(self, cards, cnc, *args) -> tuple[str, list[str], bool]:
+    def _president(self, cards, cnc, *args) -> tuple[str, list[str], bool]:
         cards = sorted(cards)
         if self.bot_mind == X.HITLER:
             return self._president_hitler(cards, cnc)
@@ -148,6 +151,9 @@ class Bot2(Bot):
             return self._president_anarchist(cards, cnc)
         else:
             return self._president_unknown(cards, cnc)
+    def president(self, cards, cnc) -> tuple[str, list[str], bool]:
+        temp: tuple[str, list[str], bool] = self._president(cards, cnc)
+        return 'XXX', temp[1], temp[2]
 
     def chancellor(self, cards: str | list[str], prs: int, words: str, veto: bool) -> tuple[str, str]:
         cards = sorted(cards)
@@ -161,3 +167,49 @@ class Bot2(Bot):
             return self._chancellor_anarchist(cards, prs, words, veto)
         else:
             return self._chancellor_unknown(cards, prs, words, veto)
+
+    def _vote_for_pair_hitler(self, prs: AbstractPlayer, cnc: AbstractPlayer) -> Literal[-1, 0, 1]:
+        if prs in self.black or cnc in self.black:
+            return 1
+        if CARDS[X.RED] == RED_WIN_NUM - 1 or CARDS[X.BLACK] == BLACK_WIN_NUM - 1:
+            return -1
+        return 1
+
+    def _vote_for_pair_red(self, prs: AbstractPlayer, cnc: AbstractPlayer) -> Literal[-1, 0, 1]:
+        if prs in self.black or cnc in self.black:
+            return -1
+        if (prs.contr > 0 or cnc.contr > 0) and rnd.random() < 0.87:
+            return -1
+        return 1
+
+    def _vote_for_pair_black(self, prs: AbstractPlayer, cnc: AbstractPlayer) -> Literal[-1, 0, 1]:
+        if prs in self.black or cnc in self.black:
+            return 1
+        if CARDS[X.RED] == RED_WIN_NUM - 1 or CARDS[X.BLACK] == BLACK_WIN_NUM - 1 or rnd.random() < 0.03125:
+            return -1
+        return 1
+
+    def _vote_for_pair_anarchist(self, prs: AbstractPlayer, cnc: AbstractPlayer) -> Literal[-1, 0, 1]:
+        return -1 if rnd.random() < 0.333 else rnd.random() < 0.5
+
+    def _vote_for_pair_unknown(self, prs: AbstractPlayer, cnc: AbstractPlayer) -> Literal[-1, 0, 1]:
+        if IS_PRINT_FULL_INFO:
+            print(f"Unknown vote situation {self.bot_mind= } {prs= } {cnc= }")
+        elif IS_PRINT_SMALL_INFO:
+            print(f"Unknown vote situation")
+        INFO_LOGS.append(InfoLog(info_type=X.ERROR,
+                                 info_name=f"Unknown vote situation",
+                                 info1=f"№{self.num} [{self}] {self.bot_mind= } {prs= } {cnc= }",
+                                 info2=f"{datetime.datetime.now().strftime(f'{DATE_FORMAT} {TIME_FORMAT}')}"))
+        return 0
+    def vote_for_pair(self, prs: AbstractPlayer, cnc: AbstractPlayer) -> Literal[-1, 0, 1]:
+        if self.bot_mind == X.HITLER:
+            return self._vote_for_pair_hitler(prs, cnc)
+        elif self.bot_mind == X.RED:
+            return self._vote_for_pair_red(prs, cnc)
+        elif self.bot_mind == X.BLACK:
+            return self._vote_for_pair_black(prs, cnc)
+        elif self.bot_mind == X.NRH:
+            return self._vote_for_pair_anarchist(prs, cnc)
+        else:
+            return self._vote_for_pair_unknown(prs, cnc)

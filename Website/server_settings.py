@@ -24,6 +24,7 @@ EXTENSION_FOR_CONSOLE_LOGS: str = '.txt'  # расширение
 TABLE_SPLITTER: str = '|'
 DATE_FORMAT: str = "%d.%m.%y"
 TIME_FORMAT: str = "%H:%M:%S"
+
 def get_roles(length: int) -> tuple[list[str], bool]:
     """
     creates shuffled list of roles
@@ -53,6 +54,7 @@ def get_roles(length: int) -> tuple[list[str], bool]:
     roles.extend(red)
     random.shuffle(roles)
     return roles, bool(molotov or ribbentrop)
+
 def get_bot_places(length: int) -> list[int]:
     """
     creates list of places for bots

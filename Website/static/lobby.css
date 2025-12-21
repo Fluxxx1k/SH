@@ -1,0 +1,401 @@
+/* Стили для лобби игры Secret Hitler */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+    color: #ffffff;
+    min-height: 100vh;
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Header */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding: 20px;
+    background: linear-gradient(45deg, #8B0000, #DC143C);
+    border-radius: 15px;
+    box-shadow: 0 8px 32px rgba(220, 20, 60, 0.3);
+    flex-wrap: wrap;
+}
+
+.game-title {
+    font-size: 2.5em;
+    font-weight: bold;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+    letter-spacing: 1px;
+}
+
+.nav {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+
+.welcome-message {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 1.1em;
+    font-weight: bold;
+}
+
+.logout-link {
+    background: rgba(220, 20, 60, 0.3);
+    color: white;
+    text-decoration: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+
+.logout-link:hover {
+    background: rgba(220, 20, 60, 0.5);
+    transform: translateY(-2px);
+}
+
+/* Main content */
+.main-content {
+    margin-bottom: 40px;
+}
+
+.lobby-container {
+    display: grid;
+    grid-template-columns: 1fr 2fr 1fr;
+    gap: 30px;
+    align-items: start;
+}
+
+/* Game actions */
+.game-actions {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 25px;
+    border-radius: 15px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.game-actions h2 {
+    color: #DC143C;
+    margin-bottom: 20px;
+    font-size: 1.5em;
+    text-align: center;
+}
+
+.action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+/* Available games */
+.available-games {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 25px;
+    border-radius: 15px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.available-games h2 {
+    color: #DC143C;
+    margin-bottom: 20px;
+    font-size: 1.5em;
+    text-align: center;
+}
+
+.games-list {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.no-games-message {
+    text-align: center;
+    padding: 40px;
+    color: rgba(255, 255, 255, 0.6);
+    font-style: italic;
+}
+
+.game-item {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+}
+
+.game-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(220, 20, 60, 0.5);
+}
+
+.game-name {
+    font-weight: bold;
+    color: #DC143C;
+    margin-bottom: 5px;
+}
+
+.game-info {
+    font-size: 0.9em;
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 10px;
+}
+
+.game-players {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.player-count {
+    color: #4169E1;
+    font-weight: bold;
+}
+
+.join-btn {
+    background: linear-gradient(45deg, #4169E1, #1E90FF);
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: all 0.3s ease;
+}
+
+.join-btn:hover {
+    background: linear-gradient(45deg, #1E90FF, #4169E1);
+    transform: translateY(-1px);
+}
+
+/* Player info */
+.player-info {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 25px;
+    border-radius: 15px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.player-info h2 {
+    color: #DC143C;
+    margin-bottom: 20px;
+    font-size: 1.5em;
+    text-align: center;
+}
+
+.player-stats p {
+    margin-bottom: 10px;
+    padding: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 6px;
+}
+
+.status-online {
+    color: #32CD32;
+    font-weight: bold;
+}
+
+/* Buttons */
+.btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+}
+
+.btn-primary {
+    background: linear-gradient(45deg, #DC143C, #8B0000);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(45deg, #8B0000, #DC143C);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(220, 20, 60, 0.4);
+}
+
+.btn-secondary {
+    background: linear-gradient(45deg, #4169E1, #1E90FF);
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: linear-gradient(45deg, #1E90FF, #4169E1);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(65, 105, 225, 0.4);
+}
+
+/* Modal */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(5px);
+}
+
+.modal-content {
+    background: linear-gradient(135deg, #2d2d2d, #1a1a1a);
+    margin: 10% auto;
+    padding: 30px;
+    border-radius: 15px;
+    width: 90%;
+    max-width: 500px;
+    border: 2px solid #DC143C;
+    box-shadow: 0 10px 40px rgba(220, 20, 60, 0.3);
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.close:hover,
+.close:focus {
+    color: #DC143C;
+}
+
+.modal-content h2 {
+    color: #DC143C;
+    margin-bottom: 20px;
+    font-size: 1.8em;
+}
+
+/* Form */
+.game-form {
+    margin-top: 20px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #ffffff;
+    font-weight: bold;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    font-size: 1em;
+    transition: all 0.3s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: #DC143C;
+    background: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 0 10px rgba(220, 20, 60, 0.3);
+}
+
+.form-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: flex-end;
+    margin-top: 25px;
+}
+
+/* Footer */
+.footer {
+    text-align: center;
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 10px;
+    margin-top: 40px;
+}
+
+/* Responsive design */
+@media (max-width: 1024px) {
+    .lobby-container {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .available-games {
+        order: -1;
+    }
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
+    
+    .header {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+    
+    .game-title {
+        font-size: 2em;
+    }
+    
+    .nav {
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    
+    .modal-content {
+        margin: 15% auto;
+        width: 95%;
+        padding: 20px;
+    }
+    
+    .form-buttons {
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 480px) {
+    .game-title {
+        font-size: 1.8em;
+    }
+    
+    .btn {
+        padding: 10px 20px;
+        font-size: 0.9em;
+    }
+    
+    .action-buttons {
+        gap: 10px;
+    }
+}

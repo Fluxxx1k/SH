@@ -1,0 +1,21 @@
+{
+    "name": "test_game",
+    "password": "",
+    "max_players": 8,
+    "current_players": 3,
+    "status": "waiting",
+    "created_by": "test_user",
+    "players": [
+        "test_user",
+        "player2",
+        "player3",
+        "null",
+        "1"
+    ],
+    "votes": {
+        "null": "abstain",
+        "1": "abstain"
+    },
+    "last_action": "1 voted abstain",
+    "selected_player": "test_user"
+}
