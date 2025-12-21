@@ -47,9 +47,9 @@ try:
             print("\033[31mContinuing...\033[0m")
 except Exception as e:
     print(e)
-print("Do you want to play (1) or only log the game (2)?")
+print("Do you want to play in console (1) or only log the game in console (2) or launch in website (3)?")
 temp = input("Input: ")
-while temp != '1' and temp != '2':
+while temp != '1' and temp != '2' and temp != '3':
     temp = input("Input: ")
 if temp == '1':
     print("\033[32mLaunching\033[0m")
@@ -57,3 +57,5 @@ if temp == '1':
     import SH2
 elif temp == '2':
     print("\033[31mNot available now...\033[0m")
+elif temp == '3':
+    import Website

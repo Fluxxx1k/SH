@@ -2,12 +2,15 @@ from __future__ import annotations
 
 from datetime import datetime
 import sys
-from typing import Iterable, TYPE_CHECKING
+from typing import Iterable, TYPE_CHECKING, Union
+
 
 from user_settings import TIME_FORMAT, DATE_FORMAT, IS_PRINT_SMALL_INFO
 
 if TYPE_CHECKING:
     from Players.player import Player
+    from core.gamelog import GameLog
+    from core.infolog import InfoLog
 
 from core.globs import PLAYERS, INFO_LOGS
 from core.standard_classes import POSSIBLE_CARDS
@@ -93,7 +96,7 @@ def weighted_random(a, weights):
     if sum(weights) <= 0 or len(weights) != len(a):
         if IS_PRINT_SMALL_INFO:
             print(f"{RED}{BOLD}{UNDERLINE}Sum of weights <= 0 or wrong length, using random choice{END}")
-        INFO_LOGS.append(InfoLog.InfoLog(X.ERROR, "Sum of weights <= 0 or wrong length, using random choice", info1=f"{a= } {weights= }", info2=datetime.strftime(datetime.now(), f"{DATE_FORMAT} {TIME_FORMAT}")))
+        INFO_LOGS.append(InfoLog(X.ERROR, "Sum of weights <= 0 or wrong length, using random choice", info1=f"{a= } {weights= }", info2=datetime.strftime(datetime.now(), f"{DATE_FORMAT} {TIME_FORMAT}")))
         return random.choice(a)
     return random.choices(a, weights, k=1)[0]
 
@@ -103,7 +106,7 @@ def weighted_random_for_indexes(weights) -> int:
     if sum(weights) <= 0 or len(weights) != globs.COUNT_PLAYERS:
         if IS_PRINT_SMALL_INFO:
             print(f"{RED}{BOLD}{UNDERLINE}Sum of weights <= 0 or wrong length, using random choice{END}")
-        INFO_LOGS.append(InfoLog.InfoLog(X.ERROR, "Sum of weights <= 0 or wrong length, using random choice", info1=f"{weights= }", info2=datetime.strftime(datetime.now(), f"{DATE_FORMAT} {TIME_FORMAT}")))
+        INFO_LOGS.append(InfoLog(X.ERROR, "Sum of weights <= 0 or wrong length, using random choice", info1=f"{weights= }", info2=datetime.strftime(datetime.now(), f"{DATE_FORMAT} {TIME_FORMAT}")))
         return random.choice(range(globs.COUNT_PLAYERS))
     return random.choices(range(globs.COUNT_PLAYERS), weights, k=1)[0]
 
@@ -116,7 +119,7 @@ def preproc_votes(votes: dict[int, int], smalling:Iterable[int]=(), times_smalli
             if i in smalling:
                 x[i] //= times_smalling
         except Exception as e:
-            INFO_LOGS.append(InfoLog.InfoLog(X.ERROR, "Error in preproc_votes", info1=f"{e= } {i= } {votes= } {smalling= } {times_smalling= } {x= }", info2=datetime.strftime(datetime.now(), f"{DATE_FORMAT} {TIME_FORMAT}")))
+            INFO_LOGS.append(InfoLog(X.ERROR, "Error in preproc_votes", info1=f"{e= } {i= } {votes= } {smalling= } {times_smalling= } {x= }", info2=datetime.strftime(datetime.now(), f"{DATE_FORMAT} {TIME_FORMAT}")))
     return x
 
 def input_cards(text=f"{WARNING}Some input: {END_T}", q: int | set[int] = 0, c_p:bool=False, veto=False) -> str:
@@ -185,3 +188,18 @@ def get_color_for_role(role: str) -> str:
         return PURPLE
     else:
         return RESET_TEXT
+
+def update_obj_to_json(obj: Union[bool, int, float, str, set, list, tuple, frozenset, GameLog, InfoLog]):
+    from core.gamelog import GameLog
+    from core.infolog import InfoLog
+    if isinstance(obj, (bool, int, float, str, type(None))):
+        return obj
+    elif isinstance(obj, (set, list, tuple, frozenset)):
+        return [update_obj_to_json(i) for i in obj]
+    elif isinstance(obj, (GameLog, InfoLog)):
+        return {k: update_obj_to_json(v) for k, v in obj.__dict__.items()}
+    elif isinstance(obj, dict):
+        return {k: update_obj_to_json(v) for k, v in obj.items()}
+    else:
+        print(CRITICAL+(f"Unsupported type for JSON serialization: {type(obj)} for {obj= }"))
+        return f'TypeError("Unsupported type for JSON serialization: {type(obj)} for {obj= }")'

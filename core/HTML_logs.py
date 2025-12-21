@@ -9,7 +9,10 @@ from core.standard_functions import color_clear, yes_or_no
 from core.standard_names_SH import X
 from cli.colors import RESET
 from cli.user_color_settings import WARNING, CRITICAL
-from core.HTML_colors import *
+try:
+    from core.HTML_colors import *
+except:
+    print("HERE")
 from Players.abstract_player import AbstractPlayer
 from user_settings import IS_PRINT_SMALL_INFO, IS_PRINT_FULL_INFO
 

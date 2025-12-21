@@ -1,8 +1,12 @@
 from __future__ import annotations
 
-from io import TextIOWrapper
-from typing import Optional, TYPE_CHECKING, Any
+from typing import Optional, TYPE_CHECKING, Any, Union
+
+from cli.user_color_settings import CRITICAL
+from core import utils
+
 if TYPE_CHECKING:
+    from io import TextIOWrapper
     from Players.abstract_player import AbstractPlayer
     from core.gamelog import GameLog
     from core.infolog import InfoLog
@@ -44,6 +48,8 @@ class GlobalStorage:
     def __setitem__(self, key: str, value: Any) -> None:
         self.__dict__[key] = value
     def __delitem__(self, key: str) -> None:
+        if key in base_dict:
+            raise ValueError(f"Cannot delete base attribute: {key}")
         del self.__dict__[key]
 
     def is_active(self):
@@ -79,7 +85,11 @@ class GlobalStorage:
     __copy__ = __deepcopy__ = copy
 
     def to_json(self) -> str:
-        return json.dumps(self.__dict__)
+        gs_dict = {}
+        for i, j in self.__dict__.items():
+            if i in base_dict:
+                gs_dict[i] = utils.update_obj_to_json(j)
+        return json.dumps(gs_dict)
 
     def from_json(self, json_str: str) -> None:
         self.__dict__ = json.loads(json_str)
@@ -112,4 +122,23 @@ class GlobalStorage:
 
 
 
-base_dict = GlobalStorage.__dict__
+base_dict = GlobalStorage('base_name').__dict__
+
+
+if __name__ == '__main__':
+    from core.gamelog import GameLog
+    from core.infolog import InfoLog
+    gs = GlobalStorage('test name')
+    gs.set('test key', 'test value')
+    print(gs)
+    print(gs['test key'])
+    print(gs.get('test key'))
+    print(gs.get('test2', 'default'))
+    print('test' in gs)
+    print('test2' in gs)
+    # del gs['test']
+    print(gs)
+    # gs.PURGED = Exception('test exception')
+    # gs.INFO_LOGS = tuple([InfoLog(info_type='test', info_name='test', info1='test', info2='test') for _ in range(10)])
+    print(gs.__dict__)
+    print(gs.to_json())

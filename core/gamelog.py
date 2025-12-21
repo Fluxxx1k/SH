@@ -36,8 +36,8 @@ class GameLog:
         self.is_president = is_president
         self.is_chancellor = is_chancellor
     def to_HTML_row(self) -> str:
-        from HTML_colors import ch_c, pr_c, special_c, purple_c
-        from HTML_logs import coloring_HTML_cards
+        from core.HTML_colors import ch_c, pr_c, special_c, purple_c
+        from core.HTML_logs import coloring_HTML_cards
         president = f'\t<td style="color: {pr_c if self.is_president else purple_c}"><b>{self.prs}</b></td>\n'
         chancellor = f'\t<td style="color: {ch_c if self.is_chancellor else purple_c}"><b>{self.cnc}</b></td>\n'
         c_prs_got = f"\t<td><b>{coloring_HTML_cards(self.cpg) if self.is_cards else self.cpg}</b></td>\n"
@@ -50,8 +50,8 @@ class GameLog:
         row = president + chancellor + c_prs_got + c_prs_said + c_cnc_got + c_cnc_said + c_cnc_placed + c_prs_said_after + special
         return row
     def to_HTML_row_Website(self) -> str:
-        from HTML_colors import ch_c, pr_c, special_c, purple_c
-        from HTML_logs import coloring_HTML_cards
+        from core.HTML_colors import ch_c, pr_c, special_c, purple_c
+        from core.HTML_logs import coloring_HTML_cards
         president = f'\t<td style="color: {pr_c if self.is_president else purple_c}"><b>{self.prs}</b></td>\n'
         chancellor = f'\t<td style="color: {ch_c if self.is_chancellor else purple_c}"><b>{self.cnc}</b></td>\n'
         # c_prs_got = f"\t<td><b>{coloring_HTML_cards(self.cpg) if self.is_cards else self.cpg}</b></td>\n"
