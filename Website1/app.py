@@ -5,6 +5,8 @@ import sys
 
 from jinja2 import Undefined
 
+from Website1.database_work import get_games_count, get_complete_games_count, get_players_count, get_players_list
+
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from database_work import verify_player, create_player, create_game, verify_game, find_game_data, save_game_data, \
     get_games_list
@@ -38,7 +40,11 @@ def safe_url_for(endpoint, **values):
 @app.route('/')
 def index():
     """Main page for Secret Hitler online game"""
-    stats = {'active_games': len(list(get_games_list()))}
+    stats = {'active_games': get_games_count(),
+             'complete_games': get_complete_games_count(),
+             'total_players': get_players_count(),
+             # 'players_list': list(get_players_list()),
+             }
     return render_template('index.html', stats=stats)
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -357,7 +363,7 @@ def not_found_error(error):
     ), 404
 
 @app.errorhandler(500)
-def internal_error(error):
+def internal_error(handled_error: Exception):
     """Handle 500 Internal Server errors"""
     import traceback
     debug_info = None
@@ -370,7 +376,7 @@ def internal_error(error):
         error_description="Произошла ошибка на сервере при обработке вашего запроса.",
         error_comment="Мы уже работаем над решением этой проблемы.",
         suggestion="Попробуйте обновить страницу через несколько минут. Если ошибка повторяется, обратитесь к администратору.",
-        debug_info=debug_info
+        debug_info=f"{debug_info} | {handled_error}"
     ), 500
 
 @app.errorhandler(403)

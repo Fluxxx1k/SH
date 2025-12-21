@@ -146,3 +146,35 @@ def get_games_list() -> Generator[tuple[str, int, int, str, bool]]:
                 has_password = bool(game_data.get('password', ''))
                 yield (game_name, current_players, max_players, status, has_password)
     # print(f"{temp= }")
+
+def get_complete_games_count() -> int:
+    count = 0
+    for file in os.listdir(game_data_dir_end):
+        if file.endswith(".json"):
+            count += 1
+        else:
+            error_log(f"File {file} in {game_data_dir_end} is not a json file")
+    return count
+
+def get_games_count() -> int:
+    count = 0
+    for file in os.listdir(game_data_dir):
+        if file.endswith(".json"):
+            count += 1
+        else:
+            error_log(f"File {file} in {game_data_dir} is not a json file")
+    return count
+def get_players_count() -> int:
+    count = 0
+    for file in os.listdir(player_data_dir):
+        if file.endswith(".json"):
+            count += 1
+        else:
+            error_log(f"File {file} in {player_data_dir} is not a json file")
+    return count
+def get_players_list() -> Generator[str]:
+    for file in os.listdir(player_data_dir):
+        if file.endswith(".json"):
+            yield file[:-5]  # Remove .json extension
+        else:
+            error_log(f"File {file} in {player_data_dir} is not a json file")

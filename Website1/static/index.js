@@ -41,7 +41,14 @@ function animateNumbers() {
     const statNumbers = document.querySelectorAll('.stat-number');
     
     statNumbers.forEach(function(element) {
-        const finalValue = parseInt(element.textContent) || 0;
+        if (element.textContent in ['0', '---', 'N/A']) {
+            return;
+        }
+        const finalValue = parseInt(element.textContent) || -1;
+        if (finalValue === -1) {
+            element.textContent = '---';
+            return;
+        }
         let currentValue = 0;
         const increment = finalValue / 50; // 50 шагов анимации
         
@@ -115,13 +122,13 @@ document.addEventListener('DOMContentLoaded', function() {
 // }
 
 // Инициализация при загрузке страницы
-document.addEventListener('DOMContentLoaded', function() {
-    // Обновить статистику при загрузке
-    updateStats();
-    
-    // Обновлять статистику каждые 30 секунд
-    setInterval(updateStats, 30000);
-});
+// document.addEventListener('DOMContentLoaded', function() {
+//     // Обновить статистику при загрузке
+//     updateStats();
+//
+//     // Обновлять статистику каждые 30 секунд
+//     setInterval(updateStats, 30000);
+// });
 
 // Обработка ошибок загрузки изображений
 document.addEventListener('DOMContentLoaded', function() {

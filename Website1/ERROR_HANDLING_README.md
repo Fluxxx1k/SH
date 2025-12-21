@@ -122,7 +122,7 @@ def handle_database_error(error_message):
 Run the test script to verify error handling:
 
 ```bash
-python test_errors.py
+-deleted-
 ```
 
 ### Manual Testing
@@ -142,8 +142,8 @@ http://localhost:20050/lobby
 ### Demo Script
 Run the demo script to see error handling in action:
 
-```bash
-python error_handling_demo.py
+```
+-deleted-
 ```
 
 ## Files Created

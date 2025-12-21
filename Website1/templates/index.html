@@ -58,12 +58,16 @@
                         <span class="stat-label">Активных игр</span>
                     </div>
                     <div class="stat-item">
+                        <span class="stat-number">{{ stats.complete_games|default('N/A') }}</span>
+                        <span class="stat-label">Игр завершено</span>
+                    </div>
+                    <div class="stat-item">
                         <span class="stat-number">{{ stats.online_players|default('N/A') }}</span>
                         <span class="stat-label">Игроков онлайн</span>
                     </div>
                     <div class="stat-item">
                         <span class="stat-number">{{ stats.total_players|default('N/A') }}</span>
-                        <span class="stat-label">Всего игроков</span>
+                        <span class="stat-label">Всего игроков зарегистрировано</span>
                     </div>
                 </div>
             </div>
