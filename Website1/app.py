@@ -421,18 +421,20 @@ def method_not_allowed_error(error):
 @app.route('/error')
 def error():
     """Manual error display route"""
-    error_code = request.args.get('code', 500, type=int)
-    error_message = request.args.get('message')
-    error_description = request.args.get('description')
-    error_comment = request.args.get('comment')
+    error_code = request.args.get('error_code', request.args.get('code', 500, type=int), type=int)
+    error_message = request.args.get('error_message', request.args.get('message'))
+    error_description = request.args.get('error_description', request.args.get('description'))
+    error_comment = request.args.get('error_comment', request.args.get('comment'))
     suggestion = request.args.get('suggestion')
+    debug_info = request.args.get('debug_info')
     
     return render_error_page(
         error_code=error_code,
         error_message=error_message,
         error_description=error_description,
         error_comment=error_comment,
-        suggestion=suggestion
+        suggestion=suggestion,
+        debug_info=debug_info
     ), error_code
 
 # Application-specific error handlers
