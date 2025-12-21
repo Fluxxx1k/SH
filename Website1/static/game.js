@@ -251,7 +251,7 @@ document.addEventListener('DOMContentLoaded', function() {
     loadGameData();
     
     // Устанавливаем автоматическое обновление каждые 5 секунд
-    setInterval(loadGameData, 5000);
+    // setInterval(loadGameData, 5000);
     
     // Добавляем обработчики событий
     setupEventListeners();
