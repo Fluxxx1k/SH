@@ -30,9 +30,13 @@ class GlobalStorage:
         self.PURGED: set[AbstractPlayer] = set()
         self.GULAG: int | None = None
         self.KILLED: int | None = None
-        self.CARDS: dict[str, int] = {"BLACK": 0, "RED": 0}
+        self.BLACK = 0
+        self.RED = 0
         self.BOTS: list[int] = []
         self.ACTIVE_GAME: bool = True
+        self.HIT_CHANCELLOR: bool = False
+        self.HIT_CHANCELLOR_STAL_PRESIDENT: bool = False
+        self.HIT_CAPUT: bool = False
 
     def get(self, key: str, default: Any = None) -> Optional[Any]:
         return self.__dict__.get(key, default)

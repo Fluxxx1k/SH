@@ -99,7 +99,7 @@ body {
     font-size: 1.3em;
 }
 
-/* Game actions */
+/* AbstractGame actions */
 .game-actions {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -180,7 +180,7 @@ body {
     box-shadow: 0 5px 15px rgba(50, 205, 50, 0.4);
 }
 
-/* Game stats */
+/* AbstractGame stats */
 .game-stats {
     background: rgba(255, 255, 255, 0.1);
     padding: 30px;

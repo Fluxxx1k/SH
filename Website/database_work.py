@@ -107,7 +107,7 @@ def create_player(player_name: str, password: str) -> Exception | None:
 def verify_game(game_name: str, password: str, player_name:str) -> tuple[bool, str]:
     game_data = find_game_data(game_name)
     if isinstance(game_data, FileNotFoundError):
-        return False, "Game not found"
+        return False, "AbstractGame not found"
     if isinstance(game_data, Exception):
         return False, repr(game_data)
 
@@ -120,7 +120,7 @@ def verify_game(game_name: str, password: str, player_name:str) -> tuple[bool, s
 
 def create_game(game_name: str, game_data: dict, player_name: str) -> Exception | None:
     if os.path.exists(f'{game_data_dir}/{game_name}.json'):
-        return FileExistsError(f"Game {game_name} already exists")
+        return FileExistsError(f"AbstractGame {game_name} already exists")
     if not os.path.exists(f'{player_data_dir}/{player_name}.json'):
         return FileNotFoundError(f"Player {player_name} not found")
     game_data['players'] = [player_name]

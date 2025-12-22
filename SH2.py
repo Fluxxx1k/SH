@@ -144,7 +144,7 @@ globs.COUNT_PLAYERS = count
 start_time = t.time()
 start_time_f = t.strftime(f"{DATE_FORMAT} {TIME_FORMAT}")
 print(start_time_f)
-INFO_LOGS.append(InfoLog(info_type=X.INFO, info_name="Game start time", info1=start_time_f, info2=start_time))
+INFO_LOGS.append(InfoLog(info_type=X.INFO, info_name="AbstractGame start time", info1=start_time_f, info2=start_time))
 red = black = 0
 checks = 1
 Git_caput = False
@@ -642,9 +642,9 @@ while red < RED_WIN_NUM and black < BLACK_WIN_NUM and not Git_caput and not Git_
 
 end_time_f = t.strftime(f"{DATE_FORMAT} {TIME_FORMAT}")
 end_time = t.time()
-INFO_LOGS.append(InfoLog(info_type=X.INFO, info_name="Game end time", info1=end_time_f, info2=end_time))
-print("Game start time: " + start_time_f)
-print("Game over time: " + end_time_f)
+INFO_LOGS.append(InfoLog(info_type=X.INFO, info_name="AbstractGame end time", info1=end_time_f, info2=end_time))
+print("AbstractGame start time: " + start_time_f)
+print("AbstractGame over time: " + end_time_f)
 
 if red >= RED_WIN_NUM or Git_caput:
     print(f"{RED}{BOLD}{UNDERLINE}RED    WON!!!{END}")

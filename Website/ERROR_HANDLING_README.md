@@ -78,7 +78,7 @@ http://localhost:20050/error?code=404&message=Custom+error&description=Details&c
 ### Error Handler Functions
 
 ```python
-# Game-specific errors
+# AbstractGame-specific errors
 def handle_game_error(error_message, error_code=400):
     return render_error_page(
         error_code=error_code,

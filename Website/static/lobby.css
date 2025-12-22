@@ -79,7 +79,7 @@ body {
     align-items: start;
 }
 
-/* Game actions */
+/* AbstractGame actions */
 .game-actions {
     background: rgba(255, 255, 255, 0.1);
     padding: 25px;

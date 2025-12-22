@@ -100,7 +100,7 @@ def register():
 
 @app.route('/lobby')
 def lobby():
-    """Game lobby page"""
+    """AbstractGame lobby page"""
     if 'username' not in session:
         return redirect(safe_url_for('login'))
     
@@ -126,7 +126,7 @@ def create_game_route():
     max_players = request.json.get('max_players', MIN_PLAYER_NUM)
     
     if not game_name:
-        return jsonify({'success': False, 'error': 'Game name is required'})
+        return jsonify({'success': False, 'error': 'AbstractGame name is required'})
     
     try:
         max_players = int(max_players)
@@ -146,7 +146,7 @@ def create_game_route():
     
     error = create_game(game_name, game_data, session['username'])
     if error is None:
-        return jsonify({'success': True, 'message': 'Game created successfully'})
+        return jsonify({'success': True, 'message': 'AbstractGame created successfully'})
     else:
         return jsonify({'success': False, 'error': str(error)})
 
@@ -160,7 +160,7 @@ def join_game_route():
     game_password = request.json.get('game_password', '')
     
     if not game_name:
-        return jsonify({'success': False, 'error': 'Game name is required'})
+        return jsonify({'success': False, 'error': 'AbstractGame name is required'})
     
     success, message = verify_game(game_name, game_password, session['username'])
     if success:
@@ -179,7 +179,7 @@ def api_games():
 
 @app.route('/game/<game_name>')
 def game(game_name):
-    """Game page for playing Secret Hitler"""
+    """AbstractGame page for playing Secret Hitler"""
     if 'username' not in session:
         return redirect(safe_url_for('login'))
     
@@ -193,15 +193,15 @@ def game(game_name):
         if isinstance(game_data, FileNotFoundError):
             return redirect(safe_url_for('error',
                                          error_code=404,
-                                         error_message='Game not found',
-                                         error_description='Game data file not found',
+                                         error_message='AbstractGame not found',
+                                         error_description='AbstractGame data file not found',
                                          suggestion='Contact administrator if you sure if game is valid',
                                          debug_info=repr(game_data)))
         return redirect(safe_url_for('error',
                                      error_code=500,
                                      error_message=repr(game_data),
-                                     error_description='Game data error',
-                                     error_comment='Game data is corrupted or doesn\'t exist',
+                                     error_description='AbstractGame data error',
+                                     error_comment='AbstractGame data is corrupted or doesn\'t exist',
                                      suggestion='Contact administrator if you sure if game is valid',
                                      debug_info=repr(game_data)))
     if isinstance(game_data.get('players'), list):
@@ -235,12 +235,12 @@ def api_game_vote():
     vote = request.json.get('vote')
     
     if not game_name or not vote:
-        return jsonify({'success': False, 'error': 'Game name and vote are required'})
+        return jsonify({'success': False, 'error': 'AbstractGame name and vote are required'})
     
     # Get current game data
     game_data = find_game_data(game_name)
     if not game_data:
-        return jsonify({'success': False, 'error': 'Game not found'})
+        return jsonify({'success': False, 'error': 'AbstractGame not found'})
     
     # Check if player is in the game
     if session['username'] not in game_data.get('players', []):
@@ -272,12 +272,12 @@ def api_game_select_player():
     selected_player = request.json.get('selected_player')
     
     if not game_name or not selected_player:
-        return jsonify({'success': False, 'error': 'Game name and selected player are required'})
+        return jsonify({'success': False, 'error': 'AbstractGame name and selected player are required'})
     
     # Get current game data
     game_data = find_game_data(game_name)
     if not game_data:
-        return jsonify({'success': False, 'error': 'Game not found'})
+        return jsonify({'success': False, 'error': 'AbstractGame not found'})
     
     # Check if player is in the game
     if session['username'] not in game_data.get('players', []):
@@ -308,7 +308,7 @@ def api_game_data(game_name):
     
     game_data = find_game_data(game_name)
     if not game_data:
-        return jsonify({'success': False, 'error': 'Game not found'})
+        return jsonify({'success': False, 'error': 'AbstractGame not found'})
     
     # Check if player is in the game
     if session['username'] not in game_data.get('players', []):

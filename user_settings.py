@@ -77,3 +77,4 @@ VOTE_ANONYMOUS: bool = False
 
 
 WEBSITE_USING: bool = True
+VETO_NUM_BLACK: int = 5
