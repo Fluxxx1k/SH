@@ -44,7 +44,7 @@ class AbstractGame(ABC):
             self.black_start = 11
         self.deck = ['R'] * self.red_start + ['B'] * self.black_start
         rnd.shuffle(self.deck)
-        self.checks = 0
+        self.checks = 1
         self.cnc: AbstractPlayer = None
 
     @abstractmethod

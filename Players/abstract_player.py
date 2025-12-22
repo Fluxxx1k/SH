@@ -165,6 +165,7 @@ class AbstractPlayer(ABC):
 
     @abstractmethod
     def check_player(self) -> tuple[int, str]:
+        """Returns player number and named color"""
         pass
     @abstractmethod
     def purge_another(self, purge_type: str, votes: dict[int, int] = None) -> int:
