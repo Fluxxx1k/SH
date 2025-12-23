@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import datetime
+from typing import Literal
 
 import user_settings
+from Players.abstract_player import AbstractPlayer
 from core.HTML_colors import purple_c, pr_c
 from core.HTML_logs import color_of_HTML_roles
 from core.abstractgame import AbstractGame
@@ -15,47 +17,13 @@ from user_settings import RED_WIN_NUM
 
 
 class WebGame(AbstractGame):
-    def take_move(self):
-        if self.is_end():
-            return self.is_end()
-        i = (self.prs.num + 1)% self.globs.COUNT_PLAYERS
+    def choose_next_president(self) -> AbstractPlayer:
+        i = (self.prs.num + 1) % self.globs.COUNT_PLAYERS
         while not self.accept_player(self.globs.PLAYERS[i]):
-            i = (i + 1)% self.globs.COUNT_PLAYERS
-        self.prs = self.globs.PLAYERS[i]
-        self.cnc = self.globs.PLAYERS[self.prs.choose_chancellor(self.globs.PLAYERS)]
-        vote_sum = sum([player.vote_for_pair(self.prs, self.cnc) for player in self.players])
-        if vote_sum <= 0:
-            self.skips += 1
-            if self.skips % user_settings.ANARCHY_SKIP_NUM == 0:
-                if self.saved_cards:
-                    self.globs.GAME_LOGS.append(GameLog(special="Cards was shuffled!"))
-                    ccp = rnd.sample(self.saved_cards, k=1)[0]
-                else:
-                    ccp = self.take_random(1)[0]
-                self.globs.GAME_LOGS.append(GameLog(prs="ANARCHY", cnc="ANARCHY",      
-                                                    c_cnc_placed=ccp, special=f"({self.skips} skips)",
-                                                    is_chancellor=False, is_president=False))
-                if ccp == 'B':
-                    self.globs.BLACK += 1
-                    self.checks += 1
-                    if self.globs.BLACK == user_settings.BLACK_WIN_NUM:
-                        if self.prs is not None:
-                            self.globs.PLAYERS[self.prs.num].degov()
-                        if self.cnc is not None:
-                            self.globs.PLAYERS[self.cnc.num].degov()
-                        return 1
-                elif ccp == 'R':
-                    self.globs.RED += 1
-                    if self.globs.RED == RED_WIN_NUM:
-                        if self.prs is not None:
-                            self.globs.PLAYERS[self.prs.num].degov()
-                        if self.cnc is not None:
-                            self.globs.PLAYERS[self.cnc.num].degov()
-                        return -1
-                else:
-                    print(f"WTH?!!!! {ccp} isn't 'B' or 'R'")
-                self.saved_cards = []
-            return 0
+            i = (i + 1) % self.globs.COUNT_PLAYERS
+        return self.globs.PLAYERS[i]
+
+    def president_chancellor_cards(self):
         self.skips = 0
         self.globs.PLAYERS[self.prs.num].chosen_gov(X.PRESIDENT)
         self.globs.PLAYERS[self.cnc.num].chosen_gov(X.CHANCELLOR)
@@ -63,7 +31,8 @@ class WebGame(AbstractGame):
         cards_president_got = ''.join(self.cards)
         cards_president_said, self.cards, is_veto = self.prs.president(self.cards, self.cnc)
         cards_chancellor_got = ''.join(self.cards)
-        cards_chancellor_said, cards_chancellor_placed = self.cnc.chancellor(''.join(self.cards), self.prs, cards_president_said, is_veto)
+        cards_chancellor_said, cards_chancellor_placed = self.cnc.chancellor(''.join(self.cards), self.prs,
+                                                                             cards_president_said, is_veto)
         cards_president_said_after_chancellor = self.prs.president_said_after_chancellor(cnc=self.cnc,
                                                                                          cards=cards_president_got,
                                                                                          ccg=cards_chancellor_got,
@@ -90,37 +59,84 @@ class WebGame(AbstractGame):
         elif (cards_chancellor_placed in {"VETO", "X", "V"} and self.globs.BLACK >= user_settings.VETO_NUM_BLACK):
             cards_chancellor_placed = "V"
         else:
-            self.globs.INFO_LOGS.append(InfoLog(X.ERROR, "Unknown chancellor card", f"ccp= {cards_chancellor_placed}, {self.prs= }, {self.cnc= }, {self.name}", f"WEB ({datetime.datetime.now().strftime(f'{user_settings.DATE_FORMAT} {user_settings.TIME_FORMAT}')}"))
+            self.globs.INFO_LOGS.append(InfoLog(X.ERROR, "Unknown chancellor card",
+                                                f"ccp= {cards_chancellor_placed}, {self.prs= }, {self.cnc= }, {self.name}",
+                                                f"WEB ({datetime.datetime.now().strftime(f'{user_settings.DATE_FORMAT} {user_settings.TIME_FORMAT}')}"))
         if cards_chancellor_placed != 'V':
             self.globs.GAME_LOGS.append(GameLog(prs=self.prs, cnc=self.cnc,
-                                       c_prs_got=cards_president_got,
-                                       c_prs_said=cards_president_said,
-                                       c_prs_said_after=cards_president_said_after_chancellor,
-                                       c_cnc_got=cards_chancellor_got,
-                                       c_cnc_said=cards_chancellor_said,
-                                       c_cnc_placed=cards_chancellor_placed))
+                                                c_prs_got=cards_president_got,
+                                                c_prs_said=cards_president_said,
+                                                c_prs_said_after=cards_president_said_after_chancellor,
+                                                c_cnc_got=cards_chancellor_got,
+                                                c_cnc_said=cards_chancellor_said,
+                                                c_cnc_placed=cards_chancellor_placed))
         else:
             self.globs.GAME_LOGS.append(GameLog(prs=self.prs, cnc=self.cnc,
-                                       c_prs_got=cards_president_got, c_prs_said=cards_president_said, c_prs_said_after=cards_president_said_after_chancellor,
-                                       c_cnc_got=cards_chancellor_got, c_cnc_said=cards_chancellor_said, c_cnc_placed="",
-                                       special="VETO"))
+                                                c_prs_got=cards_president_got, c_prs_said=cards_president_said,
+                                                c_prs_said_after=cards_president_said_after_chancellor,
+                                                c_cnc_got=cards_chancellor_got, c_cnc_said=cards_chancellor_said,
+                                                c_cnc_placed="",
 
-    def do_with_black(self):
+                                            special="VETO"))
+
+    def placing_card(self, ccp):
+        if ccp == 'B':
+            self.globs.BLACK += 1
+            self.checks += 1
+            if self.globs.BLACK == user_settings.BLACK_WIN_NUM:
+                if self.prs is not None:
+                    self.globs.PLAYERS[self.prs.num].degov()
+                if self.cnc is not None:
+                    self.globs.PLAYERS[self.cnc.num].degov()
+                return 1
+        elif ccp == 'R':
+            self.globs.RED += 1
+            if self.globs.RED == RED_WIN_NUM:
+                if self.prs is not None:
+                    self.globs.PLAYERS[self.prs.num].degov()
+                if self.cnc is not None:
+                    self.globs.PLAYERS[self.cnc.num].degov()
+                return -1
+        else:
+            print(f"WTH?!!!! {ccp} isn't 'B' or 'R'")
+    def take_move(self) -> Literal[-1, 0, 1]:
+        if self.is_end():
+            return self.is_end()
+        self.prs = self.choose_next_president()
+        self.cnc = self.globs.PLAYERS[self.prs.choose_chancellor(self.globs.PLAYERS)]
+        vote_sum = sum([player.vote_for_pair(self.prs, self.cnc) for player in self.players])
+        if vote_sum <= 0:
+            self.skips += 1
+            if self.skips % user_settings.ANARCHY_SKIP_NUM == 0:
+                if self.saved_cards:
+                    self.globs.GAME_LOGS.append(GameLog(special="Cards was shuffled!"))
+                    ccp = rnd.sample(self.saved_cards, k=1)[0]
+                else:
+                    ccp = self.take_random(1)[0]
+                self.globs.GAME_LOGS.append(GameLog(prs="ANARCHY", cnc="ANARCHY",      
+                                                    c_cnc_placed=ccp, special=f"({self.skips} skips)",
+                                                    is_chancellor=False, is_president=False))
+                self.placing_card(ccp)
+                self.saved_cards = []
+            return 0
+        self.president_chancellor_cards()
+
+    def do_with_black(self) -> Literal[-1, 0, 1]:
         match self.checks:
             case 1:
-                self.do_with_1_black()
+                return self.do_with_1_black()
             case 2:
-                self.do_with_2_black()
+                return self.do_with_2_black()
             case 3:
-                self.do_with_3_black()
+                return self.do_with_3_black()
             case 4:
-                self.do_with_4_black()
+                return self.do_with_4_black()
             case 5:
-                self.do_with_5_black()
+                return self.do_with_5_black()
             case _:
                 self.globs.INFO_LOGS.append(InfoLog(X.ERROR, "Unknown checks", f"{self.checks= }", f"WEB ({datetime.datetime.now().strftime(f'{user_settings.DATE_FORMAT} {user_settings.TIME_FORMAT}')}"))
                 return 0
-    def do_with_1_black(self):
+    def do_with_1_black(self) -> Literal[-1, 0, 1]:
         self.saved_cards = self.take_random(3)
         cards_president_said_after_check = self.prs.check_cards(''.join(self.saved_cards))
         self.globs.GAME_LOGS.append(GameLog(prs=self.prs,
@@ -129,7 +145,7 @@ class WebGame(AbstractGame):
                                             special="Card check"))
         self.checks = 2
         return 0
-    def do_with_2_black(self):
+    def do_with_2_black(self) -> Literal[-1, 0, 1]:
         president_checked, color_president_checked = self.prs.check_player()
         if color_president_checked != self.globs.PLAYERS[president_checked].color:
             self.globs.PLAYERS[president_checked].black.add(self.prs.num)
@@ -139,7 +155,7 @@ class WebGame(AbstractGame):
                     is_chancellor=False))
         self.checks = 3
         return 0
-    def do_with_3_black(self):
+    def do_with_3_black(self) -> Literal[-1, 0, 1]:
         self.globs.GULAG = self.prs.purge_another(X.GULAG)
         self.globs.GAME_LOGS.append(
             GameLog(prs=self.prs, special="In gulag", is_cards=False, is_chancellor=False))
@@ -155,10 +171,10 @@ class WebGame(AbstractGame):
         return 0
 
 
-    def do_with_4_black(self):
+    def do_with_4_black(self) -> Literal[-1, 0, 1]:
         self.checks = 5
         return 0
-    def do_with_5_black(self):
+    def do_with_5_black(self) -> Literal[-1, 0, 1]:
         self.globs.KILLED = self.prs.purge_another(X.SHOUT)
         if self.globs.GULAG == self.globs.KILLED:
             self.globs.GULAG = None
