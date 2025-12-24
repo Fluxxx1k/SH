@@ -191,3 +191,6 @@ class WebGame(AbstractGame):
         self.checks = 5
         return 0
 
+    def stop_game(self):
+        import pickle
+        pickle.dump(self, open(f"{self.name}{self.id}.pickle", "wb"))

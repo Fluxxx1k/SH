@@ -130,11 +130,9 @@ class AbstractGame(ABC):
         pass
 
     @abstractmethod
-    @atexit.register
     def stop_game(self):
         pass
 
-    @atexit.register
     @abstractmethod
     def end_game(self):
         pass
