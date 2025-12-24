@@ -23,10 +23,7 @@ class WebGame(AbstractGame):
             i = (i + 1) % self.globs.COUNT_PLAYERS
         return self.globs.PLAYERS[i]
 
-    def president_chancellor_cards(self):
-        self.skips = 0
-        self.globs.PLAYERS[self.prs.num].chosen_gov(X.PRESIDENT)
-        self.globs.PLAYERS[self.cnc.num].chosen_gov(X.CHANCELLOR)
+    def president_chancellor_cards(self) -> Literal[-1, 0, 1]:
         self.cards = self.take_random(3)
         cards_president_got = ''.join(self.cards)
         cards_president_said, self.cards, is_veto = self.prs.president(self.cards, self.cnc)
@@ -78,6 +75,7 @@ class WebGame(AbstractGame):
                                                 c_cnc_placed="",
 
                                             special="VETO"))
+        return 0
 
     def placing_card(self, ccp):
         if ccp == 'B':
@@ -119,7 +117,10 @@ class WebGame(AbstractGame):
                 self.placing_card(ccp)
                 self.saved_cards = []
             return 0
-        self.president_chancellor_cards()
+        self.skips = 0
+        self.globs.PLAYERS[self.prs.num].chosen_gov(X.PRESIDENT)
+        self.globs.PLAYERS[self.cnc.num].chosen_gov(X.CHANCELLOR)
+        return self.president_chancellor_cards()
 
     def do_with_black(self) -> Literal[-1, 0, 1]:
         match self.checks:
