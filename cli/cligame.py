@@ -1,8 +1,12 @@
 from __future__ import annotations
+
+import datetime
 from typing import List, Optional, Tuple, Union, TYPE_CHECKING
 
 import user_settings
 from SH2 import take_random
+from core.standard_functions import yes_or_no
+from core.standard_names_SH import X
 
 if TYPE_CHECKING:
     from Players.abstract_player import AbstractPlayer
@@ -40,17 +44,17 @@ class CliGame(AbstractGame):
             if vote_sum <= 0:
                 return 0
         else:
-            if yes_or_no(f"Skip? (Skips: {skips}): "):
-                skips += 1
-                degov()
+            if yes_or_no(f"Skip? (Skips: {self.skips}): "):
+                self.skips += 1
+                self.prs.degov()
                 print("\n\n\n")
-                self.globs.INFO_LOGS.append(InfoLog(X.DBG, "Vote info", f"{PLAYERS[pn]} with {PLAYERS[cn]} disaccepted",
-                                         info2=t.strftime(f"{DATE_FORMAT} {TIME_FORMAT}")))
+                self.globs.INFO_LOGS.append(InfoLog(X.DBG, "Vote info", f"{self.prs} with {self.cnc} disaccepted",
+                                         info2=datetime.datetime.now().strftime(f"{user_settings.DATE_FORMAT} {user_settings.TIME_FORMAT}")))
                 return 0
             else:
-                INFO_LOGS.append(InfoLog(X.DBG, "Vote info", f"{PLAYERS[pn]} with {PLAYERS[cn]} accepted",
-                                         info2=t.strftime(f"{DATE_FORMAT} {TIME_FORMAT}")))
-                skips = 0
+                self.globs.INFO_LOGS.append(InfoLog(X.DBG, "Vote info", f"{self.prs} with {self.cnc} accepted",
+                                         info2=datetime.datetime.now().strftime(f"{user_settings.DATE_FORMAT} {user_settings.TIME_FORMAT}")))
+                self.skips = 0
         self.cards = self.take_random(3)
 
 
