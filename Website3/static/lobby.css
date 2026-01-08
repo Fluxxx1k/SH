@@ -1,0 +1,74 @@
+.lobby-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.user-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #ddd;
+}
+
+.logout-btn {
+    padding: 5px 10px;
+    background-color: #ff4444;
+    color: white;
+    text-decoration: none;
+    border-radius: 3px;
+}
+
+.game-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+#createGameBtn, #joinGameBtn {
+    padding: 10px 15px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+.join-game {
+    display: flex;
+    gap: 10px;
+}
+
+#gameCode {
+    padding: 10px;
+    flex-grow: 1;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+}
+
+.games-list {
+    border-top: 1px solid #eee;
+    padding-top: 20px;
+}
+
+.game-item {
+    background-color: #f8f8f8;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+}
+
+.game-item h3 {
+    margin-top: 0;
+}
+
+.game-meta {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+    color: #666;
+}

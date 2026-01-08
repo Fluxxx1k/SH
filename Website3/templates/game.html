@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secret Hitler - Game</title>
+    <link rel="stylesheet" href="../static/game.css">
+</head>
+<body>
+    <div class="game-container">
+        <div class="player-info">
+            <h2>Welcome, {{ session['username'] }}</h2>
+            <div class="role-info" id="roleInfo">
+                <!-- Role will be displayed here after game starts -->
+            </div>
+        </div>
+        
+        <div class="game-board">
+            <div class="government-track">
+                <!-- Government track will be displayed here -->
+            </div>
+            
+            <div class="actions">
+                <!-- Game actions will be displayed here -->
+            </div>
+        </div>
+        
+        <div class="players-list">
+            <!-- List of players will be displayed here -->
+        </div>
+    </div>
+    
+    <script src="../static/game.js"></script>
+</body>
+</html>

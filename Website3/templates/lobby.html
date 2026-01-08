@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secret Hitler - Lobby</title>
+    <link rel="stylesheet" href="../static/lobby.css">
+</head>
+<body>
+    <div class="lobby-container">
+        <h1>Secret Hitler Lobby</h1>
+        <div class="user-info">
+            <p>Logged in as: <strong>{{ session['username'] }}</strong></p>
+            <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
+        </div>
+        
+        <div class="game-actions">
+            <button id="createGameBtn">Create New Game</button>
+            <div class="join-game">
+                <input type="text" id="gameCode" placeholder="Game Code">
+                <button id="joinGameBtn">Join Game</button>
+            </div>
+        </div>
+        
+        <div class="games-list">
+            <h2>Available Games</h2>
+            <div id="gamesContainer">
+                <!-- Games will be listed here -->
+            </div>
+        </div>
+    </div>
+    
+    <script src="../static/lobby.js"></script>
+</body>
+</html>
