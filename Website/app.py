@@ -39,7 +39,7 @@ def safe_url_for(endpoint, **values):
 
 @app.route('/')
 def index():
-    """Main page for Secret Hitler online game"""
+    """Main page for Secret Hitler online games"""
     stats = {'active_games': get_games_count(),
              'complete_games': get_complete_games_count(),
              'total_players': get_players_count(),
@@ -117,7 +117,7 @@ def logout():
 
 @app.route('/create_game', methods=['POST'])
 def create_game_route():
-    """Create new game"""
+    """Create new games"""
     if 'username' not in session:
         return jsonify({'success': False, 'error': 'Not logged in'})
     
@@ -152,7 +152,7 @@ def create_game_route():
 
 @app.route('/join_game', methods=['POST'])
 def join_game_route():
-    """Join existing game"""
+    """Join existing games"""
     if 'username' not in session:
         return jsonify({'success': False, 'error': 'Not logged in'})
     
@@ -164,7 +164,7 @@ def join_game_route():
     
     success, message = verify_game(game_name, game_password, session['username'])
     if success:
-        return jsonify({'success': True, 'message': 'Joined game successfully'})
+        return jsonify({'success': True, 'message': 'Joined games successfully'})
     else:
         return jsonify({'success': False, 'error': message})
 
@@ -183,26 +183,26 @@ def game(game_name):
     if 'username' not in session:
         return redirect(safe_url_for('login'))
     
-    # Get game data
+    # Get games data
     game_data = find_game_data(game_name)
     if not game_data:
         return redirect(safe_url_for('lobby'))
     
-    # Get list of players in the game
+    # Get list of players in the games
     if isinstance(game_data, Exception):
         if isinstance(game_data, FileNotFoundError):
             return redirect(safe_url_for('error',
                                          error_code=404,
                                          error_message='AbstractGame not found',
                                          error_description='AbstractGame data file not found',
-                                         suggestion='Contact administrator if you sure if game is valid',
+                                         suggestion='Contact administrator if you sure if games is valid',
                                          debug_info=repr(game_data)))
         return redirect(safe_url_for('error',
                                      error_code=500,
                                      error_message=repr(game_data),
                                      error_description='AbstractGame data error',
                                      error_comment='AbstractGame data is corrupted or doesn\'t exist',
-                                     suggestion='Contact administrator if you sure if game is valid',
+                                     suggestion='Contact administrator if you sure if games is valid',
                                      debug_info=repr(game_data)))
     if isinstance(game_data.get('players'), list):
         players = game_data.get('players', [])
@@ -212,12 +212,12 @@ def game(game_name):
         return redirect(safe_url_for('error',
                                      error_code=403,
                                      error_message='Forbidden',
-                                     error_description='Player not in game',
-                                     error_comment='You are not part of this game',
-                                     suggestion='Contact administrator if you sure if game is valid',
-                                     debug_info=f'Player {session["username"]} not in game {game_name}'))
+                                     error_description='Player not in games',
+                                     error_comment='You are not part of this games',
+                                     suggestion='Contact administrator if you sure if games is valid',
+                                     debug_info=f'Player {session["username"]} not in games {game_name}'))
     
-    return render_template('game.html', 
+    return render_template('games.html',
                          username=session['username'],
                          game_name=game_name,
                          players=players,
@@ -227,7 +227,7 @@ def game(game_name):
 
 @app.route('/api/game/vote', methods=['POST'])
 def api_game_vote():
-    """API endpoint for voting in game"""
+    """API endpoint for voting in games"""
     if 'username' not in session:
         return jsonify({'success': False, 'error': 'Not logged in'})
     
@@ -237,14 +237,14 @@ def api_game_vote():
     if not game_name or not vote:
         return jsonify({'success': False, 'error': 'AbstractGame name and vote are required'})
     
-    # Get current game data
+    # Get current games data
     game_data = find_game_data(game_name)
     if not game_data:
         return jsonify({'success': False, 'error': 'AbstractGame not found'})
     
-    # Check if player is in the game
+    # Check if player is in the games
     if session['username'] not in game_data.get('players', []):
-        return jsonify({'success': False, 'error': 'Player not in game'})
+        return jsonify({'success': False, 'error': 'Player not in games'})
     
     # Process vote (this is a simplified version)
     if 'votes' not in game_data:
@@ -253,7 +253,7 @@ def api_game_vote():
     game_data['votes'][session['username']] = vote
     game_data['last_action'] = f"{session['username']} voted {vote}"
     
-    # Save updated game data
+    # Save updated games data
     save_game_data(game_name, game_data)
     
     return jsonify({
@@ -264,7 +264,7 @@ def api_game_vote():
 
 @app.route('/api/game/select_player', methods=['POST'])
 def api_game_select_player():
-    """API endpoint for selecting a player in game"""
+    """API endpoint for selecting a player in games"""
     if 'username' not in session:
         return jsonify({'success': False, 'error': 'Not logged in'})
     
@@ -274,24 +274,24 @@ def api_game_select_player():
     if not game_name or not selected_player:
         return jsonify({'success': False, 'error': 'AbstractGame name and selected player are required'})
     
-    # Get current game data
+    # Get current games data
     game_data = find_game_data(game_name)
     if not game_data:
         return jsonify({'success': False, 'error': 'AbstractGame not found'})
     
-    # Check if player is in the game
+    # Check if player is in the games
     if session['username'] not in game_data.get('players', []):
-        return jsonify({'success': False, 'error': 'Player not in game'})
+        return jsonify({'success': False, 'error': 'Player not in games'})
     
-    # Check if selected player is in the game
+    # Check if selected player is in the games
     if selected_player not in game_data.get('players', []):
-        return jsonify({'success': False, 'error': 'Selected player not in game'})
+        return jsonify({'success': False, 'error': 'Selected player not in games'})
     
     # Process player selection (this is a simplified version)
     game_data['selected_player'] = selected_player
     game_data['last_action'] = f"{session['username']} selected {selected_player}"
     
-    # Save updated game data
+    # Save updated games data
     save_game_data(game_name, game_data)
     
     return jsonify({
@@ -302,7 +302,7 @@ def api_game_select_player():
 
 @app.route('/api/game/<game_name>')
 def api_game_data(game_name):
-    """API endpoint to get game data"""
+    """API endpoint to get games data"""
     if 'username' not in session:
         return jsonify({'success': False, 'error': 'Not logged in'})
     
@@ -310,9 +310,9 @@ def api_game_data(game_name):
     if not game_data:
         return jsonify({'success': False, 'error': 'AbstractGame not found'})
     
-    # Check if player is in the game
+    # Check if player is in the games
     if session['username'] not in game_data.get('players', []):
-        return jsonify({'success': False, 'error': 'Player not in game'})
+        return jsonify({'success': False, 'error': 'Player not in games'})
     
     return jsonify({
         'success': True,
@@ -445,7 +445,7 @@ def error():
 
 # Application-specific error handlers
 def handle_game_error(error_message, error_code=400):
-    """Handle game-specific errors"""
+    """Handle games-specific errors"""
     return render_error_page(
         error_code=error_code,
         error_message="Ошибка в игре",

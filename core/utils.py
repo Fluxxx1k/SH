@@ -8,15 +8,15 @@ from typing import Iterable, TYPE_CHECKING, Union
 from user_settings import TIME_FORMAT, DATE_FORMAT, IS_PRINT_SMALL_INFO
 
 if TYPE_CHECKING:
-    from Players.player import Player
-    from core.gamelog import GameLog
-    from core.infolog import InfoLog
+    from core.players.player import Player
+    from core.logs.gamelog import GameLog
+    from core.logs.infolog import InfoLog
 
-from core.globs import PLAYERS, INFO_LOGS
+from legacy.globs import PLAYERS, INFO_LOGS
 from core.standard_classes import POSSIBLE_CARDS
 from core.standard_names_SH import X
 from core.standard_functions import color_clear, my_input
-from core.HTML_colors import *
+from core.logs.HTML_colors import *
 from cli.colors import (GREEN_TEXT_BRIGHT as BLACK,
                         RESET_TEXT as END_T,
                         RED_TEXT as RED,
@@ -102,7 +102,7 @@ def weighted_random(a, weights):
 
 def weighted_random_for_indexes(weights) -> int:
     import random
-    from core import globs
+    from legacy import globs
     if sum(weights) <= 0 or len(weights) != globs.COUNT_PLAYERS:
         if IS_PRINT_SMALL_INFO:
             print(f"{RED}{BOLD}{UNDERLINE}Sum of weights <= 0 or wrong length, using random choice{END}")
@@ -111,7 +111,7 @@ def weighted_random_for_indexes(weights) -> int:
     return random.choices(range(globs.COUNT_PLAYERS), weights, k=1)[0]
 
 def preproc_votes(votes: dict[int, int], smalling:Iterable[int]=(), times_smalling:int|float=2) -> list[int]:
-    from core import globs
+    from legacy import globs
     x = [1] * globs.COUNT_PLAYERS
     for i in votes:
         try:
@@ -137,7 +137,7 @@ def input_cards(text=f"{WARNING}Some input: {END_T}", q: int | set[int] = 0, c_p
         q = {q}
     if c_p and not veto:  # chancellor should place card if it wasn't veto
         letters -= {'X'}
-    if c_p:  # if president was skipped in game, but not in code
+    if c_p:  # if president was skipped in games, but not in code
         letters.add("SKIP")
     inp = input(text + END + INPUT_COLOR).strip().upper()
     print(END, end='')
@@ -174,7 +174,7 @@ def voting_human(theme: str = f"{WARNING}Voting, U forgot to add text{END}", who
 
 def out(c:int = None, file=sys.stdout):
     if c is None:
-        from core import globs
+        from legacy import globs
         c = globs.COUNT_PLAYERS
     for player_num in range(c):
         print(f"№{player_num + 1}) {PLAYERS[player_num].out()}", file=file)
@@ -190,8 +190,8 @@ def get_color_for_role(role: str) -> str:
         return RESET_TEXT
 
 def update_obj_to_json(obj: Union[bool, int, float, str, set, list, tuple, frozenset, GameLog, InfoLog]):
-    from core.gamelog import GameLog
-    from core.infolog import InfoLog
+    from core.logs.gamelog import GameLog
+    from core.logs.infolog import InfoLog
     if isinstance(obj, (bool, int, float, str, type(None))):
         return obj
     elif isinstance(obj, (set, list, tuple, frozenset)):
@@ -201,5 +201,5 @@ def update_obj_to_json(obj: Union[bool, int, float, str, set, list, tuple, froze
     elif isinstance(obj, dict):
         return {k: update_obj_to_json(v) for k, v in obj.items()}
     else:
-        print(CRITICAL+(f"Unsupported type for JSON serialization: {type(obj)} for {obj= }"))
+        print(CRITICAL + f"Unsupported type for JSON serialization: {type(obj)} for {obj= }")
         return f'TypeError("Unsupported type for JSON serialization: {type(obj)} for {obj= }")'

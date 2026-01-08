@@ -2,8 +2,8 @@ from __future__ import annotations
 from typing import Iterable, Literal
 import datetime
 
-from core.infolog import InfoLog
-from core.globs import INFO_LOGS, PLAYERS
+from core.logs.infolog import InfoLog
+from legacy.globs import INFO_LOGS, PLAYERS
 from abc import abstractmethod, ABC
 
 from cli.colors import (BLUE_TEXT_BRIGHT as BLUE,

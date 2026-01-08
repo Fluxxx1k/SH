@@ -1,16 +1,16 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from Players.player import Player
+    from core.players.player import Player
 import datetime
 import random as rnd
 import time
 
 
 import user_settings
-from core.HTML_logs import InfoLog
-from Players.abstract_player import AbstractPlayer
-from core.globs import INFO_LOGS, PLAYERS, ROLES, CARDS
+from core.logs.HTML_logs import InfoLog
+from core.players.abstract_player import AbstractPlayer
+from legacy.globs import INFO_LOGS, PLAYERS, ROLES, CARDS
 from core.standard_classes import Cards
 from core.standard_names_SH import X
 from user_settings import DATE_FORMAT, TIME_FORMAT, IS_PRINT_SMALL_INFO, IS_PRINT_FULL_INFO, DEBUG_MODE
@@ -18,6 +18,10 @@ from core.utils import get_color, weighted_random_for_indexes, preproc_votes
 
 
 class Bot(AbstractPlayer):
+    """
+    First attempt of bot player.
+    Use Bot2 instead.
+    """
     base_name = X.BOT
 
     def __init__(self, num: int, name:str, role: str):
@@ -31,7 +35,7 @@ class Bot(AbstractPlayer):
             self.risk: float = rnd.random() * 0.7 + 0.25
         self.black: set[int] = set()
         if self.bot_mind == X.BLACK:
-            from core import globs
+            from legacy import globs
             for i in range(globs.COUNT_PLAYERS):
                 if ROLES[i] == X.BLACK or ROLES[i] == X.RIBBENTROP:
                     self.black.add(i)
@@ -243,14 +247,14 @@ class Bot(AbstractPlayer):
                 return Cards(cards) if rnd.random() < self.risk else Cards("BBB")
             case X.BLACK:
                 if cards == 'BBR':
-                    from core.globs import COUNT_PLAYERS
+                    from legacy.globs import COUNT_PLAYERS
                     if PLAYERS[self.num%COUNT_PLAYERS].color == X.RED:
                         return Cards(cards) if rnd.random() < self.risk else Cards("BBB")
                     else:
                         return Cards("BBB")
                 if cards == 'BRR':
                     if cards == 'BBR':
-                        from core.globs import COUNT_PLAYERS
+                        from legacy.globs import COUNT_PLAYERS
                         if PLAYERS[self.num % COUNT_PLAYERS].color == X.RED:
                             return Cards(cards) if rnd.random() < self.risk else Cards("BBB")
                         else:
@@ -269,7 +273,7 @@ class Bot(AbstractPlayer):
         return Cards("XXX")
 
     def check_player(self, votes: list[int] = None) -> tuple[int, str]:
-        from core.globs import PLAYERS
+        from legacy.globs import PLAYERS
         if votes is None:
             votes = {}
             if IS_PRINT_SMALL_INFO:
@@ -279,7 +283,7 @@ class Bot(AbstractPlayer):
                                      info2=time.strftime(f"{DATE_FORMAT} {TIME_FORMAT}")))
         if self.bot_mind == X.BLACK:
             if rnd.random() < 0.25:
-                from core import globs
+                from legacy import globs
                 chosen = globs.HITLER
                 PLAYERS[globs.HITLER].black.add(self.num)
                 return chosen, X.RED
@@ -288,7 +292,7 @@ class Bot(AbstractPlayer):
                     chosen = list(self.black)[rnd.randint(0, len(self.black) - 1)]
                     return chosen, X.RED
         try:
-            from core.globs import COUNT_PLAYERS
+            from legacy.globs import COUNT_PLAYERS
             ppv = preproc_votes(votes)
             ppv[self.num] = 0
             chosen = weighted_random_for_indexes(ppv)
@@ -317,7 +321,7 @@ class Bot(AbstractPlayer):
                                      info1=f"№{self.num} [{self}] {self.bot_mind= }",
                                      info2=time.strftime(f"{DATE_FORMAT} {TIME_FORMAT}")))
         try:
-            from core import globs
+            from legacy import globs
             ppv = [1] * globs.COUNT_PLAYERS
             match self.bot_mind:
                 case X.RED:
@@ -399,7 +403,7 @@ class Bot(AbstractPlayer):
                         INFO_LOGS.append(InfoLog(info_type=X.ERROR, info_name=f"Error while setting ppv[i]=0",
                                                  info1=f"{self= } {i= } {repr(e)}",
                                                  info2=time.strftime(f"{DATE_FORMAT} {TIME_FORMAT}")))
-            from core import globs
+            from legacy import globs
             try:
                 if gov_type == X.CHANCELLOR:
                     if globs.HITLER is not None and globs.HITLER not in cannot_be:
@@ -436,7 +440,7 @@ class Bot(AbstractPlayer):
             INFO_LOGS.append(InfoLog(info_type=X.INFO, info_name=f"votes empty, so choose random player", info1=f"{self= } {votes= } {cannot_be= }",
                                      info2=time.strftime(f"{DATE_FORMAT} {TIME_FORMAT}")))
 
-            from core import globs
+            from legacy import globs
             ppv = [1] * globs.COUNT_PLAYERS
         ppv[self.num] = 0
         for i in cannot_be:

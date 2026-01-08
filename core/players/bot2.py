@@ -3,16 +3,16 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Literal
 
 if TYPE_CHECKING:
-    from Players.abstract_player import AbstractPlayer
+    from core.players.abstract_player import AbstractPlayer
 import datetime
 import random as rnd
-from core.globs import CARDS
+from legacy.globs import CARDS
 
-from core.HTML_logs import InfoLog
-from core.globs import INFO_LOGS
+from core.logs.HTML_logs import InfoLog
+from legacy.globs import INFO_LOGS
 from core.standard_names_SH import X
 from user_settings import DATE_FORMAT, TIME_FORMAT, IS_PRINT_SMALL_INFO, IS_PRINT_FULL_INFO, BLACK_WIN_NUM, RED_WIN_NUM
-from Players.bot import Bot
+from core.players.bot import Bot
 
 
 class Bot2(Bot):

@@ -1,13 +1,13 @@
 from __future__ import annotations
 from typing import Iterable, Literal
 
-from Players.abstract_player import AbstractPlayer
+from core.players.abstract_player import AbstractPlayer
 from cli.colors import (CYAN_TEXT_BRIGHT as CYAN,
                         YELLOW_TEXT_BRIGHT as YELLOW,
                         RESET_TEXT as END_T,
                         END, UP,
                         )
-from core.globs import PLAYERS, ROLES, CARDS
+from legacy.globs import PLAYERS, ROLES, CARDS
 from core.standard_functions import show_only_to_one, yes_or_no, is_x_in_y, my_input
 from core.standard_names_SH import X
 from cli.user_color_settings import (INPUT_COLOR,
@@ -84,7 +84,7 @@ class Player(AbstractPlayer):
             try:
                 pc = int(input(f"{CYAN}President{END} will check number (not index): {INPUT_COLOR}")) - 1
                 print(END, end='')
-                from core.globs import COUNT_PLAYERS
+                from legacy.globs import COUNT_PLAYERS
                 if pc >= COUNT_PLAYERS or pc < 0:
                     raise ValueError(f"Wrong number: {pc + 1}")
                 if pc == self.num:
@@ -113,7 +113,7 @@ class Player(AbstractPlayer):
                         gulag = int(
                             input(f"{CYAN}President{END} will place in gulag number (not index): {INPUT_COLOR}")) - 1
                         print(END, end='')
-                        from core.globs import COUNT_PLAYERS
+                        from legacy.globs import COUNT_PLAYERS
                         if gulag < 1 or gulag >= COUNT_PLAYERS:
                             raise ValueError(f"Wrong number: {gulag + 1}")
                         if gulag == self.num:
@@ -130,7 +130,7 @@ class Player(AbstractPlayer):
                     try:
                         killed = int(input(f"{CYAN}President{END} will kill number (not index): {INPUT_COLOR}")) - 1
                         print(END, end='')
-                        from core.globs import COUNT_PLAYERS
+                        from legacy.globs import COUNT_PLAYERS
                         if killed < 0 or killed >= COUNT_PLAYERS:
                             raise ValueError(f"Wrong number: {killed + 1}")
                         elif killed == self.num:
@@ -152,7 +152,7 @@ class Player(AbstractPlayer):
                 placed = int(
                     input(f"{CYAN}President{END} will place number (not index): {INPUT_COLOR}")) - 1
                 print(END, end='')
-                from core.globs import COUNT_PLAYERS
+                from legacy.globs import COUNT_PLAYERS
                 if placed < 0 or placed >= COUNT_PLAYERS:
                     raise ValueError(f"Wrong number: {placed + 1}")
                 if placed in cannot_be:
@@ -174,7 +174,7 @@ class Player(AbstractPlayer):
                 chancellor = int(
                     input(f"{CYAN}President{END} will choose number (not index): {INPUT_COLOR}")) - 1
                 print(END, end='')
-                from core.globs import COUNT_PLAYERS
+                from legacy.globs import COUNT_PLAYERS
                 if chancellor < 0 or chancellor >= COUNT_PLAYERS:
                     raise ValueError(f"Wrong number: {chancellor + 1}")
                 if chancellor in cannot_be:
@@ -190,12 +190,10 @@ class Player(AbstractPlayer):
         return chancellor
 
     def vote_for_pair(self, prs: AbstractPlayer, cnc: AbstractPlayer) -> Literal[-1, 0, 1]:
-        vote = ''
-        while vote not in {-1, 0, 1}:
-            vote = input(f"Do you vote for {CYAN}{prs.name}{END} and {YELLOW}{cnc.name}{END} as chancellor? ")
-            if vote.isdigit() or vote == '-1':
-                vote = int(vote)
-        return vote
+        vote = my_input(f"Do you vote for {CYAN}{prs.name}{END} and {YELLOW}{cnc.name}{END} as chancellor? ",
+                            upper=False, possible={'0', '-1', '1'}, )
+        # noinspection PyTypeChecker
+        return int(vote)
 
 
 

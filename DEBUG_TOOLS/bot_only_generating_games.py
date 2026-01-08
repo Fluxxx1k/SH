@@ -11,7 +11,7 @@ else:
         print("Will be created log of console")
     except Exception as e:
         print(repr(e))
-        print("Cannot log console of game")
+        print("Cannot log console of games")
 for i in range(1):
     import user_settings
     user_settings.IS_BOT_ONLY = True

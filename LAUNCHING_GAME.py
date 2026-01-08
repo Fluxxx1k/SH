@@ -11,7 +11,7 @@ else:
         print("Will be created log of console")
     except Exception as e:
         print(repr(e))
-        print("Cannot log console of game")
+        print("Cannot log console of games")
 print("Checking files:")
 try:
     import os
@@ -47,15 +47,15 @@ try:
             print("\033[31mContinuing...\033[0m")
 except Exception as e:
     print(e)
-print("Do you want to play in console (1) or only log the game in console (2) or launch in website (3)?")
+print("Do you want to play in console (1) or only log the games in console (2) or launch in website (3)?")
 temp = input("Input: ")
 while temp != '1' and temp != '2' and temp != '3':
     temp = input("Input: ")
 if temp == '1':
     print("\033[32mLaunching\033[0m")
     # noinspection PyUnusedImports
-    import SH2
+    from legacy import SH2
 elif temp == '2':
     print("\033[31mNot available now...\033[0m")
 elif temp == '3':
-    import Website
+    pass

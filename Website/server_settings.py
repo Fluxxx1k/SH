@@ -44,7 +44,7 @@ def get_roles(length: int) -> tuple[list[str], bool]:
         black *= 3
     else:
         from core.standard_functions import my_input
-        black *= int(my_input("Too many players, input how many fascists will be in game",
+        black *= int(my_input("Too many players, input how many fascists will be in games",
                           integer=True))
     molotov = []
     ribbentrop = []
@@ -60,14 +60,14 @@ def get_bot_places(length: int) -> list[int]:
     creates list of places for bots
     :param length: number of bots
     """
-    from core.globs import COUNT_PLAYERS
+    from legacy.globs import COUNT_PLAYERS
     import random
     bot_places = random.sample(range(COUNT_PLAYERS), length)
     return bot_places
 
 
 # Funny thing, if you set it to True,
-# then all game will be generated automatically with bots
+# then all games will be generated automatically with bots
 # made for debug
 IS_BOT_ONLY: bool = False
 BOT_BASE_NAME = "Bot"

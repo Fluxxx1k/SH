@@ -1,23 +1,21 @@
 from __future__ import annotations
-from typing import List, Optional, Tuple, Union, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
 import user_settings
-from SH2 import take_random
+from core.standard_functions import yes_or_no
 
 if TYPE_CHECKING:
-    from Players.abstract_player import AbstractPlayer
-    from core.gamelog import GameLog
-    from core.infolog import InfoLog
+    from core.players.abstract_player import AbstractPlayer
+    from core.logs.gamelog import GameLog
+    from core.logs.infolog import InfoLog
     from io import TextIOWrapper
 
-from core.abstractgame import AbstractGame
-
-from user_settings import BLACK_WIN_NUM, RED_WIN_NUM
+from core.games.abstractgame import AbstractGame
 
 
 class CliGame(AbstractGame):
     """
-    class for game in console
+    class for games in console
 
     """
     def __init__(self, id: int, name: str, players: list[AbstractPlayer], description: str = None, image: str = None):

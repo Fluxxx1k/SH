@@ -1,19 +1,17 @@
 from __future__ import annotations
 
 import atexit
-from typing import Optional, TYPE_CHECKING, Any, List
+from typing import Optional, TYPE_CHECKING, List
 from abc import ABC, abstractmethod
 
-import user_settings
 from core.globalstorage import GlobalStorage
-from core.standard_classes import Cards
 from user_settings import BLACK_WIN_NUM, RED_WIN_NUM
 import random as rnd
 if TYPE_CHECKING:
     from io import TextIOWrapper
-    from Players.abstract_player import AbstractPlayer
-    from core.gamelog import GameLog
-    from core.infolog import InfoLog
+    from core.players.abstract_player import AbstractPlayer
+    from core.logs.gamelog import GameLog
+    from core.logs.infolog import InfoLog
 
 
 

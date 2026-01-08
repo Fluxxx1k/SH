@@ -1,15 +1,14 @@
 from __future__ import annotations
 
-from typing import Optional, TYPE_CHECKING, Any, Union
+from typing import Optional, TYPE_CHECKING, Any
 
-from cli.user_color_settings import CRITICAL
 from core import utils
 
 if TYPE_CHECKING:
     from io import TextIOWrapper
-    from Players.abstract_player import AbstractPlayer
-    from core.gamelog import GameLog
-    from core.infolog import InfoLog
+    from core.players.abstract_player import AbstractPlayer
+    from core.logs.gamelog import GameLog
+    from core.logs.infolog import InfoLog
 
 
 import json
@@ -130,8 +129,8 @@ base_dict = GlobalStorage('base_name').__dict__
 
 
 if __name__ == '__main__':
-    from core.gamelog import GameLog
-    from core.infolog import InfoLog
+    from core.logs.gamelog import GameLog
+    from core.logs.infolog import InfoLog
     gs = GlobalStorage('test name')
     gs.set('test key', 'test value')
     print(gs)

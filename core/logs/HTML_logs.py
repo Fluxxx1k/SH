@@ -1,19 +1,19 @@
 import os
 import time as t
 
-from core import globs
-from core.gamelog import GameLog
-from core.infolog import InfoLog
-from core.globs import INFO_LOGS, ROLES
+from legacy import globs
+from core.logs.gamelog import GameLog
+from core.logs.infolog import InfoLog
+from legacy.globs import INFO_LOGS, ROLES
 from core.standard_functions import color_clear, yes_or_no
 from core.standard_names_SH import X
 from cli.colors import RESET
 from cli.user_color_settings import WARNING, CRITICAL
 try:
-    from core.HTML_colors import *
+    from core.logs.HTML_colors import *
 except:
     print("HERE")
-from Players.abstract_player import AbstractPlayer
+from core.players.abstract_player import AbstractPlayer
 from user_settings import IS_PRINT_SMALL_INFO, IS_PRINT_FULL_INFO
 
 
@@ -159,7 +159,7 @@ def create_HTML_info(print_errors: bool = IS_PRINT_FULL_INFO) -> str:
     table_caption = ("\t<caption><h1><strong>"
                      "Таблица с информацией об игре"
                      "<br>"
-                     "Table with information about game"
+                     "Table with information about games"
                      "</strong></h1></caption>\n")
     table_head = (f"\t<thead>\n"
                   f"\t\t<tr>\n"
@@ -205,7 +205,7 @@ def create_HTML_logs_cards(logs, print_errors = IS_PRINT_FULL_INFO, is_print = I
         table_caption = ("<caption><h1><strong>"
                          "Таблица событий игры"
                          "<br>"
-                         "Logs of the game"
+                         "Logs of the games"
                          "</strong></h1></caption>\n")
         table_head = (f"<thead>"
                         f"\t<tr>"
@@ -270,7 +270,7 @@ def create_HTML_logs_cards_for_Website(logs=None, print_errors = IS_PRINT_FULL_I
         # table_caption = ("<caption><h1><strong>"
         #                  "Таблица событий игры"
         #                  "<br>"
-        #                  "Logs of the game"
+        #                  "Logs of the games"
         #                  "</strong></h1></caption>\n")
         table_head = (f"<thead>"
                         f"\t<tr>"

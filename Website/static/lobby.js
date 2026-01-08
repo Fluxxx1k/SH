@@ -172,7 +172,7 @@ function joinGame(joinData) {
             alert('Вы успешно присоединились к игре!');
             closeJoinGameModal();
             // Перенаправление в игру
-            window.location.href = '/game/' + joinData.game_name;
+            window.location.href = '/games/' + joinData.game_name;
         } else {
             alert('Ошибка: ' + (data.error || 'Неизвестная ошибка'));
         }

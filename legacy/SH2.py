@@ -4,8 +4,8 @@ import os
 import random as rnd
 import time as t
 from atexit import register as atexit
-from core.HTML_logs import create_HTML_logs, color_of_HTML_roles, GameLog, pr_c, purple_c, InfoLog
-from Players.bot2 import Bot2 as Bot
+from core.logs.HTML_logs import create_HTML_logs, color_of_HTML_roles, GameLog, pr_c, purple_c, InfoLog
+from core.players.bot2 import Bot2 as Bot
 from cli.colors import (YELLOW_TEXT_BRIGHT as YELLOW,
                         BLUE_TEXT_BRIGHT as BLUE,
                         CYAN_TEXT_BRIGHT as CYAN,
@@ -17,9 +17,9 @@ from cli.colors import (YELLOW_TEXT_BRIGHT as YELLOW,
                         YELLOW_BACKGROUND as GULAG,
                         END, BOLD, UNDERLINE,
                         )
-from Players.player import Player
-from core.globs import PLAYERS, ROLES, INFO_LOGS
-from core import globs
+from core.players.player import Player
+from legacy.globs import PLAYERS, ROLES, INFO_LOGS
+from legacy import globs
 from core.standard_functions import show_only_to_one, yes_or_no, my_input
 from core.standard_names_SH import X
 from cli.user_color_settings import INPUT_COLOR, CRITICAL, WARNING, GOOD
