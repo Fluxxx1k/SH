@@ -4,7 +4,7 @@ import datetime
 from typing import Literal
 
 import user_settings
-from Players.abstract_player import AbstractPlayer
+from core.players.abstract_player import AbstractPlayer
 from core.logs.HTML_colors import purple_c, pr_c
 from core.logs.HTML_logs import color_of_HTML_roles
 from core.games.abstractgame import AbstractGame
@@ -184,7 +184,6 @@ class BaseGame(AbstractGame):
 
 
     def out_of_queue_president(self) -> Literal[-1, 0, 1]:
-        self.prs
         return 0
     def purge_kill(self) -> Literal[-1, 0, 1]:
         self.globs.KILLED = self.prs.purge_another(X.SHOUT)

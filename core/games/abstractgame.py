@@ -30,7 +30,7 @@ class AbstractGame(ABC):
         self.previous_president: AbstractPlayer = None
         self.previous_chancellor: AbstractPlayer = None
         self.definitely_not_hitter = set()
-        self.saved_cards: list[str] = None
+        self.saved_cards: Optional[list[str]] = None
         self.deck: list[str]
         self.globs.ACTIVE_GAME = True
         self.globs.COUNT_PLAYERS = len(players)
@@ -43,7 +43,8 @@ class AbstractGame(ABC):
         self.deck = ['R'] * self.red_start + ['B'] * self.black_start
         rnd.shuffle(self.deck)
         self.checks = 1
-        self.cnc: AbstractPlayer = None
+        self.cnc: Optional[AbstractPlayer] = None
+        self.out_of_queue_president: Optional[AbstractPlayer] = None
 
     @abstractmethod
     def take_move(self):
