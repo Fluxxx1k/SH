@@ -35,8 +35,22 @@ player_objects = {}
 
 def create_game_instance(game_id):
     players = [WebPlayer(i, name, '', request.sid) for i, name in enumerate(games[game_id]['players'])]
+    
+    # Initialize game with proper roles and policies
     game = BaseGame(players)
+    game.initialize_game()
+    
+
+    # Store game in active games
     active_games[game_id] = game
+    
+    # Send initial game state to all players
+    emit('game_started', {
+        'players': [p.name for p in players],
+        'roles': {p.name: p.role for p in players},
+        'initial_state': game.get_state()
+    }, room=game_id)
+    
     return game
 
 # User data storage
@@ -136,12 +150,16 @@ def handle_create_game():
     games[game_id] = {
         'id': game_id,
         'players': [session['username']],
-        'max_players': 10,
-        'status': 'waiting'
+        'max_players': 5,  # Optimal for Secret Hitler
+        'status': 'waiting',
+        'creator': session['username']
     }
     
     players_in_games[game_id][session['username']] = request.sid
-    emit('game_created', {'game_id': game_id}, room=request.sid)
+    emit('game_created', {
+        'game_id': game_id,
+        'creator': session['username']
+    }, room=request.sid)
     emit('games_list', {'games': list(games.values())}, broadcast=True)
 
 @socketio.on('join_game', namespace='/lobby')
@@ -150,6 +168,18 @@ def handle_join_game(data):
     if game_id in games and len(games[game_id]['players']) < games[game_id]['max_players']:
         games[game_id]['players'].append(session['username'])
         players_in_games[game_id][session['username']] = request.sid
+        
+        # Start game if enough players joined
+        if len(games[game_id]['players']) >= 5:
+            games[game_id]['status'] = 'in_progress'
+            create_game_instance(game_id)
+            emit('game_started', {'game_id': game_id}, room=game_id)
+        else:
+            emit('player_joined', {
+                'player': session['username'],
+                'players_count': len(games[game_id]['players'])
+            }, room=game_id)
+            
         emit('game_joined', {'game_id': game_id}, room=request.sid)
         emit('games_list', {'games': list(games.values())}, broadcast=True)
 

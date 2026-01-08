@@ -108,23 +108,6 @@ class AbstractGame(ABC):
         return 0
 
     @abstractmethod
-    def add_player(self, player: AbstractPlayer):
-        pass
-    @abstractmethod
-    def add_players(self, players: list[AbstractPlayer]):
-        pass
-    def remove_player(self, player: AbstractPlayer):
-        self.players.remove(player)
-    @abstractmethod
-    def add_game_log(self, game_log: GameLog):
-        pass
-    @abstractmethod
-    def add_info_log(self, info_log: InfoLog):
-        pass
-    @abstractmethod
-    def add_game_log_file(self, game_log_file: TextIOWrapper):
-        pass
-    @abstractmethod
     def take_move(self):
         pass
 
@@ -132,9 +115,6 @@ class AbstractGame(ABC):
     def stop_game(self):
         pass
 
-    @abstractmethod
-    def end_game(self):
-        pass
 
     def accept_player(self, player: AbstractPlayer, chooser: AbstractPlayer = None) -> bool:
         if player in self.globs.PURGED:

@@ -7,8 +7,32 @@ lobbySocket.onmessage = function(event) {
     if (data.type === 'games_list') {
         updateGamesList(data.games);
     } else if (data.type === 'game_created') {
-        window.location.href = `/game/${data.game_id}`;
+        document.getElementById('current-game').innerHTML = `
+            <h3>Your Game (${data.game_id})</h3>
+            <p>Waiting for players... (1/5)</p>
+            <p>You are the game creator</p>
+        `;
     } else if (data.type === 'game_joined') {
+        const gameInfo = document.getElementById('current-game');
+        if (gameInfo) {
+            const match = gameInfo.innerHTML.match(/\((\d+)\/5\)/);
+            if (match) {
+                const count = parseInt(match[1]) + 1;
+                gameInfo.innerHTML = gameInfo.innerHTML.replace(
+                    /\d+\/5/, `${count}/5`
+                );
+            }
+        }
+    } else if (data.type === 'player_joined') {
+        const notification = document.createElement('div');
+        notification.className = 'notification';
+        notification.innerHTML = `${data.player} joined the game (${data.players_count}/5)`;
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.remove();
+        }, 3000);
+    } else if (data.type === 'game_started') {
         window.location.href = `/game/${data.game_id}`;
     }
 };
@@ -40,10 +64,12 @@ function updateGamesList(games) {
     gamesContainer.innerHTML = games.map(game => 
         `<div class="game-item">
             <h3>Game ${game.id}</h3>
-            <p>Players: ${game.players.length}/${game.max_players}</p>
+            <p>Players: ${game.players.length}/5</p>
             <div class="game-meta">
                 <span>Status: ${game.status}</span>
-                <button onclick="joinGame('${game.id}')">Join</button>
+                ${game.status === 'waiting' ? 
+                    `<button onclick="joinGame('${game.id}')">Join</button>` : 
+                    ''}
             </div>
         </div>`
     ).join('');
