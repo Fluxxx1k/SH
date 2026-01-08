@@ -18,7 +18,6 @@ from user_settings import RED_WIN_NUM
 
 class BaseGame(AbstractGame):
     def choose_next_president(self) -> AbstractPlayer:
-
         i = (self.prs.num + 1) % self.globs.COUNT_PLAYERS
         while not self.accept_player(self.globs.PLAYERS[i]):
             i = (i + 1) % self.globs.COUNT_PLAYERS
@@ -78,7 +77,9 @@ class BaseGame(AbstractGame):
                                                 c_prs_got=cards_president_got, c_prs_said=cards_president_said,
                                                 c_prs_said_after=cards_president_said_after_chancellor,
                                                 c_cnc_got=cards_chancellor_got, c_cnc_said=cards_chancellor_said,
-                                                c_cnc_placed="", special="VETO"))
+                                                c_cnc_placed="",
+
+                                            special="VETO"))
         return 0
 
     def placing_card(self, ccp):
@@ -124,8 +125,10 @@ class BaseGame(AbstractGame):
                 self.placing_card(ccp)
                 self.saved_cards = []
             return 0
+        self.skips = 0
+        self.globs.PLAYERS[self.prs.num].chosen_gov(X.PRESIDENT)
+        self.globs.PLAYERS[self.cnc.num].chosen_gov(X.CHANCELLOR)
         return self.president_chancellor_cards()
-
 
     def do_with_black(self) -> Literal[-1, 0, 1]:
         match self.checks:
@@ -198,4 +201,6 @@ class BaseGame(AbstractGame):
             self.globs.GIT_NOT.add(self.globs.KILLED)
         return 0
 
-
+    def stop_game(self):
+        import pickle
+        pickle.dump(self, open(f"{self.name}{self.id}.pickle", "wb"))
