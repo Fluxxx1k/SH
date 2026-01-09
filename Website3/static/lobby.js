@@ -1,5 +1,26 @@
 // WebSocket connection for lobby updates
-const lobbySocket = new WebSocket(`ws://${window.location.host}/lobby`);
+let lobbySocket;
+
+function connectWebSocket() {
+    const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
+    lobbySocket = new WebSocket(`${protocol}${window.location.host}/socket.io/lobby`);
+    
+    lobbySocket.onopen = function() {
+        console.log('WebSocket connection established');
+    };
+    
+    lobbySocket.onclose = function() {
+        console.log('WebSocket connection closed, reconnecting...');
+        setTimeout(connectWebSocket, 1000);
+    };
+    
+    lobbySocket.onerror = function(error) {
+        console.error('WebSocket error:', error);
+    };
+}
+
+// Initialize WebSocket connection
+connectWebSocket();
 
 lobbySocket.onmessage = function(event) {
     const data = JSON.parse(event.data);
@@ -38,12 +59,20 @@ lobbySocket.onmessage = function(event) {
 };
 
 document.getElementById('createGameBtn').addEventListener('click', () => {
+    if (lobbySocket.readyState !== WebSocket.OPEN) {
+        console.log('Waiting for WebSocket connection...');
+        return;
+    }
     lobbySocket.send(JSON.stringify({
         type: 'create_game'
     }));
 });
 
 document.getElementById('joinGameBtn').addEventListener('click', () => {
+    if (lobbySocket.readyState !== WebSocket.OPEN) {
+        console.log('Waiting for WebSocket connection...');
+        return;
+    }
     const gameCode = document.getElementById('gameCode').value.trim();
     if (gameCode) {
         lobbySocket.send(JSON.stringify({

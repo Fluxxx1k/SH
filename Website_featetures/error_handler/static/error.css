@@ -1,0 +1,197 @@
+/* Стили для страницы ошибок */
+
+.error-container {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 40px;
+    border-radius: 15px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    text-align: center;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.error-icon {
+    margin-bottom: 30px;
+}
+
+.error-404, .error-500, .error-403, .error-401, .error-generic {
+    font-size: 4em;
+    margin-bottom: 20px;
+    display: inline-block;
+    animation: pulse 2s infinite;
+}
+
+.error-404 { color: #4169E1; }
+.error-500 { color: #DC143C; }
+.error-403 { color: #FF8C00; }
+.error-401 { color: #9370DB; }
+.error-generic { color: #696969; }
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+.error-title {
+    color: #DC143C;
+    font-size: 2.5em;
+    margin-bottom: 20px;
+    font-weight: bold;
+}
+
+.error-message {
+    font-size: 1.3em;
+    margin-bottom: 25px;
+    color: #ffffff;
+    line-height: 1.5;
+}
+
+.error-description {
+    background: rgba(220, 20, 60, 0.2);
+    padding: 20px;
+    border-radius: 10px;
+    margin: 20px 0;
+    border-left: 4px solid #DC143C;
+}
+
+.error-comment {
+    background: rgba(255, 140, 0, 0.2);
+    padding: 15px;
+    border-radius: 10px;
+    margin: 20px 0;
+    border-left: 4px solid #FF8C00;
+    font-style: italic;
+}
+
+.error-suggestion {
+    background: rgba(65, 105, 225, 0.2);
+    padding: 20px;
+    border-radius: 10px;
+    margin: 20px 0;
+    border-left: 4px solid #4169E1;
+    text-align: left;
+}
+
+.error-suggestion h3 {
+    color: #4169E1;
+    margin-bottom: 10px;
+    font-size: 1.2em;
+}
+
+.error-suggestion ul {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.error-suggestion li {
+    margin: 8px 0;
+    padding-left: 20px;
+    position: relative;
+}
+
+.error-suggestion li:before {
+    content: "→";
+    position: absolute;
+    left: 0;
+    color: #4169E1;
+    font-weight: bold;
+}
+
+.error-actions {
+    margin-top: 30px;
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.error-debug {
+    background: rgba(105, 105, 105, 0.3);
+    padding: 20px;
+    border-radius: 10px;
+    margin-top: 30px;
+    text-align: left;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9em;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.error-debug h3 {
+    color: #cccccc;
+    margin-bottom: 10px;
+    font-size: 1.1em;
+}
+
+.error-debug pre {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    color: #cccccc;
+    margin: 0;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .error-container {
+        padding: 20px;
+        margin: 20px;
+    }
+    
+    .error-title {
+        font-size: 2em;
+    }
+    
+    .error-message {
+        font-size: 1.1em;
+    }
+    
+    .error-404, .error-500, .error-403, .error-401, .error-generic {
+        font-size: 3em;
+    }
+    
+    .error-actions {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .error-actions .btn {
+        width: 200px;
+    }
+}
+
+@media (max-width: 480px) {
+    .error-container {
+        padding: 15px;
+        margin: 10px;
+    }
+    
+    .error-title {
+        font-size: 1.8em;
+    }
+    
+    .error-message {
+        font-size: 1em;
+    }
+    
+    .error-404, .error-500, .error-403, .error-401, .error-generic {
+        font-size: 2.5em;
+    }
+}
+
+/* Специальные стили для разных типов ошибок */
+.error-container.error-404 {
+    border-color: rgba(65, 105, 225, 0.5);
+}
+
+.error-container.error-500 {
+    border-color: rgba(220, 20, 60, 0.5);
+}
+
+.error-container.error-403 {
+    border-color: rgba(255, 140, 0, 0.5);
+}
+
+.error-container.error-401 {
+    border-color: rgba(147, 112, 219, 0.5);
+}

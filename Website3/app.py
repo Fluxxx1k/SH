@@ -23,8 +23,6 @@ class SilentUndefined(Undefined):
         __getitem__ = __lt__ = __le__ = __gt__ = __ge__ = \
         __int__ = __float__ = __complex__ = __pow__ = __rpow__ = \
         __sub__ = __rsub__ = _fail_with_undefined_error
-
-
 app.jinja_env.undefined = SilentUndefined
 
 # Game state storage
@@ -72,8 +70,6 @@ class WebPlayer:
 # Routes
 @app.route('/')
 def index():
-    if 'username' in session:
-        return redirect(url_for('lobby'))
     return render_template('index.html')
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -126,6 +122,11 @@ def logout():
 def lobby():
     if 'username' not in session:
         return redirect(url_for('login'))
+    
+    # Ensure session is properly initialized
+    if 'username' not in session or not session['username']:
+        return redirect(url_for('login'))
+        
     return render_template('lobby.html')
 
 @app.route('/game/<game_id>')
@@ -139,12 +140,12 @@ def game(game_id):
     return render_template('game.html')
 
 # SocketIO events
-@socketio.on('connect', namespace='/lobby')
+@socketio.on('connect', namespace='/socket.io/lobby')
 def handle_lobby_connect():
     if 'username' in session:
         emit('games_list', {'games': list(games.values())})
 
-@socketio.on('create_game', namespace='/lobby')
+@socketio.on('create_game', namespace='/socket.io/lobby')
 def handle_create_game():
     game_id = str(uuid.uuid4())[:8]
     games[game_id] = {
@@ -162,7 +163,7 @@ def handle_create_game():
     }, room=request.sid)
     emit('games_list', {'games': list(games.values())}, broadcast=True)
 
-@socketio.on('join_game', namespace='/lobby')
+@socketio.on('join_game', namespace='/socket.io/lobby')
 def handle_join_game(data):
     game_id = data['game_id']
     if game_id in games and len(games[game_id]['players']) < games[game_id]['max_players']:
@@ -232,4 +233,8 @@ def handle_player_response(data):
                 }, room=game_id)
 
 if __name__ == '__main__':
-    socketio.run(app, debug=True,allow_unsafe_werkzeug=True)
+    socketio.run(app, 
+                debug=True,
+                allow_unsafe_werkzeug=True,
+                host='0.0.0.0',
+                port=5000)
