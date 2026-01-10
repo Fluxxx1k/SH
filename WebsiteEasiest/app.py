@@ -82,14 +82,6 @@ def register_post():
         return render_error_page(400, 'Passwords do not match')
     if len(password) < 3:
         return render_error_page(400, 'Password must be at least 3 characters long')
-    # if not any(char.isdigit() for char in password):
-    #     return render_error_page(400, 'Password must contain at least one digit')
-    # if not any(char.isupper() for char in password):
-    #     return render_error_page(400, 'Password must contain at least one uppercase letter')
-    # if not any(char.islower() for char in password):
-    #     return render_error_page(400, 'Password must contain at least one lowercase letter')
-    # if not any(char in '!@#$%^&*()-_=+[]{}|;:\'",.<>/?' for char in password):
-    #     return render_error_page(400, 'Password must contain at least one special character')
     creating_player = create_player(username, password)
     if creating_player[0]:
         return redirect(safe_url_for('login'))
