@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Создание игры - Secret Hitler</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='lobby.css') }}">
+    <link rel="stylesheet" href="{{ safe_url_for('static', filename='lobby.css') }}">
 </head>
 <body>
     <div class="container">
@@ -12,14 +12,14 @@
             <h1 class="game-title">Secret Hitler</h1>
             <nav class="nav">
                 <span class="welcome-message">Добро пожаловать, {{ username }}!</span>
-                <a href="{{ url_for('logout') }}" class="nav-link logout-link">Выйти</a>
+                <a href="{{ safe_url_for('logout') }}" class="nav-link logout-link">Выйти</a>
             </nav>
         </header>
 
         <main class="main-content">
             <div class="create-game-container">
                 <h2>Создание новой игры</h2>
-                <form id="createGameForm" class="game-form" action="{{ url_for('create_game') }}" method="POST">
+                <form id="createGameForm" class="game-form" action="{{ safe_url_for('create_game') }}" method="POST">
                     <div class="form-group">
                         <label for="gameName">Название игры:</label>
                         <input type="text" id="gameName" name="game_name" required 
@@ -82,7 +82,7 @@
                     
                     <div class="form-buttons">
                         <button type="submit" class="btn btn-primary">Создать игру</button>
-                        <a href="{{ url_for('lobby') }}" class="btn btn-secondary">Отмена</a>
+                        <a href="{{ safe_url_for('lobby') }}" class="btn btn-secondary">Отмена</a>
                     </div>
                 </form>
             </div>

@@ -4,15 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Лобби - Secret Hitler</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='lobby.css') }}">
+    <link rel="stylesheet" href="{{ safe_url_for('static', filename='lobby.css') }}">
 </head>
 <body>
     <div class="container">
         <header class="header">
             <h1 class="game-title">Secret Hitler</h1>
             <nav class="nav">
-                <a href="{{ url_for('index') }}" class="nav-link">Главная</a>
-                <a href="{{ url_for('login') }}" class="nav-link">Выход</a>
+                <a href="{{ safe_url_for('index') }}" class="nav-link">Главная</a>
+                <a href="{{ safe_url_for('login') }}" class="nav-link">Выход</a>
             </nav>
         </header>
 
@@ -25,17 +25,17 @@
                     <div class="game-card">
                         <div class="game-info">
                             <h3>{{ game.game_name }}</h3>
-                            <p>ID: #{{ game.id }}</p>
+                            <p>ID: #{{ game.name }}</p>
                             <p>Игроков: {{ game.players_count }}/10</p>
                         </div>
-                        <a href="{{ url_for('game', game_id=game.id) }}" class="btn btn-primary">Присоединиться</a>
+                        <a href="{{ safe_url_for('game', game_name=game.name) }}" class="btn btn-primary">Присоединиться</a>
                     </div>
                     {% endfor %}
                 </div>
 
                 <div class="lobby-actions">
                     <div class="action-buttons">
-                        <a href="{{ url_for('create_game') }}" class="btn btn-primary">Создать игру</a>
+                        <a href="{{ safe_url_for('create_game') }}" class="btn btn-primary">Создать игру</a>
                         <button class="btn btn-secondary" onclick="showJoinGameModal()">Присоединиться к игре</button>
                     </div>
                 </div>

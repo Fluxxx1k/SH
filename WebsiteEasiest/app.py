@@ -1,6 +1,6 @@
 import os
 import json
-from flask import Flask, request, redirect, session
+from flask import Flask, request, redirect, session, jsonify
 
 from Website_featetures.error_handler.safe_functions import *
 from Website_featetures.error_handler.undefined import SilentUndefined
@@ -16,9 +16,6 @@ app.jinja_env.undefined = SilentUndefined
 @app.route('/')
 def index():
     return safe_render_template('index.html')
-@app.route('/game')
-def game():
-    return safe_render_template('game.html')
 
 @app.route('/login')
 def login():
@@ -76,7 +73,6 @@ def lobby():
                 with open(os.path.join(games_dir, file), 'r') as f:
                     game_data = json.load(f)
                     games.append({
-                        'id': file[:-5],
                         'name': game_data.get('name', file[:-5]),
                         'players': len(game_data.get('players', [])),
                         'max_players': game_data.get('max_players', 8),
@@ -87,14 +83,65 @@ def lobby():
                          username=session['username'], 
                          games=games)
 
+@app.route('/game/<game_name>')
+def game(game_name):
+    if 'username' not in session:
+        return redirect(safe_url_for('login'))
+    
+    # Load game data
+    game_file = os.path.join('data', 'games', f'{game_name}.json')
+    if not os.path.exists(game_file):
+        return safe_render_template('error.html', error_code=404, error_message="Игра не найдена"), 404
+    
+    with open(game_file, 'r', encoding='utf-8') as f:
+        game_data = json.load(f)
+    
+    # Get players list
+    players = []
+    for player_name in game_data['players']:
+        player_file = os.path.join('data', 'players', f'{player_name}.json')
+        if os.path.exists(player_file):
+            with open(player_file, 'r', encoding='utf-8') as f:
+                player_data = json.load(f)
+                players.append({
+                    'name': player_name,
+                    'role': player_data.get('role', 'unknown')
+                })
+    
+    return safe_render_template('game.html', 
+                         game_name=game_name,
+                         players=players)
+
+@app.route('/game/<game_name>/ws')
+def game_ws(game_name):
+    if 'username' not in session:
+        return redirect(safe_url_for('login'))
+    
+    # TODO: Implement WebSocket connection
+    return "Not implemented", 501
+
+@app.route('/game/<game_name>/vote', methods=['POST'])
+def game_vote(game_name):
+    if 'username' not in session:
+        return jsonify({'success': False, 'message': 'Not authenticated'}), 401
+    
+    # TODO: Implement vote processing
+    return jsonify({'success': True, 'message': 'Vote recorded'})
+
+@app.route('/game/<game_name>/vote_player', methods=['POST'])
+def game_vote_player(game_name):
+    if 'username' not in session:
+        return jsonify({'success': False, 'message': 'Not authenticated'}), 401
+    
+    # TODO: Implement player vote processing
+    return jsonify({'success': True, 'message': 'Player vote recorded'})
+
 @app.route('/create_game', methods=['GET', 'POST'])
 def create_game(VOTE_DELAY=30):
     if 'username' not in session:
         return redirect(safe_url_for('login'))
     from user_settings import (MIN_PLAYER_NUM,
                                MAX_PLAYER_NUM,
-                               MIN_NAME_LEN,
-                               MAX_NAME_LEN,
                                RED_WIN_NUM,
                                BLACK_WIN_NUM,
                                ANARCHY_SKIP_NUM,
