@@ -1,17 +1,59 @@
 import os
 import json
+from typing import Iterable, Literal
+
 from flask import Flask, request, redirect, session, jsonify
 
+import user_settings
 from Website_featetures.error_handler.safe_functions import *
 from Website_featetures.error_handler.undefined import SilentUndefined
 from WebsiteEasiest.data.database_work import exists_player, create_player, login_player
-
+from core.players.abstract_player import AbstractPlayer
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key_here'
 app.jinja_env.undefined = SilentUndefined
 
+class GamesDict(dict):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.games = {}
+    def __setitem__(self, key, value) -> bool:
+        if len(self.games) > 7:
+            return False
+        else:
+            self.games[key] = value
+            return True
+games_dict = GamesDict()
 
+
+class WebPlayer(AbstractPlayer):
+    def president(self, cards: str | list[str], cnc: "AbstractPlayer"):
+        pass
+    def chancellor(self, cards: str, prs: "AbstractPlayer", words, veto):
+        pass
+
+    def president_said_after_chancellor(self, *, cards: str, cnc: "AbstractPlayer", ccg: str, cps: str, ccs: str,
+                                        ccp: str) -> str:
+        pass
+
+    def check_cards(self, cards: str) -> str:
+        pass
+
+    def check_player(self) -> tuple[int, str]:
+        pass
+
+    def purge_another(self, purge_type: str, votes: dict[int, int] = None) -> int:
+        pass
+
+    def place_another(self, cannot_be: Iterable[int] = frozenset(), votes: dict[int, int] = None) -> int:
+        pass
+
+    def choose_chancellor(self, cannot_be: Iterable[int] = frozenset(), votes: dict[int, int] = None) -> int:
+        pass
+
+    def vote_for_pair(self, prs: AbstractPlayer, cnc: AbstractPlayer) -> Literal[-1, 0, 1]:
+        pass
 
 @app.route('/')
 def index():
@@ -85,6 +127,7 @@ def lobby():
 
 @app.route('/game/<game_name>')
 def game(game_name):
+    print(f'GAME {game_name} |  {session["username"]}')
     if 'username' not in session:
         return redirect(safe_url_for('login'))
     
@@ -99,18 +142,20 @@ def game(game_name):
     # Get players list
     players = []
     for player_name in game_data['players']:
-        player_file = os.path.join('data', 'players', f'{player_name}.json')
-        if os.path.exists(player_file):
-            with open(player_file, 'r', encoding='utf-8') as f:
-                player_data = json.load(f)
+        # player_file = os.path.join('data', 'players', f'{player_name}.json')
+        # if os.path.exists(player_file):
+        #     with open(player_file, 'r', encoding='utf-8') as f:
+        #         player_data = json.load(f)
                 players.append({
                     'name': player_name,
-                    'role': player_data.get('role', 'unknown')
+                    # 'role': player_data.get('role', 'unknown')
+                    'role': 'creator' if player_name == game_data['created_by'] else 'participant',
                 })
     
-    return safe_render_template('game.html', 
-                         game_name=game_name,
-                         players=players)
+    return safe_render_template('game.html',
+                        created_by=game_data['created_by'],
+                        game_name=game_name,
+                        players=players)
 
 @app.route('/game/<game_name>/ws')
 def game_ws(game_name):
@@ -135,6 +180,37 @@ def game_vote_player(game_name):
     
     # TODO: Implement player vote processing
     return jsonify({'success': True, 'message': 'Player vote recorded'})
+
+@app.route('/game/<game_name>/start', methods=['POST'])
+def game_start(game_name):
+    if 'username' not in session:
+        return jsonify({'success': False, 'message': 'Not authenticated'}), 401
+    
+    # Load game data
+    game_file = os.path.join('data', 'games', f'{game_name}.json')
+    if not os.path.exists(game_file):
+        return jsonify({'success': False, 'message': 'Game not found'}), 404
+    
+    with open(game_file, 'r', encoding='utf-8') as f:
+        game_data = json.load(f)
+    
+    # Check if user is the creator
+    if game_data['created_by'] != session['username']:
+        return jsonify({'success': False, 'message': 'Only game creator can start the game'}), 403
+    
+
+    from WebsiteEasiest.webplayer import WebPlayer
+    roles = user_settings.get_roles(game_data['current_players'])
+    players = [WebPlayer(i, game_data['players'], roles[i]) for i in range(game_data['players'])]
+    from core.games.basegame import BaseGame
+    games_dict[game_name] = BaseGame(game_name, players)
+    
+    # Update game status
+    game_data['status'] = 'started'
+    with open(game_file, 'w', encoding='utf-8') as f:
+        json.dump(game_data, f)
+    
+    return jsonify({'success': True, 'message': 'Game started'})
 
 @app.route('/create_game', methods=['GET', 'POST'])
 def create_game(VOTE_DELAY=30):

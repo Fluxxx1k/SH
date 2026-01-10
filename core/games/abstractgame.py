@@ -1,6 +1,4 @@
 from __future__ import annotations
-
-import atexit
 from typing import Optional, TYPE_CHECKING, List
 from abc import ABC, abstractmethod
 
@@ -16,19 +14,17 @@ if TYPE_CHECKING:
 
 
 class AbstractGame(ABC):
-    def __init__(self, id: int, name: str, players: list[AbstractPlayer], description: str, image: str):
-        self.id = id
+    def __init__(self, name: str, players: list[AbstractPlayer], description: str=''):
         self.name = name
         self.description = description
-        self.image = image
         self.globs = GlobalStorage(name)
         self.players: List[AbstractPlayer] = players
         self.game_log_file: Optional[TextIOWrapper|str] = None
         self.info_log_file: Optional[TextIOWrapper|str] = None
-        self.prs: AbstractPlayer = None
+        self.prs: Optional[AbstractPlayer] = None
         self.skips: int = 0
-        self.previous_president: AbstractPlayer = None
-        self.previous_chancellor: AbstractPlayer = None
+        self.previous_president: Optional[AbstractPlayer] = None
+        self.previous_chancellor: Optional[AbstractPlayer] = None
         self.definitely_not_hitter = set()
         self.saved_cards: Optional[list[str]] = None
         self.deck: list[str]
@@ -60,9 +56,9 @@ class AbstractGame(ABC):
             chosen = rnd.sample(self.deck, k=c)
         except ValueError:
             self.globs.GAME_LOGS.append(
-                GameLog(special=f"self.deck resetting<br>RED: {self.red_start - self.red}<br>BLACK: {self.black_start - self.black}",
+                GameLog(special=f"self.deck resetting<br>RED: {self.red_start - self.globs.RED}<br>BLACK: {self.black_start - self.globs.BLACK}",
                         is_cards=False))
-            self.deck = ["R"] * (self.red_start - self.red) + ["B"] * (self.black_start - self.black)
+            self.deck = ["R"] * (self.red_start - self.globs.RED) + ["B"] * (self.black_start - self.globs.BLACK)
             chosen = rnd.sample(self.deck, k=c)
         for card in chosen:
             self.deck.remove(card)
@@ -70,7 +66,7 @@ class AbstractGame(ABC):
 
 
     def __str__(self):
-        return f"{self.__name__}(id={self.id}, name='{self.name}', description='{self.description}', image='{self.image}')"
+        return f"{self.__name__}(name='{self.name}', description='{self.description}')"
 
     def __repr__(self):
         return f"{self.__name__}({', '.join(f'{i}= {j}' for i, j in self.__dict__.items())})"
@@ -78,15 +74,12 @@ class AbstractGame(ABC):
     def __eq__(self, other):
         if not isinstance(other, AbstractGame):
             return False
-        return (
-            self.id == other.id
-            and self.name == other.name
+        return (self.name == other.name
             and self.description == other.description
-            and self.image == other.image
         )
 
     def __hash__(self):
-        return hash((self.id, self.name, self.description, self.image))
+        return hash((self.name, self.description))
 
     def to_dict(self):
         return self.__dict__

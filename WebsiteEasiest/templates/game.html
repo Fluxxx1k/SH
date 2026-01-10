@@ -19,7 +19,7 @@
         <section class="action-log">
             <h2>Журнал действий</h2>
             <div class="log-table">
-                <!-- Table for game actions will be populated here -->
+                {{ log_table | safe }}
             </div>
         </section>
 
@@ -54,6 +54,12 @@
             </ul>
         </section>
     </main>
+
+    {% if created_by == session['username'] %}
+        <div class="game-start">
+            <button id="startGameBtn" class="btn btn-start">Начать игру</button>
+        </div>
+    {% endif %}
 
     <script src="{{ safe_url_for('static', filename='game.js') }}"></script>
 </body>

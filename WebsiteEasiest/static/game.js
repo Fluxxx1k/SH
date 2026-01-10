@@ -1,4 +1,27 @@
 document.addEventListener('DOMContentLoaded', function() {
+    // Game initialization
+    const startGameBtn = document.getElementById('startGameBtn');
+    if (startGameBtn) {
+        startGameBtn.addEventListener('click', function() {
+            if (confirm('Вы уверены, что хотите начать игру?')) {
+                fetch(`/game/${gameId}/start`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Игра начата!');
+                        // TODO: Update game state
+                    } else {
+                        alert('Ошибка: ' + data.message);
+                    }
+                });
+            }
+        });
+    }
     // Voting buttons functionality
     const voteButtons = document.querySelectorAll('.vote-btn');
     voteButtons.forEach(button => {
