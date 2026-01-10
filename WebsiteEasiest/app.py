@@ -27,33 +27,6 @@ class GamesDict(dict):
 games_dict = GamesDict()
 
 
-class WebPlayer(AbstractPlayer):
-    def president(self, cards: str | list[str], cnc: "AbstractPlayer"):
-        pass
-    def chancellor(self, cards: str, prs: "AbstractPlayer", words, veto):
-        pass
-
-    def president_said_after_chancellor(self, *, cards: str, cnc: "AbstractPlayer", ccg: str, cps: str, ccs: str,
-                                        ccp: str) -> str:
-        pass
-
-    def check_cards(self, cards: str) -> str:
-        pass
-
-    def check_player(self) -> tuple[int, str]:
-        pass
-
-    def purge_another(self, purge_type: str, votes: dict[int, int] = None) -> int:
-        pass
-
-    def place_another(self, cannot_be: Iterable[int] = frozenset(), votes: dict[int, int] = None) -> int:
-        pass
-
-    def choose_chancellor(self, cannot_be: Iterable[int] = frozenset(), votes: dict[int, int] = None) -> int:
-        pass
-
-    def vote_for_pair(self, prs: AbstractPlayer, cnc: AbstractPlayer) -> Literal[-1, 0, 1]:
-        pass
 
 @app.route('/')
 def index():
@@ -162,7 +135,16 @@ def game_vote(game_name):
     if 'username' not in session:
         return jsonify({'success': False, 'message': 'Not authenticated'}), 401
     
-    # TODO: Implement vote processing
+    vote_type = request.json.get('vote')
+    if vote_type not in ['yes', 'no', 'pass']:
+        return jsonify({'success': False, 'message': 'Invalid vote type'}), 400
+    
+    # Convert to numeric value (1=YES, -1=NO, 0=PASS)
+    vote_value = 1 if vote_type == 'yes' else (-1 if vote_type == 'no' else 0)
+    
+    # TODO: Find player and set vote
+    # player.set_vote(vote_value)
+    
     return jsonify({'success': True, 'message': 'Vote recorded'})
 
 @app.route('/game/<game_name>/vote_player', methods=['POST'])
@@ -170,7 +152,13 @@ def game_vote_player(game_name):
     if 'username' not in session:
         return jsonify({'success': False, 'message': 'Not authenticated'}), 401
     
-    # TODO: Implement player vote processing
+    player_id = request.json.get('player_id')
+    if not player_id:
+        return jsonify({'success': False, 'message': 'Player ID required'}), 400
+    
+    # TODO: Find player and set vote for specific player
+    # player.set_vote_for_player(player_id, vote_value)
+    
     return jsonify({'success': True, 'message': 'Player vote recorded'})
 
 @app.route('/game/<game_name>/start', methods=['POST'])
@@ -192,8 +180,8 @@ def game_start(game_name):
 
     roles = user_settings.get_roles(game_data['current_players'])
     players = [WebPlayer(i, game_data['players'], roles[i]) for i in range(game_data['players'])]
-    from core.games.basegame import BaseGame
-    games_dict[game_name] = BaseGame(game_name, players)
+    from webplayers.web_game import WebGame
+    games_dict[game_name] = WebGame(game_name, players)
     
     # Update game status
     game_data['status'] = 'started'

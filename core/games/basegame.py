@@ -110,8 +110,7 @@ class BaseGame(AbstractGame):
             return self.is_end()
         self.prs = self.choose_next_president()
         self.cnc = self.globs.PLAYERS[self.prs.choose_chancellor(self.globs.PLAYERS)]
-        vote_sum = sum([player.vote_for_pair(self.prs, self.cnc) for player in self.players])
-        if vote_sum <= 0:
+        if self.voting():
             self.skips += 1
             if self.skips % user_settings.ANARCHY_SKIP_NUM == 0:
                 if self.saved_cards:
@@ -203,3 +202,7 @@ class BaseGame(AbstractGame):
     def stop_game(self):
         import pickle
         pickle.dump(self, open(f"{self.name}{self.id}.pickle", "wb"))
+
+    def voting(self):
+        return sum([player.vote_for_pair(self.prs, self.cnc) for player in self.players])
+

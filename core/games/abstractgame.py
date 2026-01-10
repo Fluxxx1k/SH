@@ -108,6 +108,9 @@ class AbstractGame(ABC):
     def stop_game(self):
         pass
 
+    @abstractmethod
+    def voting(self):
+        pass
 
     def accept_player(self, player: AbstractPlayer, chooser: AbstractPlayer = None) -> bool:
         if player in self.globs.PURGED:
