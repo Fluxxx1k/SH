@@ -1,3 +1,5 @@
+import os
+import json
 from flask import Flask, request, redirect
 
 from Website_featetures.error_handler.safe_functions import *
@@ -60,7 +62,25 @@ def register():
     return safe_render_template('register.html')
 @app.route('/lobby')
 def lobby():
-    return safe_render_template('lobby.html')
+    # Load available games from data/games directory
+    games = []
+    games_dir = os.path.join(os.path.dirname(__file__), 'data', 'games')
+    if os.path.exists(games_dir):
+        for filename in os.listdir(games_dir):
+            if filename.endswith('.json'):
+                with open(os.path.join(games_dir, filename), 'r') as f:
+                    game_data = json.load(f)
+                    games.append({
+                        # 'id': filename[:-5],
+                        'game_name': game_data.get('game_name', 'Unnamed Game'),
+                        'players_count': len(game_data.get('players', []))
+                    })
+    return safe_render_template('lobby.html', games=games)
+
+@app.route('/create_game')
+def create_game():
+    # TODO: Add game creation logic
+    return redirect(safe_url_for('game'))
 
 
 def render_error_page(error_code, error_message=None, error_description=None, error_comment=None, suggestion=None,
