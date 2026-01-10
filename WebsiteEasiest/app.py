@@ -1,10 +1,12 @@
 import os
 import json
-from flask import Flask, request, redirect
+from flask import Flask, request, redirect, session
 
 from Website_featetures.error_handler.safe_functions import *
 from Website_featetures.error_handler.undefined import SilentUndefined
 from WebsiteEasiest.data.database_work import exists_player, create_player, login_player
+
+
 app = Flask(__name__)
 app.secret_key = 'your_secret_key_here'
 app.jinja_env.undefined = SilentUndefined
@@ -62,25 +64,94 @@ def register():
     return safe_render_template('register.html')
 @app.route('/lobby')
 def lobby():
-    # Load available games from data/games directory
+    if 'username' not in session:
+        return redirect(safe_url_for('login'))
+    
+    # Load available games
     games = []
-    games_dir = os.path.join(os.path.dirname(__file__), 'data', 'games')
+    games_dir = os.path.join('data', 'games')
     if os.path.exists(games_dir):
-        for filename in os.listdir(games_dir):
-            if filename.endswith('.json'):
-                with open(os.path.join(games_dir, filename), 'r') as f:
+        for file in os.listdir(games_dir):
+            if file.endswith('.json'):
+                with open(os.path.join(games_dir, file), 'r') as f:
                     game_data = json.load(f)
                     games.append({
-                        # 'id': filename[:-5],
-                        'game_name': game_data.get('game_name', 'Unnamed Game'),
-                        'players_count': len(game_data.get('players', []))
+                        'id': file[:-5],
+                        'name': game_data.get('name', file[:-5]),
+                        'players': len(game_data.get('players', [])),
+                        'max_players': game_data.get('max_players', 8),
+                        'status': game_data.get('status', 'waiting')
                     })
-    return safe_render_template('lobby.html', games=games)
+    
+    return safe_render_template('lobby.html', 
+                         username=session['username'], 
+                         games=games)
 
-@app.route('/create_game')
-def create_game():
-    # TODO: Add game creation logic
-    return redirect(safe_url_for('game'))
+@app.route('/create_game', methods=['GET', 'POST'])
+def create_game(VOTE_DELAY=30):
+    if 'username' not in session:
+        return redirect(safe_url_for('login'))
+    from user_settings import (MIN_PLAYER_NUM,
+                               MAX_PLAYER_NUM,
+                               MIN_NAME_LEN,
+                               MAX_NAME_LEN,
+                               RED_WIN_NUM,
+                               BLACK_WIN_NUM,
+                               ANARCHY_SKIP_NUM,
+                               DATE_FORMAT,
+                               TIME_FORMAT,
+                               VOTE_ANONYMOUS,
+                               VETO_NUM_BLACK)
+    if request.method == 'GET':
+        default_players = min(MAX_PLAYER_NUM, 8)  # Default to 8 players if max is higher
+        return safe_render_template('create_game.html',
+                             username=session['username'],
+                             min_players=MIN_PLAYER_NUM,
+                             max_players=MAX_PLAYER_NUM,
+                             default_players=default_players,
+                             red_win_num=RED_WIN_NUM,
+                             black_win_num=BLACK_WIN_NUM,
+                             anarchy_skip_num=ANARCHY_SKIP_NUM,
+                             date_format=DATE_FORMAT,
+                             time_format=TIME_FORMAT,
+                             vote_anonymous=VOTE_ANONYMOUS,
+                             veto_num_black=VETO_NUM_BLACK,
+                             vote_delay=VOTE_DELAY)
+    
+    # Handle POST request for game creation
+    game_name = request.form.get('game_name')
+    game_password = request.form.get('game_password', '')
+    max_players = int(request.form.get('max_players', MIN_PLAYER_NUM))
+    
+
+    # Create game data
+    game_data = {
+        'name': game_name,
+        'password': game_password,
+        'max_players': max_players,
+        'current_players': 1,
+        'status': 'waiting',
+        'created_by': session['username'],
+        'players': [session['username']],
+        'settings': {
+            'red_win_num': int(request.form.get('red_win_num', 5)),
+            'black_win_num': int(request.form.get('black_win_num', 6)),
+            'anarchy_skip_num': int(request.form.get('anarchy_skip_num', 3)),
+            'date_format': request.form.get('date_format', '%d.%m.%y'),
+            'time_format': request.form.get('time_format', '%H:%M:%S'),
+            'vote_anonymous': bool(request.form.get('vote_anonymous', False)),
+            'veto_num_black': int(request.form.get('veto_num_black', 5)),
+            'vote_delay': int(request.form.get('vote_delay', 30))
+        }
+    }
+    
+    # Save game
+    games_dir = os.path.join('data', 'games')
+    os.makedirs(games_dir, exist_ok=True)
+    with open(os.path.join(games_dir, f"{game_name}.json"), 'w') as f:
+        json.dump(game_data, f)
+    
+    return redirect(safe_url_for('lobby'))
 
 
 def render_error_page(error_code, error_message=None, error_description=None, error_comment=None, suggestion=None,

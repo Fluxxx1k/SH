@@ -34,7 +34,10 @@
                 </div>
 
                 <div class="lobby-actions">
-                    <a href="{{ url_for('create_game') }}" class="btn btn-primary">Создать новую игру</a>
+                    <div class="action-buttons">
+                        <a href="{{ url_for('create_game') }}" class="btn btn-primary">Создать игру</a>
+                        <button class="btn btn-secondary" onclick="showJoinGameModal()">Присоединиться к игре</button>
+                    </div>
                 </div>
             </div>
         </main>
