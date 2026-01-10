@@ -1,7 +1,8 @@
-from flask import Flask, request
+from flask import Flask, request, redirect
+
 from Website_featetures.error_handler.safe_functions import *
 from Website_featetures.error_handler.undefined import SilentUndefined
-
+from WebsiteEasiest.data.database_work import exists_player, create_player, login_player
 app = Flask(__name__)
 app.secret_key = 'your_secret_key_here'
 app.jinja_env.undefined = SilentUndefined
@@ -18,6 +19,39 @@ def game():
 @app.route('/login')
 def login():
     return safe_render_template('login.html')
+@app.route('/login', methods=['POST'])
+def login_post():
+    username = request.form.get('username')
+    password = request.form.get('password')
+    logging_in_player = login_player(username, password)
+    if not logging_in_player[0]:
+        return render_error_page(400, logging_in_player[1])
+    else:
+        return redirect(safe_url_for('lobby'))
+@app.route('/register', methods=['POST'])
+def register_post():
+    username = request.form.get('username')
+    password = request.form.get('password')
+    confirm_password = request.form.get('confirm_password')
+    if exists_player(username):
+        return render_error_page(400, 'Username already exists')
+    if password != confirm_password:
+        return render_error_page(400, 'Passwords do not match')
+    if len(password) < 3:
+        return render_error_page(400, 'Password must be at least 3 characters long')
+    # if not any(char.isdigit() for char in password):
+    #     return render_error_page(400, 'Password must contain at least one digit')
+    # if not any(char.isupper() for char in password):
+    #     return render_error_page(400, 'Password must contain at least one uppercase letter')
+    # if not any(char.islower() for char in password):
+    #     return render_error_page(400, 'Password must contain at least one lowercase letter')
+    # if not any(char in '!@#$%^&*()-_=+[]{}|;:\'",.<>/?' for char in password):
+    #     return render_error_page(400, 'Password must contain at least one special character')
+    creating_player = create_player(username, password)
+    if creating_player[0]:
+        return safe_render_template('login.html', success_message='Registration successful! Please log in.')
+    else:
+        return render_error_page(400, creating_player[1])
 @app.route('/logout')
 def logout():
     return safe_render_template('logout.html')

@@ -3,6 +3,6 @@ from __future__ import annotations
 import os, json, sys
 
 
-from database_py.games import *
-from database_py.players import *
+from WebsiteEasiest.data.database_py.games import *
+from WebsiteEasiest.data.database_py.players import *
 
