@@ -49,7 +49,7 @@ def register_post():
     #     return render_error_page(400, 'Password must contain at least one special character')
     creating_player = create_player(username, password)
     if creating_player[0]:
-        return safe_render_template('login.html', success_message='Registration successful! Please log in.')
+        return redirect(safe_url_for('login'))
     else:
         return render_error_page(400, creating_player[1])
 @app.route('/logout')
