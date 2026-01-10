@@ -197,9 +197,7 @@ def game_start(game_name):
     # Check if user is the creator
     if game_data['created_by'] != session['username']:
         return jsonify({'success': False, 'message': 'Only game creator can start the game'}), 403
-    
 
-    from WebsiteEasiest.webplayer import WebPlayer
     roles = user_settings.get_roles(game_data['current_players'])
     players = [WebPlayer(i, game_data['players'], roles[i]) for i in range(game_data['players'])]
     from core.games.basegame import BaseGame
