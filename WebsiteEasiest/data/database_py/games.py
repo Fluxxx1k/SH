@@ -96,5 +96,5 @@ def end_game(game_name: str, game_data: dict = None) -> tuple[bool, Optional[str
     except FileExistsError as e:
         return False, f'Game "{game_name}" already existed, data will be lost: {repr(e)}'
     except Exception as e:
-        return False, repr(e)
+        return False, repr(e) + f' Game "{game_name}" will be lost'
 
