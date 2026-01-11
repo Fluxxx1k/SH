@@ -42,10 +42,12 @@ function animateNumbers() {
     
     statNumbers.forEach(function(element) {
         if (element.textContent in ['0', '---', 'N/A']) {
+            console.log(`Element with text ${element.textContent} skip`);
             return;
         }
         const finalValue = parseInt(element.textContent) || -1;
         if (finalValue === -1) {
+            console.log(`Element with text ${element.textContent} is not a number`);
             element.textContent = '---';
             return;
         }

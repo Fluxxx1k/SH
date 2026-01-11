@@ -1,18 +1,24 @@
 import os
 import json
+from datetime import datetime
 from typing import Iterable, Literal
 
 from flask import Flask, request, redirect, session, jsonify
 
 import user_settings
+from WebsiteEasiest.data.database_py.games import count_games
+from WebsiteEasiest.data.database_py.players import count_players
 from WebsiteEasiest.webplayers.web_game import WebPlayer
 from Website_featetures.error_handler.safe_functions import *
 from Website_featetures.error_handler.undefined import SilentUndefined
 from WebsiteEasiest.data.database_work import exists_player, create_player, login_player
 from core.globalstorage import GlobalStorage
 from core.players.abstract_player import AbstractPlayer
+from cli.colors import RED_TEXT_BRIGHT, GREEN_TEXT_BRIGHT, RESET_TEXT, YELLOW_TEXT, YELLOW_TEXT_BRIGHT, GREEN_TEXT
 
 app = Flask(__name__)
+app.debug = True
+
 app.secret_key = 'your_secret_key_here'
 app.jinja_env.undefined = SilentUndefined
 
@@ -28,12 +34,18 @@ class GamesDict(dict):
             return True
 games_dict = GamesDict()
 
-
+@app.route('/favicon.ico')
+def favicon():
+    return safe_url_for('static', filename='favicon.ico')
 
 @app.route('/')
 def index():
     print(f'index  |  {"not logged in" if "username" not in session else session["username"]}')
-    return safe_render_template('index.html')
+    stats = {'active_games': count_games(),
+             'complete_games': count_games(active=False),
+             'total_players': count_players(),
+             }
+    return safe_render_template('index.html', stats=stats)
 
 @app.route('/login')
 def login():
@@ -139,8 +151,37 @@ def game_ws(game_name):
     if 'username' not in session:
         return redirect(safe_url_for('login'))
     
-    # TODO: Implement WebSocket connection
-    return "Not implemented", 501
+    if request.environ.get('wsgi.websocket'):
+        ws = request.environ['wsgi.websocket']
+        
+        # Register player in WebSocket connections
+        player_name = session['username']
+        
+        while True:
+            try:
+                message = ws.receive()
+                if message is None:
+                    break
+                    
+                data = json.loads(message)
+                
+                # Broadcast message to all players
+                for player in games_dict[game_name].players:
+                    if hasattr(player, 'ws') and player.ws:
+                        player.ws.send(json.dumps({
+                            'type': 'action',
+                            'player': player_name,
+                            'action': data.get('action'),
+                            'time': datetime.now().strftime('%H:%M:%S')
+                        }))
+                
+            except Exception as e:
+                print(f"WebSocket error: {e}")
+                break
+        
+        return ""
+    
+    return "WebSocket connection required", 400
 
 @app.route('/game/<game_name>/vote', methods=['POST'])
 def game_vote(game_name):
@@ -156,13 +197,17 @@ def game_vote(game_name):
     vote_value = 1 if vote_type == 'yes' else (-1 if vote_type == 'no' else 0)
     
     # TODO: Find player and set vote
-    # player.set_vote(vote_value)
+    player = next((p for p in games_dict[game_name].players if p.name == session['username']), None)
+    if not player:
+        return jsonify({'success': False, 'message': 'Player not found'}), 404
+
+    player.set_vote(vote_value)
     
     return jsonify({'success': True, 'message': 'Vote recorded'})
 
 @app.route('/game/<game_name>/vote_player', methods=['POST'])
 def game_vote_player(game_name):
-    print(f'game_vote_player {game_name}  |  {"not logged in" if "username" not in session else session["username"]}')
+    print(f'game_vote_player ({game_name})  |  {"not logged in" if "username" not in session else session["username"]}')
     if 'username' not in session:
         return jsonify({'success': False, 'message': 'Not authenticated'}), 401
     
@@ -180,11 +225,16 @@ def game_start(game_name):
     print(f'game_start ({game_name})  |  {"not logged in" if "username" not in session else session["username"]}')
     if 'username' not in session:
         return jsonify({'success': False, 'message': 'Not authenticated'}), 401
-    
+    if game_name not in games_dict:
+        return jsonify({'success': False, 'message': 'Game not found'}), 404
+    if games_dict[game_name]['status'] == 'started':
+        return jsonify({'success': False, 'message': 'Game already started'}), 400
+    if games_dict[game_name]['current_players'] < games_dict[game_name]['min_players']:
+        return jsonify({'success': False, 'message': 'Not enough players'}), 400
     # Load game data
     game_file = os.path.join('data', 'games', f'{game_name}.json')
     if not os.path.exists(game_file):
-        return jsonify({'success': False, 'message': 'Game not found'}), 404
+        return jsonify({'success': False, 'message': 'Game not found in server files'}), 404
     
     with open(game_file, 'r', encoding='utf-8') as f:
         game_data = json.load(f)
@@ -332,7 +382,8 @@ def not_found_error(error):
         error_message="Страница не найдена",
         error_description="Запрошенная страница не существует или была перемещена.",
         error_comment="Возможно, вы ввели неправильный адрес или страница была удалена.",
-        suggestion="Проверьте правильность URL-адреса или вернитесь на главную страницу."
+        suggestion="Проверьте правильность URL-адреса или вернитесь на главную страницу.",
+        debug_info=repr(error),
     ), 404
 
 
@@ -445,6 +496,43 @@ def handle_database_error(error_message):
         suggestion="Попробуйте обновить страницу. Если ошибка повторяется, обратитесь к администратору.",
         debug_info=error_message if app.debug else None
     ), 500
+@app.before_request
+def log_request():
+    print(f"[{YELLOW_TEXT_BRIGHT}{request.method}{RESET_TEXT}] {request.path} - {request.remote_addr}")
 
+@app.after_request
+def log_response(response):
+    match response.status_code // 100:
+        case 2:
+            color = GREEN_TEXT_BRIGHT
+        case 4 | 5:
+            color = RED_TEXT_BRIGHT
+        case 3:
+            if response.status_code == 304:
+                color = GREEN_TEXT
+            else:
+                color = YELLOW_TEXT
+        case _:
+            color = YELLOW_TEXT_BRIGHT
+    print(f"Response: {f'{color}{response.status}{RESET_TEXT}'}")
+    return response
 if __name__ == '__main__':
-    app.run(debug=True)
+    from gevent.pywsgi import WSGIServer
+    from geventwebsocket.handler import WebSocketHandler
+    
+    if app.debug:
+
+        from gevent import monkey
+        monkey.patch_all()
+        from gevent.pywsgi import WSGIServer
+        from geventwebsocket.handler import WebSocketHandler
+
+        http_server = WSGIServer(('0.0.0.0', 5000),
+                                 app,
+                                 handler_class=WebSocketHandler,
+                                 log=None)
+        print("Running WebSocket server in debug mode on port 5000")
+        http_server.serve_forever()
+    else:
+        server = WSGIServer(('0.0.0.0', 5000), app, handler_class=WebSocketHandler)
+        server.serve_forever()

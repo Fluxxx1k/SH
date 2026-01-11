@@ -4,13 +4,15 @@ import os, json, sys
 from typing import Optional
 
 
-def count_games() -> int:
-    print("Counting games")
+
+def count_games(active: bool = True) -> int:
+    print(f"Counting games {'active' if active else 'existed'}")
     try:
-        return len(os.listdir(os.path.join('data', 'games')))
+        return len(os.listdir(os.path.join('data', 'games' if active else 'ended_games')))
     except Exception as e:
         print(repr(e))
         return 0
+
 
 def exists_game(game_name: str) -> bool:
     print(f"Checking if game {game_name} exists")
