@@ -5,9 +5,11 @@ from typing import Iterable, Literal
 from flask import Flask, request, redirect, session, jsonify
 
 import user_settings
+from WebsiteEasiest.webplayers.web_game import WebPlayer
 from Website_featetures.error_handler.safe_functions import *
 from Website_featetures.error_handler.undefined import SilentUndefined
 from WebsiteEasiest.data.database_work import exists_player, create_player, login_player
+from core.globalstorage import GlobalStorage
 from core.players.abstract_player import AbstractPlayer
 
 app = Flask(__name__)
@@ -30,22 +32,27 @@ games_dict = GamesDict()
 
 @app.route('/')
 def index():
+    print(f'index  |  {"not logged in" if "username" not in session else session["username"]}')
     return safe_render_template('index.html')
 
 @app.route('/login')
 def login():
+    print(f'login  |  {"not logged in" if "username" not in session else session["username"]}')
     return safe_render_template('login.html')
 @app.route('/login', methods=['POST'])
 def login_post():
+    print(f'login_post  |  {"not logged in" if "username" not in session else session["username"]}')
     username = request.form.get('username')
     password = request.form.get('password')
     logging_in_player = login_player(username, password)
     if not logging_in_player[0]:
         return render_error_page(400, logging_in_player[1])
     else:
+        session['username'] = username
         return redirect(safe_url_for('lobby'))
 @app.route('/register', methods=['POST'])
 def register_post():
+    print(f'register_post  |  {"not logged in" if "username" not in session else session["username"]}')
     username = request.form.get('username')
     password = request.form.get('password')
     confirm_password = request.form.get('confirm_password')
@@ -62,12 +69,15 @@ def register_post():
         return render_error_page(400, creating_player[1])
 @app.route('/logout')
 def logout():
+    print(f'logout   |  {"not logged in" if "username" not in session else session["username"]}')
     return safe_render_template('logout.html')
 @app.route('/register')
 def register():
+    print(f'register  |  {"not logged in" if "username" not in session else session["username"]}')
     return safe_render_template('register.html')
 @app.route('/lobby')
 def lobby():
+    print(f'lobby  |  {"not logged in" if "username" not in session else session["username"]}')
     if 'username' not in session:
         return redirect(safe_url_for('login'))
     
@@ -92,7 +102,7 @@ def lobby():
 
 @app.route('/game/<game_name>')
 def game(game_name):
-    print(f'GAME {game_name} |  {session["username"]}')
+    print(f'GAME {game_name}  |  {"not logged in" if "username" not in session else session["username"]}')
     if 'username' not in session:
         return redirect(safe_url_for('login'))
     
@@ -120,10 +130,12 @@ def game(game_name):
     return safe_render_template('game.html',
                         created_by=game_data['created_by'],
                         game_name=game_name,
-                        players=players)
+                        players=players,
+                        is_game_started=game_data['status'] == 'started',)
 
 @app.route('/game/<game_name>/ws')
 def game_ws(game_name):
+    print(f'game_ws ({game_name})  |  {"not logged in" if "username" not in session else session["username"]}')
     if 'username' not in session:
         return redirect(safe_url_for('login'))
     
@@ -132,6 +144,7 @@ def game_ws(game_name):
 
 @app.route('/game/<game_name>/vote', methods=['POST'])
 def game_vote(game_name):
+    print(f'game_vote ({game_name})  |  {"not logged in" if "username" not in session else session["username"]}')
     if 'username' not in session:
         return jsonify({'success': False, 'message': 'Not authenticated'}), 401
     
@@ -149,6 +162,7 @@ def game_vote(game_name):
 
 @app.route('/game/<game_name>/vote_player', methods=['POST'])
 def game_vote_player(game_name):
+    print(f'game_vote_player {game_name}  |  {"not logged in" if "username" not in session else session["username"]}')
     if 'username' not in session:
         return jsonify({'success': False, 'message': 'Not authenticated'}), 401
     
@@ -163,6 +177,7 @@ def game_vote_player(game_name):
 
 @app.route('/game/<game_name>/start', methods=['POST'])
 def game_start(game_name):
+    print(f'game_start ({game_name})  |  {"not logged in" if "username" not in session else session["username"]}')
     if 'username' not in session:
         return jsonify({'success': False, 'message': 'Not authenticated'}), 401
     
@@ -179,9 +194,14 @@ def game_start(game_name):
         return jsonify({'success': False, 'message': 'Only game creator can start the game'}), 403
 
     roles = user_settings.get_roles(game_data['current_players'])
-    players = [WebPlayer(i, game_data['players'], roles[i]) for i in range(game_data['players'])]
+    players = [WebPlayer(i, game_data['players'], roles[i]) for i in range(len(game_data['players']))]
     from webplayers.web_game import WebGame
     games_dict[game_name] = WebGame(game_name, players)
+    WebGame.globs = GlobalStorage(game_name,
+                                  roles=roles[0],
+                                  players=players,
+                                  count_players=game_data['current_players'],
+                                  )
     
     # Update game status
     game_data['status'] = 'started'
@@ -191,7 +211,8 @@ def game_start(game_name):
     return jsonify({'success': True, 'message': 'Game started'})
 
 @app.route('/create_game', methods=['GET', 'POST'])
-def create_game(VOTE_DELAY=30):
+def create_game():
+    print(f'create_game  |  {"not logged in" if "username" not in session else session["username"]}')
     if 'username' not in session:
         return redirect(safe_url_for('login'))
     from user_settings import (MIN_PLAYER_NUM,
@@ -217,7 +238,7 @@ def create_game(VOTE_DELAY=30):
                              time_format=TIME_FORMAT,
                              vote_anonymous=VOTE_ANONYMOUS,
                              veto_num_black=VETO_NUM_BLACK,
-                             vote_delay=VOTE_DELAY)
+                             vote_delay = 30)
     
     # Handle POST request for game creation
     game_name = request.form.get('game_name')
@@ -226,25 +247,33 @@ def create_game(VOTE_DELAY=30):
     
 
     # Create game data
-    game_data = {
-        'name': game_name,
-        'password': game_password,
-        'max_players': max_players,
-        'current_players': 1,
-        'status': 'waiting',
-        'created_by': session['username'],
-        'players': [session['username']],
-        'settings': {
-            'red_win_num': int(request.form.get('red_win_num', 5)),
-            'black_win_num': int(request.form.get('black_win_num', 6)),
-            'anarchy_skip_num': int(request.form.get('anarchy_skip_num', 3)),
-            'date_format': request.form.get('date_format', '%d.%m.%y'),
-            'time_format': request.form.get('time_format', '%H:%M:%S'),
-            'vote_anonymous': bool(request.form.get('vote_anonymous', False)),
-            'veto_num_black': int(request.form.get('veto_num_black', 5)),
-            'vote_delay': int(request.form.get('vote_delay', 30))
+    try:
+        game_data = {
+            'name': game_name,
+            'password': game_password,
+            'max_players': max_players,
+            'current_players': 1,
+            'status': 'waiting',
+            'created_by': session['username'],
+            'players': [session['username']],
+            'settings': {
+                'red_win_num': int(request.form.get('red_win_num', 5)),
+                'black_win_num': int(request.form.get('black_win_num', 6)),
+                'anarchy_skip_num': int(request.form.get('anarchy_skip_num', 3)),
+                'date_format': request.form.get('date_format', '%d.%m.%y'),
+                'time_format': request.form.get('time_format', '%H:%M:%S'),
+                'vote_anonymous': bool(request.form.get('vote_anonymous', False)),
+                'veto_num_black': int(request.form.get('veto_num_black', 5)),
+                'vote_delay': int(request.form.get('vote_delay', 30))
+            }
         }
-    }
+    except ValueError as e:
+        return render_error_page(400,
+                                 f'Invalid input',
+                                 str(e),
+                                 error_comment='This may mean that your input values are not integers or are out of range or like that.',
+                                 debug_info=repr(e),
+                                 suggestion='Check your input values')
     
     # Save game
     games_dir = os.path.join('data', 'games')
@@ -257,6 +286,13 @@ def create_game(VOTE_DELAY=30):
 
 def render_error_page(error_code, error_message=None, error_description=None, error_comment=None, suggestion=None,
                       debug_info=None):
+    print(f'''render_error_page {error_code= },
+                               {error_message= },
+                               {error_description= },
+                               {error_comment= },
+                               {suggestion= },
+                               {debug_info= },
+                               config= {{'DEBUG': {app.debug}}})''')
     """Render error page with comprehensive error information"""
     try:
         return safe_render_template('error.html',

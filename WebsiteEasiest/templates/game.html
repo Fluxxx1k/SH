@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Игра</title>
+    <title>Игра {{ (game_name) }}</title>
     <link rel="stylesheet" href="{{ safe_url_for('static', filename='game.css') }}">
 </head>
 <body>
@@ -55,12 +55,15 @@
         </section>
     </main>
 
-    {% if created_by == session['username'] %}
+    {% if created_by == session['username'] and not is_game_started%}
         <div class="game-start">
             <button id="startGameBtn" class="btn btn-start">Начать игру</button>
         </div>
     {% endif %}
 
+    <script>
+        const gameId = '{{ game_name }}';
+    </script>
     <script src="{{ safe_url_for('static', filename='game.js') }}"></script>
 </body>
 </html>

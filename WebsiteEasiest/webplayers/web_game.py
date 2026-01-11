@@ -1,15 +1,19 @@
+from __future__ import annotations
+
 from typing import Literal, Iterable
 import threading
 
 from core.games.basegame import BaseGame
 from core.players.abstract_player import AbstractPlayer
-from core.players.player import Player
 import time
 
+check_interval = 10  # Check every 10 seconds
+timeout = 600  # 10 minute timeout
+
 class WebGame(BaseGame):
-    def __init__(self, game_data):
-        super().__init__(game_data)
-        self.players = [WebPlayer(p) for p in game_data['players']]
+    def __init__(self, name: str, players: list[AbstractPlayer], description: str=''):
+        super().__init__(name, players, description)
+
     def voting(self):
         return sum(self.collect_votes())
 
@@ -55,40 +59,152 @@ class WebGame(BaseGame):
 
 class WebPlayer(AbstractPlayer):
     def president(self, cards: str | list[str], cnc: "AbstractPlayer"):
-        pass
+        """
+        Wait for president action with 10-minute timeout
+        Checks every 10 seconds for user input
+        """
+        start_time = time.time()
+
+        while time.time() - start_time < timeout:
+            if self.has_action():
+                return self.get_action()
+            time.sleep(check_interval)
+        
+        if self.has_action():
+            return self.get_action()
+        raise TimeoutError("President action timeout")
 
     def chancellor(self, cards: str, prs: "AbstractPlayer", words, veto):
-        pass
+        """
+        Wait for chancellor action with 10-minute timeout
+        Checks every 10 seconds for user input
+        """
+        start_time = time.time()
+        
+
+        while time.time() - start_time < timeout:
+            if self.has_action():
+                return self.get_action()
+            time.sleep(check_interval)
+        
+        if self.has_action():
+            return self.get_action()
+        raise TimeoutError("Chancellor action timeout")
 
     def president_said_after_chancellor(self, *, cards: str, cnc: "AbstractPlayer", ccg: str, cps: str, ccs: str,
                                         ccp: str) -> str:
-        pass
+        """
+        Wait for president response with 10-minute timeout
+        Checks every 10 seconds for user input
+        """
+        start_time = time.time()
+        
+
+        while time.time() - start_time < timeout:
+            if self.has_action():
+                return self.get_action()
+            time.sleep(check_interval)
+        
+        if self.has_action():
+            return self.get_action()
+        raise TimeoutError("President response timeout")
 
     def check_cards(self, cards: str) -> str:
-        pass
+        """
+        Wait for card check with 10-minute timeout
+        Checks every 10 seconds for user input
+        """
+        start_time = time.time()
+        
+
+        while time.time() - start_time < timeout:
+            if self.has_action():
+                return self.get_action()
+            time.sleep(check_interval)
+        
+        if self.has_action():
+            return self.get_action()
+        raise TimeoutError("Card check timeout")
 
     def check_player(self) -> tuple[int, str]:
-        pass
+        """
+        Wait for player check with 10-minute timeout
+        Checks every 10 seconds for user input
+        """
+        start_time = time.time()
+        
+
+        while time.time() - start_time < timeout:
+            if self.has_action():
+                return self.get_action()
+            time.sleep(check_interval)
+        
+        if self.has_action():
+            return self.get_action()
+        raise TimeoutError("Player check timeout")
 
     def purge_another(self, purge_type: str, votes: dict[int, int] = None) -> int:
-        pass
+        """
+        Wait for purge action with 10-minute timeout
+        Checks every 10 seconds for user input
+        """
+        start_time = time.time()
+        
+
+        while time.time() - start_time < timeout:
+            if self.has_action():
+                return self.get_action()
+            time.sleep(check_interval)
+        
+        if self.has_action():
+            return self.get_action()
+        raise TimeoutError("Purge action timeout")
 
     def place_another(self, cannot_be: Iterable[int] = frozenset(), votes: dict[int, int] = None) -> int:
-        pass
+        """
+        Wait for placement action with 10-minute timeout
+        Checks every 10 seconds for user input
+        """
+        start_time = time.time()
+        
+
+        while time.time() - start_time < timeout:
+            if self.has_action():
+                return self.get_action()
+            time.sleep(check_interval)
+        
+        if self.has_action():
+            return self.get_action()
+        raise TimeoutError("Placement action timeout")
 
     def choose_chancellor(self, cannot_be: Iterable[int] = frozenset(), votes: dict[int, int] = None) -> int:
-        pass
+        """
+        Wait for chancellor selection with 10-minute timeout
+        Checks every 10 seconds for user input
+        """
+        start_time = time.time()
+        
 
-    def __init__(self, player_data):
-        super().__init__(player_data)
+        while time.time() - start_time < timeout:
+            if self.has_action():
+                return self.get_action()
+            time.sleep(check_interval)
+        
+        if self.has_action():
+            return self.get_action()
+        raise TimeoutError("Chancellor selection timeout")
+
+    def __init__(self, num: int, name: str, role: str):
+        super().__init__(num, name, role)
         self._vote = None
+        self._action = None
         
     def has_voted(self) -> bool:
         """Check if player has submitted a vote"""
         return self._vote is not None
         
     def get_vote(self) -> Literal[-1, 0, 1]:
-        """Get player's vote (1=YES, -1=NO, 0=PASS)"""
+        """Get and clear player's vote (1=YES, -1=NO, 0=PASS)"""
         vote = self._vote
         self._vote = None
         return vote
@@ -96,6 +212,20 @@ class WebPlayer(AbstractPlayer):
     def set_vote(self, vote: Literal[-1, 0, 1]):
         """Set player's vote from web interface"""
         self._vote = vote
+        
+    def has_action(self) -> bool:
+        """Check if player has submitted an action"""
+        return self._action is not None
+        
+    def get_action(self):
+        """Get and clear player's action"""
+        action = self._action
+        self._action = None
+        return action
+        
+    def set_action(self, action):
+        """Set player's action from web interface"""
+        self._action = action
 
     def vote_for_pair(self, prs: 'AbstractPlayer', cnc: 'AbstractPlayer') -> Literal[-1, 0, 1]:
         """
@@ -104,7 +234,7 @@ class WebPlayer(AbstractPlayer):
         """
         start_time = time.time()
         timeout = 60  # 1 minute timeout
-        check_interval = 10  # Check every 10 seconds
+
 
         while time.time() - start_time < timeout:
             if self.has_voted():

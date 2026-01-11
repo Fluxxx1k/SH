@@ -16,26 +16,44 @@ import json
 
 
 class GlobalStorage:
-    def __init__(self, name: str):
+    def __init__(self, name: str,
+                 info_logs: list[InfoLog] = None,
+                 game_logs: list[GameLog] = None,
+                 count_players: int = None,
+                 players: list[AbstractPlayer] = None,
+                 roles: list[str] = None,
+                 hitler: int | None = None,
+                 stalin: int | None = None,
+                 purged: set[AbstractPlayer] = None,
+                 gulag: int | None = None,
+                 killed: int | None = None,
+                 black: int = 0,
+                 red: int = 0,
+                 bots: list[int] = None,
+                 active_game: bool = True,
+                 hit_chancellor: bool = False,
+                 hit_chancellor_stal_president: bool = False,
+                 hit_caput: bool = False,
+                 ):
         self.name: str = name
-        self.INFO_LOGS: list[InfoLog] = []
-        self.GAME_LOGS: list[GameLog] = []
+        self.INFO_LOGS: list[InfoLog] = info_logs or []
+        self.GAME_LOGS: list[GameLog] = game_logs or []
         # noinspection PyTypeChecker
-        self.COUNT_PLAYERS: int = None
-        self.PLAYERS: list[AbstractPlayer] = []
-        self.ROLES: list[str] = []
-        self.HITLER: int | None = None
-        self.STALIN: int | None = None
-        self.PURGED: set[AbstractPlayer] = set()
-        self.GULAG: int | None = None
-        self.KILLED: int | None = None
-        self.BLACK = 0
-        self.RED = 0
-        self.BOTS: list[int] = []
-        self.ACTIVE_GAME: bool = True
-        self.HIT_CHANCELLOR: bool = False
-        self.HIT_CHANCELLOR_STAL_PRESIDENT: bool = False
-        self.HIT_CAPUT: bool = False
+        self.COUNT_PLAYERS: int = count_players or None
+        self.PLAYERS: list[AbstractPlayer] = players or []
+        self.ROLES: list[str] = roles or []
+        self.HITLER: int | None = hitler or None
+        self.STALIN: int | None = stalin or None
+        self.PURGED: set[AbstractPlayer] = purged or set()
+        self.GULAG: int | None = gulag or None
+        self.KILLED: int | None = killed or None
+        self.BLACK: int = black
+        self.RED: int = red
+        self.BOTS: list[int] = bots or []
+        self.ACTIVE_GAME: bool = active_game
+        self.HIT_CHANCELLOR: bool = hit_chancellor
+        self.HIT_CHANCELLOR_STAL_PRESIDENT: bool = hit_chancellor_stal_president
+        self.HIT_CAPUT: bool = hit_caput
 
     def get(self, key: str, default: Any = None) -> Optional[Any]:
         return self.__dict__.get(key, default)
@@ -64,7 +82,7 @@ class GlobalStorage:
         return self.__dict__ != base_dict
 
     def __str__(self):
-        return self.name
+        return f"GlobalStorage({self.name})"
 
     def __repr__(self):
         return str(self.__dict__)
