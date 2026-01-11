@@ -165,6 +165,10 @@ def game_ws(game_name):
                     
                 data = json.loads(message)
                 
+                # Check if game exists before broadcasting
+                if game_name not in games_dict:
+                    return "Game not found", 404
+                
                 # Broadcast message to all players
                 for player in games_dict[game_name].players:
                     if hasattr(player, 'ws') and player.ws:
@@ -330,7 +334,7 @@ def create_game():
     os.makedirs(games_dir, exist_ok=True)
     with open(os.path.join(games_dir, f"{game_name}.json"), 'w') as f:
         json.dump(game_data, f)
-    
+
     return redirect(safe_url_for('lobby'))
 
 
