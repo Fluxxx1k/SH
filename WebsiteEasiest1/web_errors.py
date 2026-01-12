@@ -104,6 +104,20 @@ def too_many_requests_error(error):
         suggestion="Попробуйте повторить запрос позже или обратитесь к администратору для увеличения лимита запросов."
     ), 429
 
+
+def server_error(error):
+    """Handle 5XX Server errors"""
+    logger.error(f'[{request.remote_addr} -> {request.path}] ({request.method}) {error}\n{request.data.__dict__}\n{traceback.format_exc()}\n{session.__dict__}')
+    return render_error_page(
+        error_code=error.code,
+        error_message=error.name,
+        error_description=error.description,
+        error_comment="Внутренняя ошибка сервера.",
+        suggestion="Пожалуйста, попробуйте обновить страницу позже."
+    ), error.code
+
+
+
 def internal_server_error(handled_error: Exception):
     """Handle 500 Internal Server errors"""
     import traceback
