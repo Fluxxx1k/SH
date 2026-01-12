@@ -1,6 +1,6 @@
 import logging
 import sys, os
-
+from logging.handlers import RotatingFileHandler
 # Создание логгера
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -81,32 +81,52 @@ logger.addHandler(error_handler)
 logger.addHandler(fatal_handler)
 
 
-debug_file_handler = logging.FileHandler(debug_path)
+debug_file_handler = RotatingFileHandler(
+maxBytes=5*1024*1024,  # 5MB
+    backupCount=3,
+    mode='a',
+    filename=debug_path)
 debug_file_handler.setLevel(logging.DEBUG)
 debug_file_handler.addFilter(DebugFilter())
 debug_file_handler.setFormatter(logging.Formatter(
     f'{log_text}\n'
 ))
 
-info_file_handler = logging.FileHandler(info_path)
+info_file_handler = RotatingFileHandler(
+maxBytes=5*1024*1024,  # 5MB
+    backupCount=3,
+    mode='a',
+    filename=info_path)
 info_file_handler.setLevel(logging.INFO)
 info_file_handler.addFilter(InfoFilter())
 info_file_handler.setFormatter(logging.Formatter(
     f'{log_text}\n'
 ))
-warning_file_handler = logging.FileHandler(warning_path)
+warning_file_handler = RotatingFileHandler(
+maxBytes=5*1024*1024,  # 5MB
+    backupCount=3,
+    mode='a',
+    filename=warning_path)
 warning_file_handler.setLevel(logging.WARNING)
 warning_file_handler.addFilter(WarningFilter())
 warning_file_handler.setFormatter(logging.Formatter(
     f'{log_text}\n'
 ))
-error_file_handler = logging.FileHandler(error_path)
+error_file_handler = RotatingFileHandler(
+maxBytes=5*1024*1024,  # 5MB
+    backupCount=3,
+    mode='a',
+    filename=error_path)
 error_file_handler.setLevel(logging.ERROR)
 error_file_handler.addFilter(ErrorFilter())
 error_file_handler.setFormatter(logging.Formatter(
     f'{log_text}\n'
 ))
-fatal_file_handler = logging.FileHandler(fatal_path)
+fatal_file_handler = RotatingFileHandler(
+maxBytes=5*1024*1024,  # 5MB
+    backupCount=3,
+    mode='a',
+    filename=fatal_path)
 fatal_file_handler.setLevel(logging.CRITICAL)
 fatal_file_handler.addFilter(FatalFilter())
 fatal_file_handler.setFormatter(logging.Formatter(
@@ -120,7 +140,11 @@ logger.addHandler(warning_file_handler)
 logger.addHandler(error_file_handler)
 logger.addHandler(fatal_file_handler)
 
-all_file_handler = logging.FileHandler(all_path)
+all_file_handler = RotatingFileHandler(
+maxBytes=5*1024*1024,  # 5MB
+    backupCount=3,
+    mode='a',
+    filename=all_path)
 all_file_handler.setLevel(logging.DEBUG)
 all_file_handler.addFilter(DebugFilter())
 all_file_handler.setFormatter(logging.Formatter(
@@ -130,4 +154,4 @@ all_file_handler.setFormatter(logging.Formatter(
 logger.addHandler(all_file_handler)
 
 
-logger.debug("Logger created and loaded")
+logger.info("Logger created and loaded")
