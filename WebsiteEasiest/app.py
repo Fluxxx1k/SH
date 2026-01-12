@@ -6,7 +6,7 @@ from typing import Iterable, Literal
 from flask import Flask, request, redirect, session, jsonify
 
 import user_settings
-from WebsiteEasiest.data.database_py.games import count_games
+from WebsiteEasiest.data.database_py.games import count_games, get_data_of_game
 from WebsiteEasiest.data.database_py.players import count_players
 from WebsiteEasiest.webplayers.web_game import WebPlayer
 from Website_featetures.error_handler.safe_functions import *
@@ -196,11 +196,13 @@ def game_vote(game_name):
     vote_type = request.json.get('vote')
     if vote_type not in ['yes', 'no', 'pass']:
         return jsonify({'success': False, 'message': 'Invalid vote type'}), 400
-    
+
+    if game_name not in games_dict:
+        return jsonify({'success': False, 'message': 'Game not started or not exists'}), 404
     # Convert to numeric value (1=YES, -1=NO, 0=PASS)
     vote_value = 1 if vote_type == 'yes' else (-1 if vote_type == 'no' else 0)
     
-    # TODO: Find player and set vote
+
     player = next((p for p in games_dict[game_name].players if p.name == session['username']), None)
     if not player:
         return jsonify({'success': False, 'message': 'Player not found'}), 404
@@ -219,8 +221,14 @@ def game_vote_player(game_name):
     if not player_id:
         return jsonify({'success': False, 'message': 'Player ID required'}), 400
     
-    # TODO: Find player and set vote for specific player
-    # player.set_vote_for_player(player_id, vote_value)
+    # Find player and set vote for specific player
+    if game_name not in games_dict:
+        return jsonify({'success': False, 'message': 'Game not started or not exists'}), 404
+    player = next((p for p in games_dict[game_name].players if p.name == session['username']), None)
+    if not player:
+        return jsonify({'success': False, 'message': 'Player not found'}), 404
+        
+    player.set_action({'type': 'vote_player', 'player_id': player_id})
     
     return jsonify({'success': True, 'message': 'Player vote recorded'})
 
@@ -229,8 +237,11 @@ def game_start(game_name):
     print(f'game_start ({game_name})  |  {"not logged in" if "username" not in session else session["username"]}')
     if 'username' not in session:
         return jsonify({'success': False, 'message': 'Not authenticated'}), 401
-    if game_name not in games_dict:
+    game = get_data_of_game(game_name)
+    if not game[0]:
         return jsonify({'success': False, 'message': 'Game not found'}), 404
+    else:
+        game = game[1]
     if games_dict[game_name]['status'] == 'started':
         return jsonify({'success': False, 'message': 'Game already started'}), 400
     if games_dict[game_name]['current_players'] < games_dict[game_name]['min_players']:
@@ -334,7 +345,7 @@ def create_game():
     os.makedirs(games_dir, exist_ok=True)
     with open(os.path.join(games_dir, f"{game_name}.json"), 'w') as f:
         json.dump(game_data, f)
-
+    
     return redirect(safe_url_for('lobby'))
 
 
