@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Secret Hitler - Онлайн Игра</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='index.css') }}">
+    <link rel="stylesheet" href="{{ safe_url_for('static', filename='index.css') }}">
 </head>
 <body>
     <div class="container">
@@ -38,8 +38,8 @@
                     <h3>Начать игру</h3>
                     <p>Создайте новую игру или присоединяйтесь к существующей</p>
                     <div class="button-group">
-                        <a href="{{ url_for('login') }}" class="btn btn-primary">Войти в игру</a>
-                        <a href="{{ url_for('register') }}" class="btn btn-secondary">Регистрация</a>
+                        <a href="{{ safe_url_for('login') }}" class="btn btn-primary">Войти в игру</a>
+                        <a href="{{ safe_url_for('register') }}" class="btn btn-secondary">Регистрация</a>
                     </div>
                 </div>
 
@@ -74,7 +74,7 @@
         </main>
 
         <footer class="footer">
-            <p>&copy; 2024 Secret Hitler Online. Все права защищены.</p>
+            <p>&copy; 2025 Secret Hitler Online. Открытый исходный код.</p>
         </footer>
     </div>
 
@@ -108,9 +108,12 @@
 
             <h3>Победа</h3>
             <p>Игра заканчивается, когда одна из сторон достигает своей цели. Будьте осторожны - фашисты знают друг друга, но либералы не знают, кто есть кто!</p>
+            <div>
+                debug: {{ stats }}
+            </div>
         </div>
     </div>
 
-    <script src="{{ url_for('static', filename='index.js') }}"></script>
+    <script src="{{ safe_url_for('static', filename='index.js') }}"></script>
 </body>
 </html>

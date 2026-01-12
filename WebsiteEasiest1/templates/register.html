@@ -4,15 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Регистрация - Secret Hitler</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='account.css') }}">
+    <link rel="stylesheet" href="{{ safe_url_for('static', filename='account.css') }}">
 </head>
 <body>
     <div class="container">
         <header class="header">
             <h1 class="game-title">Secret Hitler</h1>
             <nav class="nav">
-                <a href="{{ url_for('index') }}" class="nav-link">Главная</a>
-                <a href="{{ url_for('login') }}" class="nav-link">Вход</a>
+                <a href="{{ safe_url_for('index') }}" class="nav-link">Главная</a>
+                <a href="{{ safe_url_for('login') }}" class="nav-link">Вход</a>
             </nav>
         </header>
 
@@ -48,8 +48,8 @@
                 </form>
 
                 <div class="auth-links">
-                    <p>Уже есть аккаунт? <a href="{{ url_for('login') }}">Войдите</a></p>
-                    <p><a href="{{ url_for('index') }}">Вернуться на главную</a></p>
+                    <p>Уже есть аккаунт? <a href="{{ safe_url_for('login') }}">Войдите</a></p>
+                    <p><a href="{{ safe_url_for('index') }}">Вернуться на главную</a></p>
                 </div>
             </div>
         </main>

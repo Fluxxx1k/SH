@@ -4,15 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Вход в игру - Secret Hitler</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='account.css') }}">
+    <link rel="stylesheet" href="{{ safe_url_for('static', filename='account.css') }}">
 </head>
 <body>
     <div class="container">
         <header class="header">
             <h1 class="game-title">Secret Hitler</h1>
             <nav class="nav">
-                <a href="{{ url_for('index') }}" class="nav-link">Главная</a>
-                <a href="{{ url_for('register') }}" class="nav-link">Регистрация</a>
+                <a href="{{ safe_url_for('index') }}" class="nav-link">Главная</a>
+                <a href="{{ safe_url_for('register') }}" class="nav-link">Регистрация</a>
             </nav>
         </header>
 
@@ -40,14 +40,14 @@
                 </form>
 
                 <div class="auth-links">
-                    <p>Нет аккаунта? <a href="{{ url_for('register') }}">Зарегистрируйтесь</a></p>
-                    <p><a href="{{ url_for('index') }}">Вернуться на главную</a></p>
+                    <p>Нет аккаунта? <a href="{{ safe_url_for('register') }}">Зарегистрируйтесь</a></p>
+                    <p><a href="{{ safe_url_for('index') }}">Вернуться на главную</a></p>
                 </div>
             </div>
         </main>
 
         <footer class="footer">
-            <p>&copy; 2024 Secret Hitler Online. Все права защищены.</p>
+            <p>&copy; 2025 Secret Hitler Online. Открытый проект.</p>
         </footer>
     </div>
 </body>

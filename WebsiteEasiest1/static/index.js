@@ -42,10 +42,12 @@ function animateNumbers() {
     
     statNumbers.forEach(function(element) {
         if (element.textContent in ['0', '---', 'N/A']) {
+            console.log(`Element with text ${element.textContent} skip`);
             return;
         }
         const finalValue = parseInt(element.textContent) || -1;
         if (finalValue === -1) {
+            console.log(`Element with text ${element.textContent} is not a number`);
             element.textContent = '---';
             return;
         }
@@ -97,38 +99,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-// // Обновление статистики с сервера (если доступно)
-// function updateStats() {
-//     // Это можно расширить для получения реальных данных с сервера
-//     // Пока используем случайные числа для демонстрации
-//     const stats = {
-//         active_games: Math.floor(Math.random() * 20) + 5,
-//         online_players: Math.floor(Math.random() * 50) + 10,
-//         total_players: Math.floor(Math.random() * 200) + 100
-//     };
-//
-//     // Обновляем отображение
-//     const statElements = {
-//         active_games: document.querySelector('.stat-number'),
-//         online_players: document.querySelectorAll('.stat-number')[1],
-//         total_players: document.querySelectorAll('.stat-number')[2]
-//     };
-//
-//     Object.keys(stats).forEach(function(key) {
-//         if (statElements[key]) {
-//             statElements[key].textContent = stats[key];
-//         }
-//     });
-// }
-
-// Инициализация при загрузке страницы
-// document.addEventListener('DOMContentLoaded', function() {
-//     // Обновить статистику при загрузке
-//     updateStats();
-//
-//     // Обновлять статистику каждые 30 секунд
-//     setInterval(updateStats, 30000);
-// });
 
 // Обработка ошибок загрузки изображений
 document.addEventListener('DOMContentLoaded', function() {

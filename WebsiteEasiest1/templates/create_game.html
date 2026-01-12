@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Создание игры - Secret Hitler</title>
+    <link rel="stylesheet" href="{{ safe_url_for('static', filename='lobby.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1 class="game-title">Secret Hitler</h1>
+            <nav class="nav">
+                <span class="welcome-message">Добро пожаловать, {{ username }}!</span>
+                <a href="{{ safe_url_for('logout') }}" class="nav-link logout-link">Выйти</a>
+            </nav>
+        </header>
+
+        <main class="main-content">
+            <div class="create-game-container">
+                <h2>Создание новой игры</h2>
+                <form id="createGameForm" class="game-form" action="{{ safe_url_for('create_game') }}" method="POST">
+                    <div class="form-group">
+                        <label for="gameName">Название игры:</label>
+                        <input type="text" id="gameName" name="game_name" required 
+                               minlength="{{ min_name_len }}" maxlength="{{ max_name_len }}">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="gamePassword">Пароль игры (необязательно):</label>
+                        <input type="password" id="gamePassword" name="game_password">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="maxPlayers">Количество игроков:</label>
+                        <select id="maxPlayers" name="max_players" required>
+                            {% for i in range(min_players, max_players+1) %}
+                                <option value="{{ i }}" {% if i == default_players %}selected{% endif %}>{{ i }} игроков</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="redWinNum">Побед для либералов:</label>
+                        <input type="number" id="redWinNum" name="red_win_num" min="3" max="10" value="{{ red_win_num }}">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="blackWinNum">Побед для фашистов:</label>
+                        <input type="number" id="blackWinNum" name="black_win_num" min="3" max="10" value="{{ black_win_num }}">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="anarchySkipNum">Пропусков анархиста:</label>
+                        <input type="number" id="anarchySkipNum" name="anarchy_skip_num" min="1" max="10" value="{{ anarchy_skip_num }}">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="dateFormat">Формат даты:</label>
+                        <input type="text" id="dateFormat" name="date_format" value="{{ date_format }}">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="timeFormat">Формат времени:</label>
+                        <input type="text" id="timeFormat" name="time_format" value="{{ time_format }}">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="voteAnonymous">Анонимное голосование:</label>
+                        <input type="checkbox" id="voteAnonymous" name="vote_anonymous" {% if vote_anonymous %}checked{% endif %}>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="vetoNumBlack">Фашистских вето:</label>
+                        <input type="number" id="vetoNumBlack" name="veto_num_black" min="1" max="10" value="{{ veto_num_black }}">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="voteDelay">Задержка голосования (сек):</label>
+                        <input type="number" id="voteDelay" name="vote_delay" min="10" max="120" value="{{ vote_delay }}">
+                    </div>
+                    
+                    <div class="form-buttons">
+                        <button type="submit" class="btn btn-primary">Создать игру</button>
+                        <a href="{{ safe_url_for('lobby') }}" class="btn btn-secondary">Отмена</a>
+                    </div>
+                </form>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <p>&copy; 2024 Secret Hitler Online. Все права защищены.</p>
+        </footer>
+    </div>
+</body>
+</html>

@@ -6,7 +6,7 @@ from typing import Iterable, Literal
 from flask import Flask, request, redirect, session, jsonify
 
 import user_settings
-from WebsiteEasiest.data.database_py.games import count_games
+from WebsiteEasiest.data.database_py.games import count_games, get_data_of_game
 from WebsiteEasiest.data.database_py.players import count_players
 from WebsiteEasiest.webplayers.web_game import WebPlayer
 from Website_featetures.error_handler.safe_functions import *
@@ -15,9 +15,7 @@ from WebsiteEasiest.data.database_work import exists_player, create_player, logi
 from core.globalstorage import GlobalStorage
 from core.players.abstract_player import AbstractPlayer
 from cli.colors import RED_TEXT_BRIGHT, GREEN_TEXT_BRIGHT, RESET_TEXT, YELLOW_TEXT, YELLOW_TEXT_BRIGHT, GREEN_TEXT
-
-app = Flask(__name__)
-app.debug = True
+from app_globs import app
 
 app.secret_key = 'your_secret_key_here'
 app.jinja_env.undefined = SilentUndefined
@@ -196,11 +194,13 @@ def game_vote(game_name):
     vote_type = request.json.get('vote')
     if vote_type not in ['yes', 'no', 'pass']:
         return jsonify({'success': False, 'message': 'Invalid vote type'}), 400
-    
+
+    if game_name not in games_dict:
+        return jsonify({'success': False, 'message': 'Game not started or not exists'}), 404
     # Convert to numeric value (1=YES, -1=NO, 0=PASS)
     vote_value = 1 if vote_type == 'yes' else (-1 if vote_type == 'no' else 0)
     
-    # TODO: Find player and set vote
+
     player = next((p for p in games_dict[game_name].players if p.name == session['username']), None)
     if not player:
         return jsonify({'success': False, 'message': 'Player not found'}), 404
@@ -219,8 +219,14 @@ def game_vote_player(game_name):
     if not player_id:
         return jsonify({'success': False, 'message': 'Player ID required'}), 400
     
-    # TODO: Find player and set vote for specific player
-    # player.set_vote_for_player(player_id, vote_value)
+    # Find player and set vote for specific player
+    if game_name not in games_dict:
+        return jsonify({'success': False, 'message': 'Game not started or not exists'}), 404
+    player = next((p for p in games_dict[game_name].players if p.name == session['username']), None)
+    if not player:
+        return jsonify({'success': False, 'message': 'Player not found'}), 404
+        
+    player.set_action({'type': 'vote_player', 'player_id': player_id})
     
     return jsonify({'success': True, 'message': 'Player vote recorded'})
 
@@ -229,8 +235,11 @@ def game_start(game_name):
     print(f'game_start ({game_name})  |  {"not logged in" if "username" not in session else session["username"]}')
     if 'username' not in session:
         return jsonify({'success': False, 'message': 'Not authenticated'}), 401
-    if game_name not in games_dict:
+    game = get_data_of_game(game_name)
+    if not game[0]:
         return jsonify({'success': False, 'message': 'Game not found'}), 404
+    else:
+        game = game[1]
     if games_dict[game_name]['status'] == 'started':
         return jsonify({'success': False, 'message': 'Game already started'}), 400
     if games_dict[game_name]['current_players'] < games_dict[game_name]['min_players']:
@@ -338,43 +347,6 @@ def create_game():
     return redirect(safe_url_for('lobby'))
 
 
-def render_error_page(error_code, error_message=None, error_description=None, error_comment=None, suggestion=None,
-                      debug_info=None):
-    print(f'''render_error_page {error_code= },
-                               {error_message= },
-                               {error_description= },
-                               {error_comment= },
-                               {suggestion= },
-                               {debug_info= },
-                               config= {{'DEBUG': {app.debug}}})''')
-    """Render error page with comprehensive error information"""
-    try:
-        return safe_render_template('error.html',
-                               error_code=error_code,
-                               error_message=error_message,
-                               error_description=error_description,
-                               error_comment=error_comment,
-                               suggestion=suggestion,
-                               debug_info=debug_info,
-                               config={'DEBUG': app.debug})
-    except Exception as e:
-        # Fallback if error template fails
-        return f"""
-        <!DOCTYPE html>
-        <html>
-        <head><title>Критическая ошибка {error_code}</title></head>
-        <body>
-            <h1>Критическая ошибка {e}</h1>
-            <p>{error_message or 'Произошла ошибка'}</p>
-            <p>{error_description or 'Произошла ошибка'}</p>
-            <p>{error_comment or 'Нет дополнительной информации'}</p>
-            <p>{suggestion or 'Нет совета'}</p>
-            <p>{debug_info or 'Нет отладочной информации о изначальной ошибке'}</p>
-            <p>{repr(e)}</p>
-            <a href="{safe_url_for('index')}">На главную</a>
-        </body>
-        </html>
-        """, error_code
 
 
 # HTTP Error Handlers
@@ -457,25 +429,6 @@ def method_not_allowed_error(error):
     ), 405
 
 
-# Custom error route for manual error display
-@app.route('/error')
-def error():
-    """Manual error display route"""
-    error_code = request.args.get('error_code', request.args.get('code', 500, type=int), type=int)
-    error_message = request.args.get('error_message', request.args.get('message'))
-    error_description = request.args.get('error_description', request.args.get('description'))
-    error_comment = request.args.get('error_comment', request.args.get('comment'))
-    suggestion = request.args.get('suggestion')
-    debug_info = request.args.get('debug_info')
-
-    return render_error_page(
-        error_code=error_code,
-        error_message=error_message,
-        error_description=error_description,
-        error_comment=error_comment,
-        suggestion=suggestion,
-        debug_info=debug_info
-    ), error_code
 
 
 # Application-specific error handlers
@@ -500,26 +453,8 @@ def handle_database_error(error_message):
         suggestion="Попробуйте обновить страницу. Если ошибка повторяется, обратитесь к администратору.",
         debug_info=error_message if app.debug else None
     ), 500
-@app.before_request
-def log_request():
-    print(f"[{YELLOW_TEXT_BRIGHT}{request.method}{RESET_TEXT}] {request.path} - {request.remote_addr}")
 
-@app.after_request
-def log_response(response):
-    match response.status_code // 100:
-        case 2:
-            color = GREEN_TEXT_BRIGHT
-        case 4 | 5:
-            color = RED_TEXT_BRIGHT
-        case 3:
-            if response.status_code == 304:
-                color = GREEN_TEXT
-            else:
-                color = YELLOW_TEXT
-        case _:
-            color = YELLOW_TEXT_BRIGHT
-    print(f"Response: {f'{color}{response.status}{RESET_TEXT}'}")
-    return response
+
 if __name__ == '__main__':
     from gevent.pywsgi import WSGIServer
     from geventwebsocket.handler import WebSocketHandler
