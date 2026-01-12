@@ -5,7 +5,7 @@ from logging.handlers import RotatingFileHandler
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
-log_text = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+log_text = "%(asctime)s - %(message)s"
 log_dir = "logger_logs"
 debug_path = os.path.join(log_dir, "debug.log")
 info_path = os.path.join(log_dir, "info.log")
@@ -154,4 +154,4 @@ all_file_handler.setFormatter(logging.Formatter(
 logger.addHandler(all_file_handler)
 
 
-logger.info("Logger created and loaded")
+logger.debug("Logger created and loaded")

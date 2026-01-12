@@ -1,4 +1,5 @@
 import flask
+from flask import abort
 
 
 def safe_url_for(endpoint, **values):
@@ -18,4 +19,4 @@ def safe_render_template(template_name, **context):
               f"Template: {template_name}\n"
               f"Context: {context}")
         from Website_featetures.error_handler.render_error import render_error_page
-        return render_error_page(500, error_message=repr(e))
+        abort(500, repr(e))

@@ -1,7 +1,8 @@
 from flask import request
 
+from WebsiteEasiest1.logger import logger
+from WebsiteEasiest1.web_config import is_debug
 from Website_featetures.error_handler.safe_functions import safe_render_template
-from app_globs import app
 
 
 
@@ -11,13 +12,13 @@ def render_error_page(error_code,
                       error_comment=None,
                       suggestion=None,
                       debug_info=None):
-    print(f'''render_error_page {error_code= },
+    logger.debug(f'''render_error_page {error_code= },
                                {error_message= },
                                {error_description= },
                                {error_comment= },
                                {suggestion= },
                                {debug_info= },
-                               config= {{'DEBUG': {app.debug}}})''')
+                               config= {{'DEBUG': {is_debug}}})''')
     """Render error page with comprehensive error information"""
     try:
         return safe_render_template('error.html',
@@ -27,8 +28,9 @@ def render_error_page(error_code,
                                error_comment=error_comment,
                                suggestion=suggestion,
                                debug_info=debug_info,
-                               config={'DEBUG': app.debug})
+                               config={'DEBUG': is_debug})
     except Exception as e:
+        logger.error(f"Error rendering error page: {e}")
         # Fallback if error template fails
         return f"""
         <!DOCTYPE html>
@@ -49,7 +51,6 @@ def render_error_page(error_code,
 
 # Custom error route for manual error display
 
-@app.route("/error")
 def error():
     """Manual error display route"""
     error_code = request.args.get('error_code', request.args.get('code', 500, type=int), type=int)

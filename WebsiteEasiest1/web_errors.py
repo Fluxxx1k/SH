@@ -1,8 +1,29 @@
 # HTTP Error Handlers
+import traceback
+
+from flask import request, session
+
 from WebsiteEasiest1.stardard_renders import render_error_page
+from logger import logger
+
+
+
+def client_error(error):
+    """Handle 4XX Client errors"""
+    logger.error(f'[{request.remote_addr} -> {request.path}] ({request.method}) {error}\n{request.data.__dict__}\n{traceback.format_exc()}\n{session.__dict__}')
+    return render_error_page(
+        error_code=error.code,
+        error_message=error.name,
+        error_description=error.description,
+        error_comment="Пожалуйста, проверьте ваш запрос и попробуйте еще раз.",
+        suggestion="Если проблема persists, обратитесь к администратору сайта."
+    ), error.code
+
+
 
 def bad_request_error(error):
     """Handle 400 Bad Request errors"""
+    logger.critical(f'[{request.remote_addr} -> {request.path}] ({request.method}) {error}\n{request.data.__dict__}, \n{traceback.format_exc()}\n{session.__dict__}')
     return render_error_page(
         error_code=400,
         error_message="Неверный запрос",
@@ -14,6 +35,7 @@ def bad_request_error(error):
 
 def unauthorized_error(error):
     """Handle 401 Unauthorized errors"""
+    logger.debug(f'[{request.remote_addr} -> {request.path}] ({request.method}) {error}')
     return render_error_page(
         error_code=401,
         error_message="Необходима авторизация",
@@ -24,6 +46,7 @@ def unauthorized_error(error):
 
 def forbidden_error(error):
     """Handle 403 Forbidden errors"""
+    logger.debug(f'[{request.remote_addr} -> {request.path}] ({request.method}) {error}')
     return render_error_page(
         error_code=403,
         error_message="Доступ запрещен",
@@ -36,6 +59,7 @@ def forbidden_error(error):
 
 def not_found_error(error):
     """Handle 404 Not Found errors"""
+    logger.warning(f'[{request.remote_addr} -> {request.path}] ({request.method}) {error}')
     return render_error_page(
         error_code=404,
         error_message="Страница не найдена",
@@ -48,7 +72,20 @@ def not_found_error(error):
 
 def method_not_allowed_error(error):
     """Handle 405 Method Not Allowed errors"""
-    return render_error_page(
+    if ('login' in str(request.path) or
+        'register' in str(request.path)):
+        logger.critical(f'[{request.remote_addr} -> {request.path}] ({request.method}) {error}')
+        return render_error_page(
+            error_code=405,
+            error_message="Метод не разрешен",
+            error_description="Используемый метод HTTP не разрешен для этого ресурса.",
+            error_comment="Например, попытка отправить POST-запрос на страницу, которая принимает только GET-запросы.",
+            suggestion="Вероятно, вы не можете войти или зарегистрироваться. Ошибка залогирована как критическая.",
+            debug_info=repr(error),
+        ), 405
+    else:
+        logger.error(f'[{request.remote_addr} -> {request.path}] ({request.method}) {error}')
+        return render_error_page(
         error_code=405,
         error_message="Метод не разрешен",
         error_description="Используемый метод HTTP не разрешен для этого ресурса.",
@@ -58,6 +95,7 @@ def method_not_allowed_error(error):
 
 def too_many_requests_error(error):
     """Handle 429 Too Many Requests errors"""
+    logger.warning(f'[{request.remote_addr} -> {request.path}] ({request.method}) {error}')
     return render_error_page(
         error_code=429,
         error_message="Слишком много запросов",
@@ -69,6 +107,7 @@ def too_many_requests_error(error):
 def internal_server_error(handled_error: Exception):
     """Handle 500 Internal Server errors"""
     import traceback
+    logger.critical(f'[{request.remote_addr} -> {request.path}] ({request.method}) {handled_error}\n{request.data.__dict__}\n{traceback.format_exc()}\n{session.__dict__}')
     debug_info = traceback.format_exc()
 
     return render_error_page(
@@ -82,6 +121,7 @@ def internal_server_error(handled_error: Exception):
 
 def not_implemented_error(error):
     """Handle 501 Not Implemented errors"""
+    logger.error(f'[{request.remote_addr} -> {request.path}] ({request.method}) {error}')
     return render_error_page(
         error_code=501,
         error_message="Функция не реализована",
@@ -92,6 +132,7 @@ def not_implemented_error(error):
 
 def bad_gateway_error(error):
     """Handle 502 Bad Gateway errors"""
+    logger.warning(f'[{request.remote_addr} -> {request.path}] ({request.method}) {error}')
     return render_error_page(
         error_code=502,
         error_message="Неверный шлюз",
@@ -102,6 +143,7 @@ def bad_gateway_error(error):
 
 def service_unavailable_error(error):
     """Handle 503 Service Unavailable errors"""
+    logger.warning(f'[{request.remote_addr} -> {request.path}] ({request.method}) {error}')
     return render_error_page(
         error_code=503,
         error_message="Сервис недоступен",
