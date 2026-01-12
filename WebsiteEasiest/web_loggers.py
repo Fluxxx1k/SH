@@ -1,6 +1,6 @@
 from flask import request
 
-from WebsiteEasiest1.logger import logger
+from WebsiteEasiest.logger import logger
 from cli.colors import (YELLOW_TEXT_BRIGHT,
                         RESET_TEXT,
                         GREEN_TEXT_BRIGHT,

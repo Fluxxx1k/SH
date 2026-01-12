@@ -1,4 +1,4 @@
-import WebsiteEasiest.app as app1
+import WebsiteEasiest.app2 as app1
 
 app1.app.run(
                 debug=True,

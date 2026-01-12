@@ -1,10 +1,10 @@
 from flask import session, request, redirect, abort
 
-from WebsiteEasiest1.data.database_py.games import count_games
-from WebsiteEasiest1.data.database_py.players import count_players, login_player
-from WebsiteEasiest1.logger import logger
+from WebsiteEasiest.data.database_py.games import count_games
+from WebsiteEasiest.data.database_py.players import count_players, login_player
+from WebsiteEasiest.logger import logger
 from Website_featetures.error_handler.safe_functions import safe_url_for
-from WebsiteEasiest1.app_globs import app, render_template, url_for
+from WebsiteEasiest.app_globs import app, render_template, url_for
 
 @app.route('/favicon.ico')
 def favicon():

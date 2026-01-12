@@ -3,7 +3,7 @@ import traceback
 
 from flask import request, session
 
-from WebsiteEasiest1.stardard_renders import render_error_page
+from WebsiteEasiest.stardard_renders import render_error_page
 from logger import logger
 
 

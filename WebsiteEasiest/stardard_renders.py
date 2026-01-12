@@ -1,7 +1,7 @@
 from flask import request
 
-from WebsiteEasiest1.logger import logger
-from WebsiteEasiest1.web_config import is_debug
+from WebsiteEasiest.logger import logger
+from WebsiteEasiest.web_config import is_debug
 from Website_featetures.error_handler.safe_functions import safe_render_template
 
 

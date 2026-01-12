@@ -1,8 +1,8 @@
 from flask import Flask, render_template
 
-from WebsiteEasiest1.web_config import is_debug
-from WebsiteEasiest1.web_errors import *
-from WebsiteEasiest1.web_loggers import log_response, log_request
+from WebsiteEasiest.web_config import is_debug
+from WebsiteEasiest.web_errors import *
+from WebsiteEasiest.web_loggers import log_response, log_request
 
 app = Flask(__name__)
 app.debug = is_debug
