@@ -17,24 +17,7 @@ from core.players.abstract_player import AbstractPlayer
 from cli.colors import RED_TEXT_BRIGHT, GREEN_TEXT_BRIGHT, RESET_TEXT, YELLOW_TEXT, YELLOW_TEXT_BRIGHT, GREEN_TEXT
 from app_globs import app
 
-app.secret_key = 'your_secret_key_here'
-app.jinja_env.undefined = SilentUndefined
 
-class GamesDict(dict):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.games = {}
-    def __setitem__(self, key, value) -> bool:
-        if len(self.games) > 7:
-            return False
-        else:
-            self.games[key] = value
-            return True
-games_dict = GamesDict()
-
-@app.route('/favicon.ico')
-def favicon():
-    return safe_url_for('static', filename='favicon.ico')
 
 @app.route('/')
 def index():
@@ -348,85 +331,6 @@ def create_game():
 
 
 
-
-# HTTP Error Handlers
-@app.errorhandler(404)
-def not_found_error(error):
-    """Handle 404 Not Found errors"""
-    return render_error_page(
-        error_code=404,
-        error_message="Страница не найдена",
-        error_description="Запрошенная страница не существует или была перемещена.",
-        error_comment="Возможно, вы ввели неправильный адрес или страница была удалена.",
-        suggestion="Проверьте правильность URL-адреса или вернитесь на главную страницу.",
-        debug_info=repr(error),
-    ), 404
-
-
-@app.errorhandler(500)
-def internal_error(handled_error: Exception):
-    """Handle 500 Internal Server errors"""
-    import traceback
-    debug_info = None
-    if app.debug:
-        debug_info = traceback.format_exc()
-
-    return render_error_page(
-        error_code=500,
-        error_message="Внутренняя ошибка сервера",
-        error_description="Произошла ошибка на сервере при обработке вашего запроса.",
-        error_comment="Мы уже работаем над решением этой проблемы.",
-        suggestion="Попробуйте обновить страницу через несколько минут. Если ошибка повторяется, обратитесь к администратору.",
-        debug_info=f"{debug_info} | {handled_error}"
-    ), 500
-
-
-@app.errorhandler(403)
-def forbidden_error(error):
-    """Handle 403 Forbidden errors"""
-    return render_error_page(
-        error_code=403,
-        error_message="Доступ запрещен",
-        error_description="У вас нет прав для доступа к этой странице или ресурсу.",
-        error_comment="Возможно, вам нужно войти в систему или у вас недостаточно прав.",
-        suggestion="Попробуйте войти в систему или обратитесь к администратору для получения необходимых прав."
-    ), 403
-
-
-@app.errorhandler(401)
-def unauthorized_error(error):
-    """Handle 401 Unauthorized errors"""
-    return render_error_page(
-        error_code=401,
-        error_message="Необходима авторизация",
-        error_description="Для доступа к этой странице необходимо войти в систему.",
-        error_comment="Пожалуйста, авторизуйтесь, чтобы продолжить.",
-        suggestion="Используйте форму входа или зарегистрируйтесь, если у вас еще нет аккаунта."
-    ), 401
-
-
-@app.errorhandler(400)
-def bad_request_error(error):
-    """Handle 400 Bad Request errors"""
-    return render_error_page(
-        error_code=400,
-        error_message="Неверный запрос",
-        error_description="Запрос содержит неверные данные или параметры.",
-        error_comment="Проверьте правильность введенных данных.",
-        suggestion="Попробуйте выполнить действие еще раз, проверив все введенные данные."
-    ), 400
-
-
-@app.errorhandler(405)
-def method_not_allowed_error(error):
-    """Handle 405 Method Not Allowed errors"""
-    return render_error_page(
-        error_code=405,
-        error_message="Метод не разрешен",
-        error_description="Используемый метод HTTP не разрешен для этого ресурса.",
-        error_comment="Например, попытка отправить POST-запрос на страницу, которая принимает только GET-запросы.",
-        suggestion="Попробуйте использовать другой метод или обратитесь к документации API."
-    ), 405
 
 
 
