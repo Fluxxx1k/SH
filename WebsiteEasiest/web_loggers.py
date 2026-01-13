@@ -10,8 +10,9 @@ from cli.colors import (YELLOW_TEXT_BRIGHT,
 
 
 def log_request():
-    logger.debug(f"[{request.remote_addr} -> {request.path}] ({request.method})")
-    print(f"[{request.remote_addr} -> {request.path}] ({YELLOW_TEXT_BRIGHT}{request.method}{RESET_TEXT})")
+    real_ip = request.headers.get('X-Forwarded-For', request.remote_addr)
+    logger.debug(f"[{real_ip} -> {request.path}] ({request.method})")
+    print(f"[{real_ip} -> {request.path}] ({YELLOW_TEXT_BRIGHT}{request.method}{RESET_TEXT})")
 
 
 
@@ -28,7 +29,8 @@ def log_response(response):
             color = RED_TEXT_BRIGHT
         case _:
             color = YELLOW_TEXT_BRIGHT
-    logger.info(f"[{request.remote_addr} -> {request.path}] ({request.method}) {response.status}")
-    print(f"[{request.remote_addr} -> {request.path}] ({YELLOW_TEXT_BRIGHT}{request.method}{RESET_TEXT}) {color}{response.status}{RESET_TEXT}")
+    real_ip = request.headers.get('X-Forwarded-For', request.remote_addr)
+    logger.info(f"[{real_ip} -> {request.path}] ({request.method}) {response.status}")
+    print(f"[{real_ip} -> {request.path}] ({YELLOW_TEXT_BRIGHT}{request.method}{RESET_TEXT}) {color}{response.status}{RESET_TEXT}")
 
     return response
