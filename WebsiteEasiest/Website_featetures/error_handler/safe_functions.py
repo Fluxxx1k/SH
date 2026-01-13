@@ -15,7 +15,7 @@ def safe_url_for(endpoint, **values):
 def safe_render_template(template_name, **context):
     """Helper function to render templates safely"""
     try:
-        return flask.render_template(template_name, safe_url_for=safe_url_for,**context)
+        return flask.render_template(template_name, safe_url_for=safe_url_for, url_for=safe_url_for, **context)
     except Exception as e:
         logger.warning(f"Error in safe_render_template: {repr(e)}\n"
               f"Template: {template_name}\n"
