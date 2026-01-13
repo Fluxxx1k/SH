@@ -4,6 +4,7 @@ from flask_socketio import emit
 from WebsiteEasiest.data.database_py import games
 from WebsiteEasiest.data.database_py.games import count_games, exists_game
 from WebsiteEasiest.data.database_py.players import count_players
+from WebsiteEasiest.logger import logger
 from WebsiteEasiest.settings.web_config import is_debug
 from WebsiteEasiest.app_globs import app, socketio
 from WebsiteEasiest.Website_featetures.error_handler.safe_functions import safe_url_for as url_for, render_template_abort_500 as render_template
@@ -48,10 +49,9 @@ app.route('/create_game', methods=['POST'])(abort_on_exception(game_creation.cre
 
 from WebsiteEasiest.web_core.games_work import game_base
 app.route('/game/<game_name>')(abort_on_exception(game_base.game))
-@app.route('/game/<game_name>', methods=['POST'])
-@app.route('/game/<game_name>/vote', methods=['POST'])
-def x(*args, **kwargs):
-    return game_base.game_post(*args, **kwargs)
+app.route('/game/<game_name>', methods=['POST'])(game_base.game_post)
+app.route('/game/<game_name>/vote', methods=['POST'])(game_base.game_vote)
+
 
 
 # Handle WebSocket connections

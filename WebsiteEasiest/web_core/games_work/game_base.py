@@ -42,6 +42,20 @@ def game_post(game_name):
     if not game_found:
         abort(404, description=f"Игра {game_name} не найдена: {game_data}")
 
+    abort(405, description=f"POST запрос на игру {game_name} не реализован")
+    return {'success': False, 'message': 'Not implemented yet'}
+
+
+
+def game_vote(game_name):
+    if 'username' not in session:
+        return redirect(safe_url_for('login'))
+        # Load game data
+    game_found, game_data = get_data_of_game(game_name)
+    if not game_found:
+        abort(404, description=f"Игра {game_name} не найдена: {game_data}")
+
+    # Handle voting request
     vote_data = request.get_json()
     if 'voter' not in vote_data or 'vote_type' not in vote_data:
         return {'success': False, 'message': 'Invalid vote data'}
@@ -56,17 +70,15 @@ def game_post(game_name):
         'timestamp': datetime.now().isoformat()
     }
     save_data_of_game(game_name, game_data)
-    
+
     # Broadcast vote to all clients
     socketio.emit('vote_update', {
         'voter': vote_data['voter'],
         'type': vote_data['vote_type'],
         'target': vote_data.get('target_player')
     }, room=game_name)
-    
+
     return {'success': True}
-
-
 
 def game_start(game_name):
     print(f'game_start ({game_name})  |  {"not logged in" if "username" not in session else session["username"]}')
