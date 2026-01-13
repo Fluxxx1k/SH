@@ -44,6 +44,7 @@ app.route('/create_game', methods=['POST'])(abort_on_exception(game_creation.cre
 
 from WebsiteEasiest.web_core.games_work import game_base
 app.route('/game/<game_name>')(abort_on_exception(game_base.game))
+app.route('/game/<game_name>', methods=['POST'])(abort_on_exception(game_base.game_post))
 
 
 if __name__ == '__main__':

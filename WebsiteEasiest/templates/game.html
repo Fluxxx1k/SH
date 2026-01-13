@@ -63,6 +63,7 @@
 
     <script>
         const gameId = '{{ game_name }}';
+        const username = '{{ session.username }}';
     </script>
     <script src="{{ safe_url_for('static', filename='game.js') }}"></script>
 </body>

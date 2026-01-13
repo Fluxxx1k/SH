@@ -6,15 +6,13 @@ document.addEventListener('DOMContentLoaded', function() {
             if (confirm('Вы уверены, что хотите начать игру?')) {
                 fetch(`/game/${gameId}/start`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    }
+                    headers: {'Content-Type': 'application/json'}
                 })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
                         alert('Игра начата!');
-                        // TODO: Update game state
+                        updateVoteLog();
                     } else {
                         alert('Ошибка: ' + data.message);
                     }
@@ -22,55 +20,72 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
-    // Voting buttons functionality
-    const voteButtons = document.querySelectorAll('.vote-btn');
-    voteButtons.forEach(button => {
+    
+    // Update vote log from server
+    function updateVoteLog() {
+        fetch(`/game/${gameId}`)
+            .then(response => response.json())
+            .then(data => {
+                const logTable = document.querySelector('.log-table');
+                logTable.innerHTML = '';
+                
+                data.votes.forEach(vote => {
+                    const logEntry = document.createElement('div');
+                    logEntry.className = 'log-entry';
+                    
+                    if (vote.target) {
+                        logEntry.textContent = `${vote.voter} проголосовал за ${vote.target}`;
+                    } else {
+                        logEntry.textContent = `${vote.voter} проголосовал ${vote.type}`;
+                    }
+                    
+                    logTable.appendChild(logEntry);
+                });
+            });
+    }
+    
+    // Unified vote handler
+    function sendVote(type, targetPlayer = null) {
+        const voteData = {
+            voter: username,
+            vote_type: type
+        };
+        if (targetPlayer) voteData.target_player = targetPlayer;
+        
+        fetch(`/game/${gameId}/vote`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(voteData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                updateVoteLog();
+                const msg = targetPlayer 
+                    ? `Вы проголосовали за ${targetPlayer}` 
+                    : `Ваш голос "${type}" учтен`;
+                alert(msg);
+            } else {
+                alert('Ошибка при голосовании: ' + data.message);
+            }
+        });
+    }
+    
+    // Voting buttons
+    document.querySelectorAll('.vote-btn').forEach(button => {
         button.addEventListener('click', function() {
             const voteType = this.classList.contains('vote-yes') ? 'yes' : 
                             this.classList.contains('vote-no') ? 'no' : 'pass';
-            
-            // Send vote to server
-            fetch(`/game/${gameId}/vote`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ vote: voteType })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert(`Ваш голос "${voteType}" учтен`);
-                } else {
-                    alert('Ошибка при голосовании: ' + data.message);
-                }
-            });
+            sendVote(voteType);
         });
     });
-
-    // Player vote functionality
-    const votePlayerBtn = document.querySelector('.vote-player-btn');
-    votePlayerBtn.addEventListener('click', function() {
+    
+    // Player vote
+    document.querySelector('.vote-player-btn').addEventListener('click', function() {
         const playerSelect = document.querySelector('.player-select');
-        const selectedPlayerId = playerSelect.value;
-        const selectedPlayerName = playerSelect.options[playerSelect.selectedIndex].text;
-        
-        if (confirm(`Вы уверены, что хотите проголосовать за ${selectedPlayerName}?`)) {
-            fetch(`/game/${gameId}/vote_player`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ player_id: selectedPlayerId })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert(`Вы проголосовали за ${selectedPlayerName}`);
-                } else {
-                    alert('Ошибка при голосовании: ' + data.message);
-                }
-            });
+        const selectedPlayer = playerSelect.options[playerSelect.selectedIndex].text;
+        if (confirm(`Вы уверены, что хотите проголосовать за ${selectedPlayer}?`)) {
+            sendVote('player', selectedPlayer);
         }
     });
 
