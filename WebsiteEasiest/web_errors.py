@@ -4,7 +4,7 @@ import traceback
 from flask import request, session
 
 from WebsiteEasiest.stardard_renders import render_error_page
-from logger import logger
+from WebsiteEasiest.logger import logger
 
 
 
