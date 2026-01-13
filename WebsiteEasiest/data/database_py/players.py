@@ -3,9 +3,11 @@ from __future__ import annotations
 import os, json, sys
 from typing import Optional
 
+from WebsiteEasiest.logger import logger
+
 
 def exists_player(name: str) -> bool:
-    print(f"Checking if player {name} exists")
+    logger.debug(f"Checking if player {repr(name)} exists")
     try:
         return os.path.exists(os.path.join('data', 'players', name + '.json'))
     except Exception as e:
@@ -14,7 +16,7 @@ def exists_player(name: str) -> bool:
 
 
 def count_players() -> int:
-    print("Counting players")
+    logger.debug("Counting players")
     try:
         return len(os.listdir(os.path.join('data', 'players')))
     except Exception as e:
@@ -24,7 +26,7 @@ def count_players() -> int:
 
 
 def create_player(player_name: str, player_password: str) -> tuple[bool, Optional[str]]:
-    print(f"Creating player {player_name} with password {player_password}")
+    logger.debug(f"Creating player {repr(player_name)} with password {repr(player_password)}")
     try:
         if len(player_name) < 3:
             return False, repr(ValueError("Player name cannot be less than 3 characters"))
@@ -44,7 +46,7 @@ def create_player(player_name: str, player_password: str) -> tuple[bool, Optiona
         return False, repr(e)
 
 def get_data_for_player(player_name) -> tuple[bool, dict | str]:
-    print(f"Getting data for player {player_name}")
+    logger.debug(f"Getting data for player {repr(player_name)}")
     try:
         if exists_player(player_name):
             return True, json.load(open(os.path.join('data', 'players', player_name + '.json'), encoding='utf-8'))
@@ -55,7 +57,7 @@ def get_data_for_player(player_name) -> tuple[bool, dict | str]:
         return False, repr(e)
 
 def login_player(player_name: str, player_password: str) -> tuple[bool, Optional[str]]:
-    print(f"Logging in player {player_name} with password {player_password}")
+    logger.debug(f"Logging in player {repr(player_name)} with password {repr(player_password)}")
     try:
         if not exists_player(player_name):
             return False, repr(FileNotFoundError(f'Player "{player_name}" not found'))

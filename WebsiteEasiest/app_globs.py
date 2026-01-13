@@ -29,7 +29,7 @@ for code in {406, 408, 409, 410, 411, 412, 413, 414, 415, 416, 417, 418, 421, 42
     try:
         app.errorhandler(code)(client_error)
     except Exception as e:
-        logger.error(f'Error registering error handler for code {code}: {e}')
+        logger.warning(f'Error registering error handler for code {code}: {e}')
 
 app.errorhandler(500)(internal_server_error)
 app.errorhandler(501)(not_implemented_error)

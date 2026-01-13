@@ -10,26 +10,27 @@ from cli.colors import (YELLOW_TEXT_BRIGHT,
 
 
 def log_request():
-    logger.debug(f"[{request.method}] {request.path} - {request.remote_addr}")
-    print(f"[{YELLOW_TEXT_BRIGHT}{request.method}{RESET_TEXT}] {request.path} - {request.remote_addr}")
+    logger.debug(f"[{request.remote_addr} -> {request.path}] ({request.method})")
+    print(f"[{request.remote_addr} -> {request.path}] ({YELLOW_TEXT_BRIGHT}{request.method}{RESET_TEXT})")
+
 
 
 def log_response(response):
+    log = True
     match response.status_code // 100:
         case 2:
             color = GREEN_TEXT_BRIGHT
-            logger.debug(f"Response: {response.status}")
         case 3:
             if response.status_code == 304:
                 color = GREEN_TEXT
             else:
                 color = YELLOW_TEXT
-            logger.debug(f"Response: {response.status}")
         case 4 | 5:
+            log = False
             color = RED_TEXT_BRIGHT
         case _:
             color = YELLOW_TEXT_BRIGHT
-            logger.debug(f"Response: {response.status}")
-    print(f"Response: {f'{color}{response.status}{RESET_TEXT}'}")
+    logger.info(f"[{request.remote_addr} -> {request.path}] ({request.method}) {response.status}")
+    print(f"[{request.remote_addr} -> {request.path}] ({YELLOW_TEXT_BRIGHT}{request.method}{RESET_TEXT}) {color}{response.status}{RESET_TEXT}")
 
     return response

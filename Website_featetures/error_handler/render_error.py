@@ -1,5 +1,5 @@
 # Error handling functions
-from flask import render_template, request
+from flask import render_template, request, abort
 from Website_featetures.error_handler.safe_functions import safe_url_for
 
 def render_error_page(error_code, error_message=None, error_description=None, error_comment=None, suggestion=None,
@@ -84,6 +84,33 @@ def handle_database_error(error_message):
         suggestion="Попробуйте обновить страницу. Если ошибка повторяется, обратитесь к администратору.",
         debug_info=error_message
     ), 500
+
+
+
+def safe_wrapper(func):
+    """Wrapper for safe functions"""
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except Exception as e:
+            return render_error_page(
+                error_code=500,
+                error_message="Ошибка при вызове функции",
+                error_description=str(e),
+                error_comment="Возможно, проблема с параметрами функции.",
+                suggestion="Попробуйте обновить страницу. Если ошибка повторяется, обратитесь к администратору.",
+                debug_info=repr(e)
+            ), 500
+    return wrapper
+
+def wrapper_abort_500(func):
+    """Wrapper for safe functions that raise 500 error"""
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except Exception as e:
+            abort(500, repr(e))
+    return wrapper
 
 if __name__ == '__main__':
     print(error())

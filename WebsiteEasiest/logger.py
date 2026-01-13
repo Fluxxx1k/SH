@@ -13,6 +13,7 @@ warning_path = os.path.join(log_dir, "warning.log")
 error_path = os.path.join(log_dir, "error.log")
 fatal_path = os.path.join(log_dir, "fatal.log")
 all_path = os.path.join(log_dir, "all.log")
+warning_error_fatal_path = os.path.join(log_dir, "warning_error_fatal.log")
 
 if not os.path.exists(log_dir):
     os.makedirs(log_dir)
@@ -85,52 +86,56 @@ debug_file_handler = RotatingFileHandler(
 maxBytes=5*1024*1024,  # 5MB
     backupCount=3,
     mode='a',
-    filename=debug_path)
+    filename=debug_path,
+    encoding='utf-8')
 debug_file_handler.setLevel(logging.DEBUG)
 debug_file_handler.addFilter(DebugFilter())
 debug_file_handler.setFormatter(logging.Formatter(
-    f'{log_text}\n'
+    f'DEBUG | {log_text}'
 ))
 
 info_file_handler = RotatingFileHandler(
 maxBytes=5*1024*1024,  # 5MB
     backupCount=3,
     mode='a',
-    filename=info_path)
+    filename=info_path,
+    encoding='utf-8')
 info_file_handler.setLevel(logging.INFO)
 info_file_handler.addFilter(InfoFilter())
 info_file_handler.setFormatter(logging.Formatter(
-    f'{log_text}\n'
+    f'INFO  | {log_text}'
 ))
 warning_file_handler = RotatingFileHandler(
 maxBytes=5*1024*1024,  # 5MB
     backupCount=3,
     mode='a',
-    filename=warning_path)
+    filename=warning_path,
+    encoding='utf-8')
 warning_file_handler.setLevel(logging.WARNING)
 warning_file_handler.addFilter(WarningFilter())
 warning_file_handler.setFormatter(logging.Formatter(
-    f'{log_text}\n'
+    f'WARNING| {log_text}'
 ))
 error_file_handler = RotatingFileHandler(
 maxBytes=5*1024*1024,  # 5MB
     backupCount=3,
     mode='a',
-    filename=error_path)
+    filename=error_path,
+    encoding='utf-8')
 error_file_handler.setLevel(logging.ERROR)
 error_file_handler.addFilter(ErrorFilter())
 error_file_handler.setFormatter(logging.Formatter(
-    f'{log_text}\n'
-))
+    f'ERROR | {log_text} {{%(filename)s - %(funcName)s - %(lineno)d}}'))
 fatal_file_handler = RotatingFileHandler(
 maxBytes=5*1024*1024,  # 5MB
     backupCount=3,
     mode='a',
-    filename=fatal_path)
+    filename=fatal_path,
+    encoding='utf-8')
 fatal_file_handler.setLevel(logging.CRITICAL)
 fatal_file_handler.addFilter(FatalFilter())
 fatal_file_handler.setFormatter(logging.Formatter(
-    f'{log_text}\n'
+    f'FATAL | {log_text} {{%(filename)s - %(funcName)s - %(lineno)d}}'
 ))
 
 
@@ -140,18 +145,35 @@ logger.addHandler(warning_file_handler)
 logger.addHandler(error_file_handler)
 logger.addHandler(fatal_file_handler)
 
+
 all_file_handler = RotatingFileHandler(
-maxBytes=5*1024*1024,  # 5MB
+    maxBytes=5*1024*1024,  # 5MB
     backupCount=3,
     mode='a',
-    filename=all_path)
+    filename=all_path,
+    encoding='utf-8')
 all_file_handler.setLevel(logging.DEBUG)
-all_file_handler.addFilter(DebugFilter())
-all_file_handler.setFormatter(logging.Formatter(
-    f'{log_text}\n'
-))
-
+all_file_handler.setFormatter(logging.Formatter(f'%(levelname)s | {log_text}'))
 logger.addHandler(all_file_handler)
+
+warning_error_fatal_path_file_handler = RotatingFileHandler(
+    maxBytes=5*1024*1024,  # 5MB
+    backupCount=3,
+    mode='a',
+    filename=warning_error_fatal_path,
+    encoding='utf-8')
+warning_error_fatal_path_file_handler.setLevel(logging.WARNING)
+warning_error_fatal_path_file_handler.setFormatter(
+    logging.Formatter(
+        f'%(levelname)s | {log_text} {{%(filename)s - %(funcName)s - %(lineno)d}}'
+    )
+)
+logger.addHandler(warning_error_fatal_path_file_handler)
+
+
 
 
 logger.debug("Logger created and loaded")
+
+
+

@@ -10,7 +10,7 @@ from logger import logger
 
 def client_error(error):
     """Handle 4XX Client errors"""
-    logger.error(f'[{request.remote_addr} -> {request.path}] ({request.method}) {error}\n{request.data.__dict__}\n{traceback.format_exc()}\n{session.__dict__}')
+    logger.error(f'[{request.remote_addr} -> {request.path}] ({request.method}) {error}\n{request.__dict__}\n{traceback.format_exc()}\n{session.__dict__}')
     return render_error_page(
         error_code=error.code,
         error_message=error.name,
@@ -23,7 +23,7 @@ def client_error(error):
 
 def bad_request_error(error):
     """Handle 400 Bad Request errors"""
-    logger.critical(f'[{request.remote_addr} -> {request.path}] ({request.method}) {error}\n{request.data.__dict__}, \n{traceback.format_exc()}\n{session.__dict__}')
+    logger.critical(f'[{request.remote_addr} -> {request.path}] ({request.method}) {error}\n{request.__dict__}, \n{traceback.format_exc()}\n{session.__dict__}')
     return render_error_page(
         error_code=400,
         error_message="Неверный запрос",
@@ -107,7 +107,7 @@ def too_many_requests_error(error):
 
 def server_error(error):
     """Handle 5XX Server errors"""
-    logger.error(f'[{request.remote_addr} -> {request.path}] ({request.method}) {error}\n{request.data.__dict__}\n{traceback.format_exc()}\n{session.__dict__}')
+    logger.error(f'[{request.remote_addr} -> {request.path}] ({request.method}) {error}\n{request.__dict__}\n{traceback.format_exc()}\n{session.__dict__}')
     return render_error_page(
         error_code=error.code,
         error_message=error.name,
@@ -121,7 +121,7 @@ def server_error(error):
 def internal_server_error(handled_error: Exception):
     """Handle 500 Internal Server errors"""
     import traceback
-    logger.critical(f'[{request.remote_addr} -> {request.path}] ({request.method}) {handled_error}\n{request.data.__dict__}\n{traceback.format_exc()}\n{session.__dict__}')
+    logger.critical(f'[{request.remote_addr} -> {request.path}] ({request.method}) {handled_error}\n{request.__dict__}\n{traceback.format_exc()}\n{session.__dict__}')
     debug_info = traceback.format_exc()
 
     return render_error_page(
