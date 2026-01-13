@@ -5,6 +5,7 @@ from flask import session, redirect, request, abort
 
 from WebsiteEasiest.Website_featetures.error_handler.safe_functions import safe_url_for, render_template_abort_500
 from WebsiteEasiest.logger import logger
+from WebsiteEasiest.settings.web_config import denied_literals
 from WebsiteEasiest.settings.website_settings import MIN_PLAYER_NUM, VOTE_ANONYMOUS, VETO_NUM_BLACK, ANARCHY_SKIP_NUM, \
     BLACK_WIN_NUM, RED_WIN_NUM
 from WebsiteEasiest.stardard_renders import render_error_page
@@ -43,7 +44,22 @@ def create_game_post():
                                  error_comment='You must enter a game name.',
                                  debug_info=repr(game_name),
                                  suggestion='Check your input values')
-
+    if len(game_name) > 32:
+        logger.debug(f'Invalid input for game creation: The game name is too long.')
+        return render_error_page(400,
+                                 f'Invalid input',
+                                 "The game name is too long.",
+                                 error_comment='You must enter a game name with less than 32 characters.',
+                                 debug_info=repr(game_name),
+                                 suggestion='Check your input values')
+    if any(char in game_name for char in denied_literals):
+        logger.debug(f'Invalid input for game creation: The game name contains invalid characters.')
+        return render_error_page(400,
+                                 f'Invalid input',
+                                 "The game name contains invalid characters.",
+                                 error_comment='You must enter a game name without backslashes or slashes.',
+                                 debug_info=repr(game_name),
+                                 suggestion='Check your input values')
     game_password = request.form.get('game_password', '')
     max_players = int(request.form.get('max_players', 0))
     if max_players < MIN_PLAYER_NUM:

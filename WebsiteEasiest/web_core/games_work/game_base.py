@@ -11,7 +11,6 @@ def game(game_name):
         return redirect(safe_url_for('login'))
 
     # Load game data
-    game_file = os.path.join('data', 'games', f'{game_name}.json')
     game_found, game_data = get_data_of_game(game_name)
     if not game_found:
         abort(404, description=f"Игра {game_name} не найдена: {game_data}")

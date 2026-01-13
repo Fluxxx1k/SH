@@ -4,6 +4,7 @@ import os, json, sys
 from typing import Optional
 
 from WebsiteEasiest.logger import logger
+from WebsiteEasiest.settings.web_config import denied_literals
 
 
 def exists_player(name: str) -> bool:
@@ -58,7 +59,22 @@ def get_data_for_player(player_name) -> tuple[bool, dict | str]:
 
 def login_player(player_name: str, player_password: str) -> tuple[bool, Optional[str]]:
     logger.debug(f"Logging in player {repr(player_name)} with password {repr(player_password)}")
+    '''
+    Logs in a player with the given name and password.
+
+    Args:
+        player_name (str): The name of the player.
+        player_password (str): The password of the player.
+
+    Returns:
+        tuple[bool, Optional[str]]: A tuple containing a boolean indicating whether the login was successful,
+        and an optional error message.
+    '''
     try:
+        if len(player_name) < 3:
+            return False, repr(ValueError("Player name cannot be less than 3 characters"))
+        if any(char in player_password for char in denied_literals):
+            return False, repr(ValueError("Player password cannot contain denied characters"))
         if not exists_player(player_name):
             return False, repr(FileNotFoundError(f'Player "{player_name}" not found'))
         else:
