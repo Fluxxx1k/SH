@@ -7,6 +7,9 @@ from WebsiteEasiest.logger import logger
 from WebsiteEasiest.settings.web_config import denied_literals
 
 path_players = os.path.join(os.curdir, 'data', 'players')
+os.makedirs(path_players, exist_ok=True)
+
+
 def exists_player(name: str) -> bool:
     logger.debug(f"Checking if player {repr(name)} exists")
     try:

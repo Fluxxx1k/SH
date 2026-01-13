@@ -7,6 +7,9 @@ from WebsiteEasiest.logger import logger
 
 path_games = os.path.join(os.curdir, 'data', 'games')
 path_existed_games = os.path.join(os.curdir, 'data', 'ended_games')
+os.makedirs(path_games, exist_ok=True)
+os.makedirs(path_existed_games, exist_ok=True)
+
 def count_games(active: bool = True) -> int:
     logger.debug(f"Counting games {'active' if active else 'existed'}")
     try:

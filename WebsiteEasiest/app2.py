@@ -70,4 +70,4 @@ def game_ws(game_name):
 app.route('/game/<game_name>/start', methods=['POST'])(abort_on_exception(game_base.game_start))
 
 if __name__ == '__main__':
-    app.run(debug=is_debug)
+    app.run(debug=is_debug, host='0.0.0.0', port=20050)
