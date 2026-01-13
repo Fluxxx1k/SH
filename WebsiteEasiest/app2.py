@@ -28,11 +28,12 @@ def index():
         }
     return render_template('index.html', stats=stats)
 
-app.route('/login')(login)
-app.route('/login', methods=['POST'])(login_post)
-app.route('/register')(register)
-app.route('/register', methods=['POST'])(register_post)
-app.route('/logout')(logout)
+app.route('/login')(abort_on_exception(login))
+app.route('/login', methods=['POST'])(abort_on_exception(login_post))
+app.route('/register')(abort_on_exception(register))
+app.route('/register', methods=['POST'])(abort_on_exception(register_post))
+app.route('/logout')(abort_on_exception(logout))
+
 
 
 if __name__ == '__main__':
