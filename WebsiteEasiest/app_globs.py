@@ -1,4 +1,6 @@
-from flask import Flask, render_template
+import functools
+
+from flask import Flask, render_template, abort
 
 from WebsiteEasiest.web_config import is_debug
 from WebsiteEasiest.web_errors import *
@@ -35,3 +37,4 @@ app.errorhandler(500)(internal_server_error)
 app.errorhandler(501)(not_implemented_error)
 app.errorhandler(502)(bad_gateway_error)
 app.errorhandler(503)(service_unavailable_error)
+

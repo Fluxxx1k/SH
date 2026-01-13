@@ -1,6 +1,8 @@
 # Error handling functions
+import functools
+
 from flask import render_template, request, abort
-from Website_featetures.error_handler.safe_functions import safe_url_for
+from WebsiteEasiest.Website_featetures.error_handler.safe_functions import safe_url_for
 
 def render_error_page(error_code, error_message=None, error_description=None, error_comment=None, suggestion=None,
                       debug_info=None):
@@ -103,11 +105,11 @@ def safe_wrapper(func):
             ), 500
     return wrapper
 
-def wrapper_abort_500(func):
-    """Wrapper for safe functions that raise 500 error"""
+def abort_on_exception(f):
+    @functools.wraps(f)
     def wrapper(*args, **kwargs):
         try:
-            return func(*args, **kwargs)
+            return f(*args, **kwargs)
         except Exception as e:
             abort(500, repr(e))
     return wrapper

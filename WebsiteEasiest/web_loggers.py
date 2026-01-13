@@ -16,7 +16,6 @@ def log_request():
 
 
 def log_response(response):
-    log = True
     match response.status_code // 100:
         case 2:
             color = GREEN_TEXT_BRIGHT
@@ -26,7 +25,6 @@ def log_response(response):
             else:
                 color = YELLOW_TEXT
         case 4 | 5:
-            log = False
             color = RED_TEXT_BRIGHT
         case _:
             color = YELLOW_TEXT_BRIGHT
