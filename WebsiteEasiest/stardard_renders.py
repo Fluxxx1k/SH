@@ -2,16 +2,17 @@ from flask import request
 
 from WebsiteEasiest.logger import logger
 from WebsiteEasiest.web_config import is_debug
-from Website_featetures.error_handler.safe_functions import safe_render_template
+from Website_featetures.error_handler.safe_functions import render_template_abort_500
 safe_errors = {404, 502, 429, 403, 401}
 
 
-def render_error_page(error_code,
-                      error_message=None,
-                      error_description=None,
-                      error_comment=None,
-                      suggestion=None,
-                      debug_info=None):
+def render_error_page(error_code: int,
+                      error_message: str = None,
+                      error_description: str = None,
+                      error_comment: str = None,
+                      suggestion: str = None,
+                      debug_info: str = None) -> str:
+    """Render error page with comprehensive error information"""
     (logger.debug if error_code in safe_errors else logger.warning)(f'''render_error_page {error_code= },
                                {error_message= },
                                {error_description= },
@@ -21,14 +22,9 @@ def render_error_page(error_code,
                                config= {{'DEBUG': {is_debug}}})''')
     """Render error page with comprehensive error information"""
     try:
-        return safe_render_template('error.html',
-                               error_code=error_code,
-                               error_message=error_message,
-                               error_description=error_description,
-                               error_comment=error_comment,
-                               suggestion=suggestion,
-                               debug_info=debug_info,
-                               config={'DEBUG': is_debug}), error_code
+        return render_template_abort_500('error.html', error_code=error_code, error_message=error_message,
+                                         error_description=error_description, error_comment=error_comment,
+                                         suggestion=suggestion, debug_info=debug_info, config={'DEBUG': is_debug})
     except Exception as e:
         logger.fatal(f"Error rendering error page: {e}")
         # Fallback if error template fails
@@ -47,4 +43,4 @@ def render_error_page(error_code,
             <a href="/">На главную</a>
         </body>
         </html>
-        """, error_code
+        """

@@ -4,22 +4,21 @@ from WebsiteEasiest.data.database_py.games import count_games
 from WebsiteEasiest.data.database_py.players import count_players, login_player, exists_player, create_player
 from WebsiteEasiest.web_config import is_debug
 from WebsiteEasiest.app_globs import app, render_template, url_for
+from WebsiteEasiest.web_errors import internal_server_error
 from Website_featetures.error_handler.render_error import abort_on_exception
 
 
 @app.route('/favicon.ico')
-@abort_on_exception
 def favicon():
     return url_for('static', filename='favicon.ico')
 
 @app.route('/')
-@app.route('/index')
-@app.route('/index.html')
-@app.route('/main')
-@app.route('/main.html')
+# @app.route('/index')
+# @app.route('/index.html')
+# @app.route('/main')
+# @app.route('/main.html')
 @abort_on_exception
 def index():
-    raise FileNotFoundError('Index not found')
     stats = {
         'active_games': count_games(),
         'complete_games': count_games(active=False),
@@ -28,14 +27,12 @@ def index():
     return render_template('index.html', stats=stats)
 
 @app.route('/login')
-@abort_on_exception
 def login():
     if 'username' in session:
         return redirect(url_for('lobby'))
-    return render_template('login.html')
+    return render_template('login.html'), 500
 
 @app.route('/login', methods=['POST'])
-@abort_on_exception
 def login_post():
     if 'username' in session:
         return redirect(url_for('lobby'))
@@ -43,13 +40,12 @@ def login_post():
     password = request.form.get('password')
     logging_in_player = login_player(username, password)
     if not logging_in_player[0]:
-        abort(400, logging_in_player[1])
+        abort(404, logging_in_player[1])
     else:
         session['username'] = username
         return redirect(url_for('lobby'))
 
 @app.route('/register')
-@abort_on_exception
 def register():
     if 'username' in session:
         return redirect(url_for('lobby'))
@@ -57,7 +53,6 @@ def register():
 
 
 @app.route('/register', methods=['POST'])
-@abort_on_exception
 def register_post():
     username = request.form.get('username')
     password = request.form.get('password')
@@ -75,7 +70,6 @@ def register_post():
 
 
 @app.route('/logout')
-@abort_on_exception
 def logout():
     session.pop('username', None)
     return redirect(url_for('index'))

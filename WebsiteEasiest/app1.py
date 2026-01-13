@@ -26,12 +26,12 @@ def index():
              'complete_games': count_games(active=False),
              'total_players': count_players(),
              }
-    return safe_render_template('index.html', stats=stats)
+    return render_template_abort_500('index.html', stats=stats)
 
 @app.route('/login')
 def login():
     print(f'login  |  {"not logged in" if "username" not in session else session["username"]}')
-    return safe_render_template('login.html')
+    return render_template_abort_500('login.html')
 @app.route('/login', methods=['POST'])
 def login_post():
     print(f'login_post  |  {"not logged in" if "username" not in session else session["username"]}')
@@ -63,11 +63,11 @@ def register_post():
 @app.route('/logout')
 def logout():
     print(f'logout   |  {"not logged in" if "username" not in session else session["username"]}')
-    return safe_render_template('logout.html')
+    return render_template_abort_500('logout.html')
 @app.route('/register')
 def register():
     print(f'register  |  {"not logged in" if "username" not in session else session["username"]}')
-    return safe_render_template('register.html')
+    return render_template_abort_500('register.html')
 @app.route('/lobby')
 def lobby():
     print(f'lobby  |  {"not logged in" if "username" not in session else session["username"]}')
@@ -89,9 +89,7 @@ def lobby():
                         'status': game_data.get('status', 'waiting')
                     })
     
-    return safe_render_template('lobby.html', 
-                         username=session['username'], 
-                         games=games)
+    return render_template_abort_500('lobby.html', username=session['username'], games=games)
 
 @app.route('/game/<game_name>')
 def game(game_name):
@@ -102,7 +100,7 @@ def game(game_name):
     # Load game data
     game_file = os.path.join('data', 'games', f'{game_name}.json')
     if not os.path.exists(game_file):
-        return safe_render_template('error.html', error_code=404, error_message="Игра не найдена"), 404
+        return render_template_abort_500('error.html', error_code=404, error_message="Игра не найдена"), 404
     
     with open(game_file, 'r', encoding='utf-8') as f:
         game_data = json.load(f)
@@ -120,11 +118,8 @@ def game(game_name):
                     'role': 'creator' if player_name == game_data['created_by'] else 'participant',
                 })
     
-    return safe_render_template('game.html',
-                        created_by=game_data['created_by'],
-                        game_name=game_name,
-                        players=players,
-                        is_game_started=game_data['status'] == 'started',)
+    return render_template_abort_500('game.html', created_by=game_data['created_by'], game_name=game_name,
+                                     players=players, is_game_started=game_data['status'] == 'started')
 
 @app.route('/game/<game_name>/ws')
 def game_ws(game_name):
@@ -272,19 +267,12 @@ def create_game():
                                VETO_NUM_BLACK)
     if request.method == 'GET':
         default_players = min(MAX_PLAYER_NUM, 8)  # Default to 8 players if max is higher
-        return safe_render_template('create_game.html',
-                             username=session['username'],
-                             min_players=MIN_PLAYER_NUM,
-                             max_players=MAX_PLAYER_NUM,
-                             default_players=default_players,
-                             red_win_num=RED_WIN_NUM,
-                             black_win_num=BLACK_WIN_NUM,
-                             anarchy_skip_num=ANARCHY_SKIP_NUM,
-                             date_format=DATE_FORMAT,
-                             time_format=TIME_FORMAT,
-                             vote_anonymous=VOTE_ANONYMOUS,
-                             veto_num_black=VETO_NUM_BLACK,
-                             vote_delay = 30)
+        return render_template_abort_500('create_game.html', username=session['username'], min_players=MIN_PLAYER_NUM,
+                                         max_players=MAX_PLAYER_NUM, default_players=default_players,
+                                         red_win_num=RED_WIN_NUM, black_win_num=BLACK_WIN_NUM,
+                                         anarchy_skip_num=ANARCHY_SKIP_NUM, date_format=DATE_FORMAT,
+                                         time_format=TIME_FORMAT, vote_anonymous=VOTE_ANONYMOUS,
+                                         veto_num_black=VETO_NUM_BLACK, vote_delay=30)
     
     # Handle POST request for game creation
     game_name = request.form.get('game_name')

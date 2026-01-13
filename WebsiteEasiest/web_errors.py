@@ -118,7 +118,7 @@ def server_error(error):
 
 
 
-def internal_server_error(handled_error: Exception):
+def internal_server_error(handled_error: Exception) -> tuple[str, int]:
     """Handle 500 Internal Server errors"""
     import traceback
     logger.critical(f'[{request.remote_addr} -> {request.path}] ({request.method}) {handled_error}\n{request.__dict__}\n{traceback.format_exc()}\n{session.__dict__}')

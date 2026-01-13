@@ -13,7 +13,7 @@ app.secret_key = 'your_secret_key_here'
 from Website_featetures.error_handler.undefined import SilentUndefined
 app.jinja_env.undefined = SilentUndefined
 from Website_featetures.error_handler.safe_functions import (
-    safe_render_template as render_template,
+    render_template_abort_500 as render_template,
     safe_url_for as url_for)
 
 app.before_request(log_request)
