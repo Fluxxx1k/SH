@@ -47,13 +47,13 @@ def game_post(game_name):
 
     # Store vote in game data
     if 'votes' not in game_data:
-        game_data['votes'] = []
-    game_data['votes'].append({
-        'voter': vote_data['voter'],
+        game_data['votes'] = {}
+
+    game_data['votes'][vote_data['voter']] = {
         'type': vote_data['vote_type'],
         'target': vote_data.get('target_player'),
         'timestamp': datetime.now().isoformat()
-    })
+    }
     save_data_of_game(game_name, game_data)
     
     # Broadcast vote to all clients
