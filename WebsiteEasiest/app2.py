@@ -8,7 +8,7 @@ from WebsiteEasiest.logger import logger
 from WebsiteEasiest.settings.web_config import is_debug
 from WebsiteEasiest.app_globs import app, socketio
 from WebsiteEasiest.Website_featetures.error_handler.safe_functions import safe_url_for as url_for, render_template_abort_500 as render_template
-from Website_featetures.error_handler.render_error import abort_on_exception
+from WebsiteEasiest.Website_featetures.error_handler.render_error import abort_on_exception
 
 
 @app.route('/favicon.ico')

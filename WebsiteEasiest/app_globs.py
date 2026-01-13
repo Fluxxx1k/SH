@@ -8,7 +8,7 @@ app = Flask(__name__)
 app.debug = is_debug
 
 app.secret_key = 'your_secret_key_here'
-from Website_featetures.error_handler.undefined import SilentUndefined
+from WebsiteEasiest.Website_featetures.error_handler.undefined import SilentUndefined
 app.jinja_env.undefined = SilentUndefined
 
 app.before_request(log_request)
