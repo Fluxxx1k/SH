@@ -1,7 +1,5 @@
-from flask import request
-
 from WebsiteEasiest.logger import logger
-from WebsiteEasiest.web_config import is_debug
+from WebsiteEasiest.settings.web_config import is_debug
 from Website_featetures.error_handler.safe_functions import render_template_abort_500
 safe_errors = {404, 502, 429, 403, 401}
 

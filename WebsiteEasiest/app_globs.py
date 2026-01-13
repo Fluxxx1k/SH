@@ -1,8 +1,6 @@
-import functools
+from flask import Flask
 
-from flask import Flask, render_template, abort
-
-from WebsiteEasiest.web_config import is_debug
+from WebsiteEasiest.settings.web_config import is_debug
 from WebsiteEasiest.web_errors import *
 from WebsiteEasiest.web_loggers import log_response, log_request
 
@@ -12,9 +10,6 @@ app.debug = is_debug
 app.secret_key = 'your_secret_key_here'
 from Website_featetures.error_handler.undefined import SilentUndefined
 app.jinja_env.undefined = SilentUndefined
-from Website_featetures.error_handler.safe_functions import (
-    render_template_abort_500 as render_template,
-    safe_url_for as url_for)
 
 app.before_request(log_request)
 app.after_request(log_response)

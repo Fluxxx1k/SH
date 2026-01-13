@@ -1,5 +1,5 @@
 from flask import session, redirect, request, abort
-from WebsiteEasiest.app_globs import url_for, render_template
+from WebsiteEasiest.Website_featetures.error_handler.safe_functions import safe_url_for as url_for, render_template_abort_500 as render_template
 from WebsiteEasiest.data.database_py.players import exists_player, create_player
 
 

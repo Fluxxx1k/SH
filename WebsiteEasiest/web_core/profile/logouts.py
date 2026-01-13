@@ -1,5 +1,5 @@
 from flask import session, redirect
-from WebsiteEasiest.app_globs import url_for
+from WebsiteEasiest.Website_featetures.error_handler.safe_functions import safe_url_for as url_for
 
 
 def logout():

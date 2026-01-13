@@ -1,40 +1,11 @@
 # Error handling functions
 import functools
 
+from werkzeug.exceptions import HTTPException
 from flask import render_template, request, abort
-from WebsiteEasiest.Website_featetures.error_handler.safe_functions import safe_url_for
 
-def render_error_page(error_code, error_message=None, error_description=None, error_comment=None, suggestion=None,
-                      debug_info=None):
-    """Render error page with comprehensive error information"""
-    try:
-        return render_template('error.html',
-                               error_code=error_code,
-                               error_message=error_message,
-                               error_description=error_description,
-                               error_comment=error_comment,
-                               suggestion=suggestion,
-                               debug_info=debug_info,
-                               config={'DEBUG': True},
-                               safe_url_for=safe_url_for,)
-    except Exception as e:
-        # Fallback if error template fails
-        return f"""
-        <!DOCTYPE html>
-        <html>
-        <head><title>Критическая ошибка {error_code}</title></head>
-        <body>
-            <h1>Критическая ошибка {e}</h1>
-            <p>{error_message or 'Произошла ошибка'}</p>
-            <p>{error_description or 'Произошла ошибка'}</p>
-            <p>{error_comment or 'Нет дополнительной информации'}</p>
-            <p>{suggestion or 'Нет совета'}</p>
-            <p>{debug_info or 'Нет отладочной информации о изначальной ошибке'}</p>
-            <p>{repr(e)}</p>
-            <a href="{safe_url_for('index')}">На главную</a>
-        </body>
-        </html>
-        """, error_code
+from WebsiteEasiest.stardard_renders import render_error_page
+
 
 # Custom error route for manual error display
 
@@ -110,6 +81,8 @@ def abort_on_exception(f):
     def wrapper(*args, **kwargs):
         try:
             return f(*args, **kwargs)
+        except HTTPException as e:
+            abort(e.code, e.description)
         except Exception as e:
             abort(500, repr(e))
     return wrapper
