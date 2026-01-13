@@ -39,7 +39,7 @@ def create_player(player_name: str, player_password: str) -> tuple[bool, Optiona
             with open(os.path.join('data', 'players', player_name + '.json'), 'w+') as f:
                 json.dump({'player_name': player_name,
                            'player_password': player_password,
-                           'in_game': ''
+                           'game': ''
                            }, f, indent=4, ensure_ascii=False)
             return True, None
     except Exception as e:

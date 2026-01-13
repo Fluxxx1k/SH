@@ -67,6 +67,7 @@ def game_ws(game_name):
     def handle_connect():
         emit('status', {'message': 'Connected to game room'})
 
+app.route('/game/<game_name>/start', methods=['POST'])(abort_on_exception(game_base.game_start))
 
 if __name__ == '__main__':
     app.run(debug=is_debug)
