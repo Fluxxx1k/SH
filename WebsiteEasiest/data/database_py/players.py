@@ -1,16 +1,16 @@
 from __future__ import annotations
 
-import os, json, sys
+import os, json
 from typing import Optional
 
 from WebsiteEasiest.logger import logger
 from WebsiteEasiest.settings.web_config import denied_literals
 
-
+path_players = os.path.join(os.curdir, 'data', 'players')
 def exists_player(name: str) -> bool:
     logger.debug(f"Checking if player {repr(name)} exists")
     try:
-        return os.path.exists(os.path.join('data', 'players', name + '.json'))
+        return os.path.exists(os.path.join(path_players, name + '.json'))
     except Exception as e:
         print(e)
         return True
@@ -19,7 +19,7 @@ def exists_player(name: str) -> bool:
 def count_players() -> int:
     logger.debug("Counting players")
     try:
-        return len(os.listdir(os.path.join('data', 'players')))
+        return len(os.listdir(path_players))
     except Exception as e:
         print(e)
         return 0
@@ -36,7 +36,7 @@ def create_player(player_name: str, player_password: str) -> tuple[bool, Optiona
         if exists_player(player_name):
             return False, repr(FileExistsError(f'Player "{player_name}" already exists'))
         else:
-            with open(os.path.join('data', 'players', player_name + '.json'), 'w+') as f:
+            with open(os.path.join(path_players, player_name + '.json'), 'w+') as f:
                 json.dump({'player_name': player_name,
                            'player_password': player_password,
                            'game': ''
@@ -50,7 +50,7 @@ def get_data_for_player(player_name) -> tuple[bool, dict | str]:
     logger.debug(f"Getting data for player {repr(player_name)}")
     try:
         if exists_player(player_name):
-            return True, json.load(open(os.path.join('data', 'players', player_name + '.json'), encoding='utf-8'))
+            return True, json.load(open(os.path.join(path_players, player_name + '.json'), encoding='utf-8'))
         else:
             return False, repr(FileNotFoundError(f'Player "{player_name}" not found'))
     except Exception as e:
