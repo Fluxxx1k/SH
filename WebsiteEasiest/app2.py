@@ -1,7 +1,11 @@
-from WebsiteEasiest.data.database_py.games import count_games
+from flask import abort, session
+from flask_socketio import emit
+
+from WebsiteEasiest.data.database_py import games
+from WebsiteEasiest.data.database_py.games import count_games, exists_game
 from WebsiteEasiest.data.database_py.players import count_players
 from WebsiteEasiest.settings.web_config import is_debug
-from WebsiteEasiest.app_globs import app
+from WebsiteEasiest.app_globs import app, socketio
 from WebsiteEasiest.Website_featetures.error_handler.safe_functions import safe_url_for as url_for, render_template_abort_500 as render_template
 from Website_featetures.error_handler.render_error import abort_on_exception
 
@@ -44,7 +48,24 @@ app.route('/create_game', methods=['POST'])(abort_on_exception(game_creation.cre
 
 from WebsiteEasiest.web_core.games_work import game_base
 app.route('/game/<game_name>')(abort_on_exception(game_base.game))
-app.route('/game/<game_name>', methods=['POST'])(abort_on_exception(game_base.game_post))
+@app.route('/game/<game_name>', methods=['POST'])
+@app.route('/game/<game_name>/vote', methods=['POST'])
+def x(*args, **kwargs):
+    return game_base.game_post(*args, **kwargs)
+
+
+# Handle WebSocket connections
+@app.route('/game/<game_name>/ws')
+def game_ws(game_name):
+    if 'username' not in session:
+        abort(401, description="Необходимо войти в систему")
+    if game_name == '':
+        abort(400, description="Имя игры не может быть пустым")
+    if not exists_game(game_name):
+        abort(404, description=f"Игра {game_name} не найдена")
+    @socketio.on('connect', namespace=f'/game/{game_name}')
+    def handle_connect():
+        emit('status', {'message': 'Connected to game room'})
 
 
 if __name__ == '__main__':

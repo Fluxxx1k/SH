@@ -4,6 +4,7 @@ from datetime import datetime
 from flask import redirect, session, abort, request
 
 from WebsiteEasiest.Website_featetures.error_handler.safe_functions import safe_url_for, render_template_abort_500
+from WebsiteEasiest.app_globs import socketio
 from WebsiteEasiest.data.database_py.games import get_data_of_game, save_data_of_game
 
 
@@ -15,7 +16,6 @@ def game(game_name):
     game_found, game_data = get_data_of_game(game_name)
     if not game_found:
         abort(404, description=f"Игра {game_name} не найдена: {game_data}")
-
 
     # Get players list
     players = []
@@ -55,4 +55,12 @@ def game_post(game_name):
         'timestamp': datetime.now().isoformat()
     })
     save_data_of_game(game_name, game_data)
+    
+    # Broadcast vote to all clients
+    socketio.emit('vote_update', {
+        'voter': vote_data['voter'],
+        'type': vote_data['vote_type'],
+        'target': vote_data.get('target_player')
+    }, room=game_name)
+    
     return {'success': True}

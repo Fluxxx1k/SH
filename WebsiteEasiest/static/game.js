@@ -89,24 +89,27 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // WebSocket connection for real-time updates
-    const socket = new WebSocket(`ws://${window.location.host}/game/${gameId}/ws`);
+    // Socket.IO connection for real-time updates
+    const socket = io(`/game/${gameId}`);
     
-    socket.onmessage = function(event) {
-        const data = JSON.parse(event.data);
+    socket.on('connect', () => {
+        console.log('Connected to game room');
+    });
+    
+    socket.on('vote_update', (data) => {
+        const logTable = document.querySelector('.log-table');
+        const logEntry = document.createElement('div');
+        logEntry.className = 'log-entry';
         
-        if (data.type === 'action') {
-            // Update action log
-            const logTable = document.querySelector('.log-table');
-            const newRow = document.createElement('div');
-            newRow.textContent = `${data.time} - ${data.player}: ${data.action}`;
-            logTable.appendChild(newRow);
-            logTable.scrollTop = logTable.scrollHeight;
-        } else if (data.type === 'player_update') {
-            // Update player list
-            updatePlayerList(data.players);
+        if (data.target) {
+            logEntry.textContent = `${data.voter} проголосовал за ${data.target}`;
+        } else {
+            logEntry.textContent = `${data.voter} проголосовал ${data.type}`;
         }
-    };
+        
+        logTable.appendChild(logEntry);
+        logTable.scrollTop = logTable.scrollHeight;
+    });
     
     function updatePlayerList(players) {
         const playerList = document.querySelector('.players');
