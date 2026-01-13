@@ -12,7 +12,7 @@
             <h1 class="game-title">Secret Hitler</h1>
             <nav class="nav">
                 <a href="{{ safe_url_for('index') }}" class="nav-link">Главная</a>
-                <a href="{{ safe_url_for('login') }}" class="nav-link">Выход</a>
+                <a href="{{ safe_url_for('logout') }}" class="nav-link">Выход</a>
             </nav>
         </header>
 
@@ -25,10 +25,12 @@
                     <div class="game-card">
                         <div class="game-info">
                             <h3>{{ game.name }}</h3>
-                            <p>ID: #{{ game.name }}</p>
+                            <p>От: {{ game.creator }}</p>
                             <p>Игроков: {{ game.current_players }}/{{ game.max_players }}</p>
                         </div>
+                        {% if status != 'started'%}
                         <a href="{{ safe_url_for('game', game_name=game.name) }}" class="btn btn-primary">Присоединиться</a>
+                        {% endif %}
                     </div>
                     {% endfor %}
                 </div>
