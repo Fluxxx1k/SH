@@ -1,9 +1,9 @@
 import os, time
 
-from WebsiteEasiest.data.database_py.games import count_games, exists_game
+from WebsiteEasiest.data.database_py.games import count_games
 from WebsiteEasiest.data.database_py.players import count_players
 from WebsiteEasiest.logger import logger
-from WebsiteEasiest.app_globs import app, socketio
+from WebsiteEasiest.app_globs import app
 from WebsiteEasiest.Website_featetures.error_handler.safe_functions import safe_url_for as url_for, render_template_abort_500 as render_template
 from WebsiteEasiest.Website_featetures.error_handler.render_error import abort_on_exception
 
