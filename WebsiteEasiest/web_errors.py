@@ -10,7 +10,8 @@ from WebsiteEasiest.logger import logger
 
 def client_error(error):
     """Handle 4XX Client errors"""
-    logger.error(f'[{request.remote_addr} -> {request.path}] ({request.method}) {error}\n{request.__dict__}\n{traceback.format_exc()}\n{session.__dict__}')
+    real_ip = request.headers.get('X-Forwarded-For', request.remote_addr)
+    logger.error(f'[{real_ip} -> {request.path}] ({request.method}) {error}\n{request.__dict__}\n{traceback.format_exc()}\n{session.__dict__}')
     return render_error_page(
         error_code=error.code,
         error_message=error.name,
@@ -23,7 +24,8 @@ def client_error(error):
 
 def bad_request_error(error):
     """Handle 400 Bad Request errors"""
-    logger.critical(f'[{request.remote_addr} -> {request.path}] ({request.method}) {error}\n{request.__dict__}, \n{traceback.format_exc()}\n{session.__dict__}')
+    real_ip = request.headers.get('X-Forwarded-For', request.remote_addr)
+    logger.critical(f'[{real_ip} -> {request.path}] ({request.method}) {error}\n{request.__dict__}, \n{traceback.format_exc()}\n{session.__dict__}')
     return render_error_page(
         error_code=400,
         error_message="Неверный запрос",
@@ -35,7 +37,8 @@ def bad_request_error(error):
 
 def unauthorized_error(error):
     """Handle 401 Unauthorized errors"""
-    logger.debug(f'[{request.remote_addr} -> {request.path}] ({request.method}) {error}')
+    real_ip = request.headers.get('X-Forwarded-For', request.remote_addr)
+    logger.debug(f'[{real_ip} -> {request.path}] ({request.method}) {error}')
     return render_error_page(
         error_code=401,
         error_message="Необходима авторизация",
@@ -46,7 +49,8 @@ def unauthorized_error(error):
 
 def forbidden_error(error):
     """Handle 403 Forbidden errors"""
-    logger.debug(f'[{request.remote_addr} -> {request.path}] ({request.method}) {error}')
+    real_ip = request.headers.get('X-Forwarded-For', request.remote_addr)
+    logger.debug(f'[{real_ip} -> {request.path}] ({request.method}) {error}')
     return render_error_page(
         error_code=403,
         error_message="Доступ запрещен",
@@ -59,7 +63,8 @@ def forbidden_error(error):
 
 def not_found_error(error):
     """Handle 404 Not Found errors"""
-    logger.warning(f'[{request.remote_addr} -> {request.path}] ({request.method}) {error}')
+    real_ip = request.headers.get('X-Forwarded-For', request.remote_addr)
+    logger.warning(f'[{real_ip} -> {request.path}] ({request.method}) {error}')
     return render_error_page(
         error_code=404,
         error_message="Страница не найдена",
@@ -72,9 +77,10 @@ def not_found_error(error):
 
 def method_not_allowed_error(error):
     """Handle 405 Method Not Allowed errors"""
+    real_ip = request.headers.get('X-Forwarded-For', request.remote_addr)
     if ('login' in str(request.path) or
-        'register' in str(request.path)):
-        logger.critical(f'[{request.remote_addr} -> {request.path}] ({request.method}) {error}')
+            'register' in str(request.path)):
+        logger.critical(f'[{real_ip} -> {request.path}] ({request.method}) {error}')
         return render_error_page(
             error_code=405,
             error_message="Метод не разрешен",
@@ -84,18 +90,19 @@ def method_not_allowed_error(error):
             debug_info=repr(error),
         ), 405
     else:
-        logger.error(f'[{request.remote_addr} -> {request.path}] ({request.method}) {error}')
+        logger.error(f'[{real_ip} -> {request.path}] ({request.method}) {error}')
         return render_error_page(
-        error_code=405,
-        error_message="Метод не разрешен",
-        error_description="Используемый метод HTTP не разрешен для этого ресурса.",
-        error_comment="Например, попытка отправить POST-запрос на страницу, которая принимает только GET-запросы.",
-        suggestion="Попробуйте использовать другой метод или обратитесь к документации API."
-    ), 405
+            error_code=405,
+            error_message="Метод не разрешен",
+            error_description="Используемый метод HTTP не разрешен для этого ресурса.",
+            error_comment="Например, попытка отправить POST-запрос на страницу, которая принимает только GET-запросы.",
+            suggestion="Попробуйте использовать другой метод или обратитесь к документации API."
+        ), 405
 
 def too_many_requests_error(error):
     """Handle 429 Too Many Requests errors"""
-    logger.warning(f'[{request.remote_addr} -> {request.path}] ({request.method}) {error}')
+    real_ip = request.headers.get('X-Forwarded-For', request.remote_addr)
+    logger.warning(f'[{real_ip} -> {request.path}] ({request.method}) {error}')
     return render_error_page(
         error_code=429,
         error_message="Слишком много запросов",
@@ -107,7 +114,8 @@ def too_many_requests_error(error):
 
 def server_error(error):
     """Handle 5XX Server errors"""
-    logger.error(f'[{request.remote_addr} -> {request.path}] ({request.method}) {error}\n{request.__dict__}\n{traceback.format_exc()}\n{session.__dict__}')
+    real_ip = request.headers.get('X-Forwarded-For', request.remote_addr)
+    logger.error(f'[{real_ip} -> {request.path}] ({request.method}) {error}\n{request.__dict__}\n{traceback.format_exc()}\n{session.__dict__}')
     return render_error_page(
         error_code=error.code,
         error_message=error.name,
@@ -121,7 +129,8 @@ def server_error(error):
 def internal_server_error(handled_error: Exception) -> tuple[str, int]:
     """Handle 500 Internal Server errors"""
     import traceback
-    logger.critical(f'[{request.remote_addr} -> {request.path}] ({request.method}) {handled_error}\n{request.__dict__}\n{traceback.format_exc()}\n{session.__dict__}')
+    real_ip = request.headers.get('X-Forwarded-For', request.remote_addr)
+    logger.critical(f'[{real_ip} -> {request.path}] ({request.method}) {handled_error}\n{request.__dict__}\n{traceback.format_exc()}\n{session.__dict__}')
     debug_info = traceback.format_exc()
 
     return render_error_page(
@@ -135,7 +144,8 @@ def internal_server_error(handled_error: Exception) -> tuple[str, int]:
 
 def not_implemented_error(error):
     """Handle 501 Not Implemented errors"""
-    logger.error(f'[{request.remote_addr} -> {request.path}] ({request.method}) {error}')
+    real_ip = request.headers.get('X-Forwarded-For', request.remote_addr)
+    logger.error(f'[{real_ip} -> {request.path}] ({request.method}) {error}')
     return render_error_page(
         error_code=501,
         error_message="Функция не реализована",
@@ -146,7 +156,8 @@ def not_implemented_error(error):
 
 def bad_gateway_error(error):
     """Handle 502 Bad Gateway errors"""
-    logger.warning(f'[{request.remote_addr} -> {request.path}] ({request.method}) {error}')
+    real_ip = request.headers.get('X-Forwarded-For', request.remote_addr)
+    logger.warning(f'[{real_ip} -> {request.path}] ({request.method}) {error}')
     return render_error_page(
         error_code=502,
         error_message="Неверный шлюз",
@@ -157,7 +168,8 @@ def bad_gateway_error(error):
 
 def service_unavailable_error(error):
     """Handle 503 Service Unavailable errors"""
-    logger.warning(f'[{request.remote_addr} -> {request.path}] ({request.method}) {error}')
+    real_ip = request.headers.get('X-Forwarded-For', request.remote_addr)
+    logger.warning(f'[{real_ip} -> {request.path}] ({request.method}) {error}')
     return render_error_page(
         error_code=503,
         error_message="Сервис недоступен",

@@ -5,8 +5,8 @@ from typing import Optional
 
 from WebsiteEasiest.logger import logger
 
-path_games = os.path.join(os.curdir, 'data', 'games')
-path_existed_games = os.path.join(os.curdir, 'data', 'ended_games')
+path_games = os.path.join(os.path.basename(os.path.basename(__file__)), 'data', 'games')
+path_existed_games = os.path.join(os.path.basename(os.path.basename(__file__)), 'data', 'ended_games')
 os.makedirs(path_games, exist_ok=True)
 os.makedirs(path_existed_games, exist_ok=True)
 
