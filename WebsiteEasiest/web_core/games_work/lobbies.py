@@ -4,7 +4,8 @@ from flask import session, redirect
 
 from WebsiteEasiest.Website_featetures.error_handler.safe_functions import render_template_abort_500
 from WebsiteEasiest.Website_featetures.error_handler.safe_functions import safe_url_for as url_for
-from WebsiteEasiest.data.database_py.games import get_data_of_game, path_games
+from WebsiteEasiest.data.database_py.games import get_data_of_game
+from WebsiteEasiest.data.data_paths import path_games
 
 
 def lobby():

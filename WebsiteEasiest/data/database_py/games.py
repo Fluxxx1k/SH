@@ -1,14 +1,10 @@
 from __future__ import annotations
 
-import os, json, sys
+import os, json
 from typing import Optional
-
+from WebsiteEasiest.data.data_paths import path_games, path_existed_games
 from WebsiteEasiest.logger import logger
 
-path_games = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'data', 'games')
-path_existed_games = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'data', 'ended_games')
-os.makedirs(path_games, exist_ok=True)
-os.makedirs(path_existed_games, exist_ok=True)
 
 def count_games(active: bool = True, default_on_error: int = 0) -> int:
     logger.debug(f"Counting games {'active' if active else 'existed'}")
