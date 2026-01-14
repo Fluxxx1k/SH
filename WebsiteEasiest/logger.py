@@ -95,7 +95,7 @@ debug_file_handler.setFormatter(logging.Formatter(
 ))
 
 info_file_handler = RotatingFileHandler(
-maxBytes=5*1024*1024,  # 5MB
+maxBytes=10*1024*1024,  # 20MB
     backupCount=3,
     mode='a',
     filename=info_path,
@@ -147,7 +147,7 @@ logger.addHandler(fatal_file_handler)
 
 
 all_file_handler = RotatingFileHandler(
-    maxBytes=5*1024*1024,  # 5MB
+    maxBytes=20*1024*1024,  # 20MB
     backupCount=3,
     mode='a',
     filename=all_path,
@@ -157,7 +157,7 @@ all_file_handler.setFormatter(logging.Formatter(f'%(levelname)s | {log_text}'))
 logger.addHandler(all_file_handler)
 
 warning_error_fatal_path_file_handler = RotatingFileHandler(
-    maxBytes=5*1024*1024,  # 5MB
+    maxBytes=20*1024*1024,  # 20MB
     backupCount=3,
     mode='a',
     filename=warning_error_fatal_path,
