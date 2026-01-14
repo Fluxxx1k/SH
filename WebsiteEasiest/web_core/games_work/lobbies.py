@@ -4,7 +4,7 @@ from flask import session, redirect
 
 from WebsiteEasiest.Website_featetures.error_handler.safe_functions import render_template_abort_500
 from WebsiteEasiest.Website_featetures.error_handler.safe_functions import safe_url_for as url_for
-from WebsiteEasiest.data.database_py.games import get_data_of_game
+from WebsiteEasiest.data.database_py.games import get_data_of_game, path_games
 
 
 def lobby():
@@ -13,8 +13,7 @@ def lobby():
 
     # Load available games
     games = []
-    games_dir = os.path.join('data', 'games')
-    for file in os.listdir(games_dir):
+    for file in os.listdir(path_games):
         if file.endswith('.json'):
             game_name = file[:-5]
             game_found, game_data = get_data_of_game(game_name)
