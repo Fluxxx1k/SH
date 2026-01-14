@@ -14,14 +14,14 @@ def register_post():
     password = request.form.get('password')
     confirm_password = request.form.get('confirm_password')
     if any(char in username for char in denied_literals):
-        abort(400, 'Username contains invalid characters')
+        return render_template('register.html', error='Username contains invalid characters')
     if password != confirm_password:
-        abort(400, 'Passwords do not match')
+        return render_template('register.html', error='Passwords do not match')
     if exists_player(username):
-        abort(400, 'Username already exists')
+        return render_template('register.html', error='Username already exists')
     cr_pl = create_player(username, password)
     if not cr_pl[0]:
-        abort(400, cr_pl[1])
+        return render_template('register.html', error=cr_pl[1])
     else:
         session['username'] = username
         return redirect(url_for('lobby'))

@@ -16,8 +16,7 @@ def login_post():
     password = request.form.get('password')
     logging_in_player = login_player(username, password)
     if not logging_in_player[0]:
-        abort(404, logging_in_player[1])
+        return render_template('login.html', error=logging_in_player[1])
     else:
         session['username'] = username
         return redirect(url_for('lobby'))
-
