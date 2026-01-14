@@ -6,11 +6,9 @@ from flask_socketio import emit
 from WebsiteEasiest.data.database_py.games import count_games, exists_game
 from WebsiteEasiest.data.database_py.players import count_players
 from WebsiteEasiest.logger import logger
-from WebsiteEasiest.settings.web_config import is_debug
 from WebsiteEasiest.app_globs import app, socketio
 from WebsiteEasiest.Website_featetures.error_handler.safe_functions import safe_url_for as url_for, render_template_abort_500 as render_template
 from WebsiteEasiest.Website_featetures.error_handler.render_error import abort_on_exception
-from cli.colors import RED_BACKGROUND_BRIGHT, GREEN_BACKGROUND_BRIGHT, RESET
 
 
 @app.route('/favicon.ico')
@@ -62,7 +60,7 @@ def game_ws(game_name):
     if 'username' not in session:
         abort(401, description="Необходимо войти в систему")
     if game_name == '':
-        abort(400, description="Имя игры не может быть пустым")
+        abort(404, description="Имя игры не может быть пустым")
     if not exists_game(game_name):
         abort(404, description=f"Игра {game_name} не найдена")
     @socketio.on('connect', namespace=f'/game/{game_name}')
@@ -78,35 +76,35 @@ def mem_check():
     from psutil import Process
     curr_process = Process(os.getpid())
     memory_info = curr_process.memory_info().rss
-    while memory_info < (1 << 32):
+    while memory_info < 1610612736:
+        time.sleep(600)
         memory_info = curr_process.memory_info().rss
-        time.sleep(5)
-        logger.debug(f"Memory usage: {memory_info / (1 << 20):.2f} MB")
-        if memory_info > (1 << 30):
-            if memory_info > (1 << 31):
-                logger.critical(f"Memory usage exceeded 2 GB ({memory_info / (1 << 20):.2f} MB)")
+        logger.debug(f"Memory usage: {(memory_info >> 10) / 1024:.2f} MB")
+        if memory_info > 536870912: # 1 << 29
+            if memory_info > 1342177280: # (1 << 30) * 1.25
+                logger.critical(f"Memory usage exceeded 1.25 GB ({(memory_info >> 10) / 1024:.2f} MB)")
                 try:
                     shutdown_server()
                     time.sleep(30)
                 except BaseException as E:
-                    logger.critical(f"Shutdown server failed: {repr(E)} 2 GB")
+                    logger.critical(f"Shutdown server failed with {(memory_info >> 10) / 1024: .2f} MB: {repr(E)}")
                 else:
-                    logger.critical(f"Shutdown server failed with no response, hard kill 2 GB")
+                    logger.critical(f"Shutdown server failed with {(memory_info >> 10) / 1024: .2f} MB with no response, hard kill!")
                 finally:
                     os._exit(1)
-            if memory_info > ((1 << 30) + (1 << 29)):
-                logger.error(f"Memory usage exceeded 1.5 GB ({memory_info / (1 << 20):.2f} MB)")
+            elif memory_info > 1073741824: # 1 << 30
+                logger.error(f"Memory usage exceeded 1 GB ({(memory_info >> 10) / 1024:.2f} MB)")
             else:
-                logger.warning(f"Memory usage exceeded 1 GB ({memory_info / (1 << 20):.2f} MB)")
+                logger.warning(f"Memory usage exceeded 0.5 GB ({(memory_info >> 10) / 1024:.2f} MB)")
             from WebsiteEasiest.settings import web_config
             web_config.New_games_allowed = False
     try:
         shutdown_server()
         time.sleep(30)
     except BaseException as E:
-        logger.critical(f"Shutdown server failed 4 GB: {repr(E)}")
+        logger.critical(f"Shutdown server failed with {(memory_info >> 10) / 1024: .2f} MB: {repr(E)}")
     else:
-        logger.critical(f"Shutdown server failed with no response, hard kill 4 GB")
+        logger.critical(f"Shutdown server failed with {(memory_info >> 10) / 1024: .2f} MB with no response, hard kill!")
     finally:
         os._exit(1)
 
