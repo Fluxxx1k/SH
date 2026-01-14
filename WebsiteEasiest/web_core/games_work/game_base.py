@@ -2,10 +2,11 @@ import os
 from datetime import datetime
 
 from flask import redirect, session, abort, request, jsonify
+from flask_socketio import emit
 
 from WebsiteEasiest.Website_featetures.error_handler.safe_functions import safe_url_for, render_template_abort_500
 from WebsiteEasiest.app_globs import socketio
-from WebsiteEasiest.data.database_py.games import get_data_of_game, save_data_of_game
+from WebsiteEasiest.data.database_py.games import get_data_of_game, save_data_of_game, exists_game
 
 from WebsiteEasiest.settings.website_settings import get_roles
 
@@ -79,6 +80,16 @@ def game_vote(game_name):
     }, room=game_name)
 
     return {'success': True}
+def game_ws(game_name):
+    if 'username' not in session:
+        abort(401, description="Необходимо войти в систему")
+    if game_name == '':
+        abort(404, description="Имя игры не может быть пустым")
+    if not exists_game(game_name):
+        abort(404, description=f"Игра {game_name} не найдена")
+    @socketio.on('connect', namespace=f'/game/{game_name}')
+    def handle_connect():
+        emit('status', {'message': 'Connected to game room'})
 
 def game_start(game_name):
     print(f'game_start ({game_name})  |  {"not logged in" if "username" not in session else session["username"]}')
