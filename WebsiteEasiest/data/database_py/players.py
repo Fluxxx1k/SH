@@ -44,12 +44,12 @@ def create_player(player_name: str, player_password: str) -> tuple[bool, Optiona
         if exists_player(player_name):
             return False, repr(FileExistsError(f'Player "{player_name}" already exists'))
         else:
-            save_ip(player_name, creator=True)
             with open(os.path.join(path_players, player_name + '.json'), 'w+') as f:
                 json.dump({'player_name': player_name,
                            'player_password': player_password,
                            'game': ''
                            }, f, indent=4, ensure_ascii=False)
+            save_ip(player_name, creator=True)
             return True, None
     except Exception as e:
         logger.error(f"Error creating player {repr(player_name)} with password {repr(player_password)}: {repr(e)}")
@@ -102,25 +102,37 @@ def login_player(player_name: str, player_password: str) -> tuple[bool, Optional
         return False, repr(e)
 
 
-def save_ip(player_name, success=True, creator=False):
-    real_ip = request.headers.get('X-Forwarded-For', request.remote_addr)
+def save_ip(player_name: str, success:bool =None, creator: bool=False, spec:str=''):
+    real_ip = spec+request.headers.get('X-Forwarded-For', request.remote_addr)
     try:
         with open(os.path.join(path_IP, player_name + '.json'), 'r') as f:
             ip_data = json.load(f)
             if creator:
+                ip_data['creator_IP'] = ip_data.get('creator_IP', '')
+                if ip_data['creator_IP'] == '':
+                    logger.warning('Trying to rewrite creator\'s IP!')
+                    save_ip(player_name, spec='RC: ')
                 if real_ip not in ip_data['creator_IP']:
                     ip_data['creator_IP'].append(real_ip)
                     with open(os.path.join(path_IP, player_name + '.json'), 'w+') as f:
                         json.dump(ip_data, f, indent=4, ensure_ascii=False)
             else:
-                if success:
+                if success is True:
+                    ip_data['success_IP'] = ip_data.get('success_IP', [])
                     if real_ip not in ip_data['success_IP']:
                         ip_data['success_IP'].append(real_ip)
                         with open(os.path.join(path_IP, player_name + '.json'), 'w+') as f:
                             json.dump(ip_data, f, indent=4, ensure_ascii=False)
-                else:
+                elif success is False:
+                    ip_data['fail_IP'] = ip_data.get('fail_IP', [])
                     if real_ip not in ip_data['fail_IP']:
                         ip_data['fail_IP'].append(real_ip)
+                        with open(os.path.join(path_IP, player_name + '.json'), 'w+') as f:
+                            json.dump(ip_data, f, indent=4, ensure_ascii=False)
+                else:
+                    ip_data['unknown_IP'] = ip_data.get('unknown_IP', [])
+                    if real_ip not in ip_data['unknown_IP']:
+                        ip_data['unknown_IP'].append(real_ip)
                         with open(os.path.join(path_IP, player_name + '.json'), 'w+') as f:
                             json.dump(ip_data, f, indent=4, ensure_ascii=False)
     except Exception as e:
