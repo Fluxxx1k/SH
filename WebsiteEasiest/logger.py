@@ -6,7 +6,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 log_text = "%(asctime)s - %(message)s"
-log_dir = "logger_logs"
+log_dir = os.path.join(os.path.dirname(__file__),"logger_logs")
 debug_path = os.path.join(log_dir, "debug.log")
 info_path = os.path.join(log_dir, "info.log")
 warning_path = os.path.join(log_dir, "warning.log")
