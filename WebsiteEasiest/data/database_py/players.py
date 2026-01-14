@@ -116,34 +116,36 @@ def save_ip(player_name: str, success:bool =None, creator: bool=False, spec:str=
                        'success_IP': [real_ip]}
             with open(path_ip_for_player, 'w+') as f:
                 json.dump(ip_data, f, indent=4, ensure_ascii=False)
-
-        with open(path_ip_for_player, 'r') as f:
-            ip_data = json.load(f)
-            if success is True:
-                logger.debug(f"Saving last IP ({real_ip}) for player {repr(player_name)}")
-                ip_data['last_IP'] = real_ip
-                logger.debug(f"Saving IP of player {player_name} with successful login")
-                ip_data['success_IP'] = ip_data.get('success_IP', [])
-                if real_ip not in ip_data['success_IP']:
-                    ip_data['success_IP'].append(real_ip)
-                    with open(path_ip_for_player, 'w') as f:
-                        json.dump(ip_data, f, indent=4, ensure_ascii=False)
-            elif success is False:
-                logger.debug(f"Saving IP of player {player_name} with failed login")
-                ip_data['fail_IP'] = ip_data.get('fail_IP', [])
-                if real_ip not in ip_data['fail_IP']:
-                    ip_data['fail_IP'].append(real_ip)
-                    with open(path_ip_for_player, 'w') as f:
-                        json.dump(ip_data, f, indent=4, ensure_ascii=False)
-            else:
-                logger.debug(f"Saving IP of player {player_name} with unknown status login")
-                ip_data['unknown_IP'] = ip_data.get('unknown_IP', [])
-                if real_ip not in ip_data['unknown_IP']:
-                    ip_data['unknown_IP'].append(real_ip)
-                    with open(path_ip_for_player, 'w+') as f:
-                        json.dump(ip_data, f, indent=4, ensure_ascii=False)
+        else:
+            with open(path_ip_for_player, 'r') as f:
+                ip_data = json.load(f)
+                if success is True:
+                    logger.debug(f"Saving last IP ({real_ip}) for player {repr(player_name)}")
+                    ip_data['last_IP'] = real_ip
+                    logger.debug(f"Saving IP of player {player_name} with successful login")
+                    ip_data['success_IP'] = ip_data.get('success_IP', [])
+                    if real_ip not in ip_data['success_IP']:
+                        ip_data['success_IP'].append(real_ip)
+                        with open(path_ip_for_player, 'w') as f:
+                            json.dump(ip_data, f, indent=4, ensure_ascii=False)
+                elif success is False:
+                    logger.debug(f"Saving IP of player {player_name} with failed login")
+                    ip_data['fail_IP'] = ip_data.get('fail_IP', [])
+                    if real_ip not in ip_data['fail_IP']:
+                        ip_data['fail_IP'].append(real_ip)
+                        with open(path_ip_for_player, 'w') as f:
+                            json.dump(ip_data, f, indent=4, ensure_ascii=False)
+                else:
+                    logger.debug(f"Saving IP of player {player_name} with unknown status login")
+                    ip_data['unknown_IP'] = ip_data.get('unknown_IP', [])
+                    if real_ip not in ip_data['unknown_IP']:
+                        ip_data['unknown_IP'].append(real_ip)
+                        with open(path_ip_for_player, 'w+') as f:
+                            json.dump(ip_data, f, indent=4, ensure_ascii=False)
     except Exception as e:
         try:
             logger.warning(f"Error logging player's ({repr(player_name)}) IP {repr(real_ip)}: {repr(e)}")
         except Exception as e2:
             logger.error(f"Error logging player's ({repr(player_name)}) IP: {repr(e)} {repr(e2)}")
+    else:
+        logger.info(f"Saved player's ({repr(player_name)}) IP {repr(real_ip)}")
