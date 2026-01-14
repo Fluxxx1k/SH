@@ -10,36 +10,36 @@ path_existed_games = os.path.join(os.path.basename(os.path.basename(__file__)), 
 os.makedirs(path_games, exist_ok=True)
 os.makedirs(path_existed_games, exist_ok=True)
 
-def count_games(active: bool = True) -> int:
+def count_games(active: bool = True, default_on_error: int = 0) -> int:
     logger.debug(f"Counting games {'active' if active else 'existed'}")
     try:
         return len(os.listdir(path_games if active else path_existed_games))
     except Exception as e:
         logger.error(repr(e))
-        return 0
+        return default_on_error
 
 
-def exists_game(game_name: str) -> bool:
+def exists_game(game_name: str, default_on_error: bool = True) -> bool:
     logger.debug(f"Checking if game {repr(game_name)} exists")
-    return os.path.exists(os.path.join(path_games, game_name + '.json'))
+    try:
+        return os.path.exists(os.path.join(path_games, game_name + '.json'))
+    except Exception as e:
+        logger.error(repr(e))
+        return default_on_error
 
-def existed_game(game_name: str) -> bool:
+def existed_game(game_name: str, default_on_error: bool = True) -> bool:
     logger.debug(f"Checking if game {repr(game_name)} existed")
-    return os.path.exists(os.path.join(path_existed_games, game_name + '.json'))
+    try:
+        return os.path.exists(os.path.join(path_existed_games, game_name + '.json'))
+    except Exception as e:
+        logger.error(repr(e))
+        return default_on_error
 
 
-def deep_check_exists_game(game_name: str) -> bool:
+def deep_check_exists_game(game_name: str, default_on_error: bool = True) -> bool:
     logger.debug(f"Deep checking if game {repr(game_name)} exists or existed")
-    try:
-        exists = exists_game(game_name)
-    except Exception as e:
-        logger.error(repr(e))
-        exists = True
-    try:
-        existed = existed_game(game_name)
-    except Exception as e:
-        logger.error(repr(e))
-        existed = True
+    exists = exists_game(game_name, default_on_error)
+    existed = existed_game(game_name, default_on_error)
     return exists or existed
 
 
@@ -56,16 +56,18 @@ def get_data_of_game(game_name: str) -> tuple[bool, dict | str]:
         return False, repr(e)
 
 
-def save_data_of_game(game_name: str, game_data: dict) -> None:
+def save_data_of_game(game_name: str, game_data: dict) -> bool:
     logger.debug(f"Saving data of game {repr(game_name)}: {game_data}")
     try:
         if exists_game(game_name):
             with open(os.path.join(path_games, game_name + '.json'), 'w', encoding='utf-8') as f:
                 json.dump(game_data, f, indent=4, ensure_ascii=False)
+            return True
         else:
             logger.debug('Game not found')
     except Exception as e:
         logger.error(repr(e))
+    return False
 
 def create_game(game_name: str, creator: str, password: str=None) -> tuple[bool, Optional[str]]:
     logger.debug(f"Creating game {repr(game_name)} with creator {repr(creator)} and password {repr(password)}")
