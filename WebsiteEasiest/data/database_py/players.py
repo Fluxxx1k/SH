@@ -7,9 +7,8 @@ from flask import request
 
 from WebsiteEasiest.logger import logger
 from WebsiteEasiest.settings.web_config import denied_literals
-
-path_players = os.path.join(os.path.basename(os.path.basename(__file__)), 'data', 'players')
-path_IP = os.path.join(os.path.basename(os.path.basename(__file__)), 'data', 'success_IP')
+path_players = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'data', 'players')
+path_IP = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'data', 'IP')
 os.makedirs(path_players, exist_ok=True)
 os.makedirs(path_IP, exist_ok=True)
 
