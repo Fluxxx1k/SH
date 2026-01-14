@@ -11,12 +11,12 @@ def login():
 
 def login_post():
     if 'username' in session:
-        return redirect(url_for('lobby'))
+        return {'redirect': url_for('lobby')}
     username = request.form.get('username')
     password = request.form.get('password')
     logging_in_player = login_player(username, password)
     if not logging_in_player[0]:
-        return render_template('login.html', error=logging_in_player[1])
+        return {'error': logging_in_player[1]}, 400
     else:
         session['username'] = username
-        return redirect(url_for('lobby'))
+        return {'redirect': url_for('lobby')}

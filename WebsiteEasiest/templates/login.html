@@ -24,7 +24,7 @@
                 <div class="error-message">{{ error }}</div>
                 {% endif %}
 
-                <form method="POST" class="auth-form">
+                <form method="POST" class="auth-form" onsubmit="return submitForm(this);">
                     <div class="form-group">
                         <label for="username">Имя пользователя:</label>
                         <input type="text" id="username" name="username" required 
@@ -50,5 +50,38 @@
             <p>&copy; 2025 Secret Hitler Online. Открытый проект.</p>
         </footer>
     </div>
+<script>
+function submitForm(form) {
+    fetch(form.action, {
+        method: 'POST',
+        body: new FormData(form),
+        headers: {
+            'Accept': 'application/json'
+        }
+    })
+    .then(response => {
+        if (!response.ok) return response.json().then(err => { throw err; });
+        return response.json();
+    })
+    .then(data => {
+        if (data.redirect) {
+            window.location.href = data.redirect;
+        }
+    })
+    .catch(error => {
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'error-message';
+        errorDiv.textContent = error.error;
+        
+        const existingError = form.querySelector('.error-message');
+        if (existingError) {
+            existingError.replaceWith(errorDiv);
+        } else {
+            form.insertBefore(errorDiv, form.firstChild);
+        }
+    });
+    return false;
+}
+</script>
 </body>
 </html>
