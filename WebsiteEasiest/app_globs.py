@@ -31,3 +31,10 @@ app.errorhandler(500)(internal_server_error)
 app.errorhandler(501)(not_implemented_error)
 app.errorhandler(502)(bad_gateway_error)
 app.errorhandler(503)(service_unavailable_error)
+
+
+
+from flask_socketio import SocketIO
+
+socketio = SocketIO(app)
+
