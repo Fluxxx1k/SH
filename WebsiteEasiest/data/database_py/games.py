@@ -71,6 +71,9 @@ def save_data_of_game(game_name: str, game_data: dict) -> bool:
 
 def create_game(game_name: str, creator: str, password: str=None) -> tuple[bool, Optional[str]]:
     logger.debug(f"Creating game {repr(game_name)} with creator {repr(creator)} and password {repr(password)}")
+    from WebsiteEasiest.settings.web_config import New_games_allowed
+    if not New_games_allowed:
+        return False, repr(PermissionError('New games are not allowed'))
     try:
         if len(game_name) < 3:
             return False, repr(ValueError('Game name cannot be less than 3 characters'))
