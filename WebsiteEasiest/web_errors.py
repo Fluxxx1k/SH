@@ -12,6 +12,8 @@ def client_error(error):
     """Handle 4XX Client errors"""
     real_ip = request.headers.get('X-Forwarded-For', request.remote_addr)
     logger.error(f'[{real_ip} -> {request.path}] ({request.method}) {error}\n{request.__dict__}\n{traceback.format_exc()}\n{session.__dict__}')
+    if request.accept_mimetypes.accept_json or request.path.startswith('/api') or request.path.startswith('/.well-known'):
+        return json_error_base_return(error)
     return render_error_page(
         error_code=error.code,
         error_message=error.name,
@@ -26,6 +28,9 @@ def bad_request_error(error):
     """Handle 400 Bad Request errors"""
     real_ip = request.headers.get('X-Forwarded-For', request.remote_addr)
     logger.critical(f'[{real_ip} -> {request.path}] ({request.method}) {error}\n{request.__dict__}, \n{traceback.format_exc()}\n{session.__dict__}')
+    if request.accept_mimetypes.accept_json or request.path.startswith('/api') or request.path.startswith('/.well-known'):
+        return json_error_base_return(error)
+
     return render_error_page(
         error_code=400,
         error_message="Неверный запрос",
@@ -39,6 +44,9 @@ def unauthorized_error(error):
     """Handle 401 Unauthorized errors"""
     real_ip = request.headers.get('X-Forwarded-For', request.remote_addr)
     logger.debug(f'[{real_ip} -> {request.path}] ({request.method}) {error}')
+    if request.accept_mimetypes.accept_json or request.path.startswith('/api') or request.path.startswith('/.well-known'):
+        return json_error_base_return(error)
+
     return render_error_page(
         error_code=401,
         error_message="Необходима авторизация",
@@ -51,6 +59,9 @@ def forbidden_error(error):
     """Handle 403 Forbidden errors"""
     real_ip = request.headers.get('X-Forwarded-For', request.remote_addr)
     logger.debug(f'[{real_ip} -> {request.path}] ({request.method}) {error}')
+    if request.accept_mimetypes.accept_json or request.path.startswith('/api') or request.path.startswith('/.well-known'):
+        return json_error_base_return(error)
+
     return render_error_page(
         error_code=403,
         error_message="Доступ запрещен",
@@ -65,6 +76,11 @@ def not_found_error(error):
     """Handle 404 Not Found errors"""
     real_ip = request.headers.get('X-Forwarded-For', request.remote_addr)
     logger.warning(f'[{real_ip} -> {request.path}] ({request.method}) {error}')
+    
+    # Return JSON for API requests or when client expects JSON
+    if request.accept_mimetypes.accept_json or request.path.startswith('/api') or request.path.startswith('/.well-known'):
+        return json_error_base_return(error)
+        
     return render_error_page(
         error_code=404,
         error_message="Страница не найдена",
@@ -81,6 +97,9 @@ def method_not_allowed_error(error):
     if ('login' in str(request.path) or
             'register' in str(request.path)):
         logger.critical(f'[{real_ip} -> {request.path}] ({request.method}) {error}')
+        if request.accept_mimetypes.accept_json or request.path.startswith('/api') or request.path.startswith(
+                '/.well-known'):
+                return json_error_base_return(error)
         return render_error_page(
             error_code=405,
             error_message="Метод не разрешен",
@@ -91,6 +110,9 @@ def method_not_allowed_error(error):
         ), 405
     else:
         logger.error(f'[{real_ip} -> {request.path}] ({request.method}) {error}')
+        if request.accept_mimetypes.accept_json or request.path.startswith('/api') or request.path.startswith(
+                '/.well-known'):
+                return json_error_base_return(error)
         return render_error_page(
             error_code=405,
             error_message="Метод не разрешен",
@@ -103,6 +125,10 @@ def too_many_requests_error(error):
     """Handle 429 Too Many Requests errors"""
     real_ip = request.headers.get('X-Forwarded-For', request.remote_addr)
     logger.warning(f'[{real_ip} -> {request.path}] ({request.method}) {error}')
+    # Return JSON for API requests or when client expects JSON
+    if request.accept_mimetypes.accept_json or request.path.startswith('/api') or request.path.startswith(
+                '/.well-known'):
+                return json_error_base_return(error)
     return render_error_page(
         error_code=429,
         error_message="Слишком много запросов",
@@ -116,6 +142,10 @@ def server_error(error):
     """Handle 5XX Server errors"""
     real_ip = request.headers.get('X-Forwarded-For', request.remote_addr)
     logger.error(f'[{real_ip} -> {request.path}] ({request.method}) {error}\n{request.__dict__}\n{traceback.format_exc()}\n{session.__dict__}')
+    # Return JSON for API requests or when client expects JSON
+    if request.accept_mimetypes.accept_json or request.path.startswith('/api') or request.path.startswith(
+                '/.well-known'):
+                return json_error_base_return(error)
     return render_error_page(
         error_code=error.code,
         error_message=error.name,
@@ -126,26 +156,32 @@ def server_error(error):
 
 
 
-def internal_server_error(handled_error: Exception) -> tuple[str, int]:
+def internal_server_error(error):
     """Handle 500 Internal Server errors"""
-    import traceback
     real_ip = request.headers.get('X-Forwarded-For', request.remote_addr)
-    logger.critical(f'[{real_ip} -> {request.path}] ({request.method}) {handled_error}\n{request.__dict__}\n{traceback.format_exc()}\n{session.__dict__}')
+    logger.critical(f'[{real_ip} -> {request.path}] ({request.method}) {error}\n{request.__dict__}\n{traceback.format_exc()}\n{session.__dict__}')
     debug_info = traceback.format_exc()
-
+    # Return JSON for API requests or when client expects JSON
+    if request.accept_mimetypes.accept_json or request.path.startswith('/api') or request.path.startswith(
+                '/.well-known'):
+                return json_error_base_return(error)
     return render_error_page(
         error_code=500,
         error_message="Внутренняя ошибка сервера",
         error_description="Произошла ошибка на сервере при обработке вашего запроса.",
         error_comment="Мы уже работаем над решением этой проблемы.",
         suggestion="Попробуйте обновить страницу через несколько минут. Если ошибка повторяется, обратитесь к администратору.",
-        debug_info=f"{debug_info} | {handled_error}"
+        debug_info=f"{debug_info} | {error}"
     ), 500
 
 def not_implemented_error(error):
     """Handle 501 Not Implemented errors"""
     real_ip = request.headers.get('X-Forwarded-For', request.remote_addr)
     logger.error(f'[{real_ip} -> {request.path}] ({request.method}) {error}')
+    # Return JSON for API requests or when client expects JSON
+    if request.accept_mimetypes.accept_json or request.path.startswith('/api') or request.path.startswith(
+                '/.well-known'):
+                return json_error_base_return(error)
     return render_error_page(
         error_code=501,
         error_message="Функция не реализована",
@@ -158,6 +194,10 @@ def bad_gateway_error(error):
     """Handle 502 Bad Gateway errors"""
     real_ip = request.headers.get('X-Forwarded-For', request.remote_addr)
     logger.warning(f'[{real_ip} -> {request.path}] ({request.method}) {error}')
+    # Return JSON for API requests or when client expects JSON
+    if request.accept_mimetypes.accept_json or request.path.startswith('/api') or request.path.startswith(
+                '/.well-known'):
+        return json_error_base_return(error)
     return render_error_page(
         error_code=502,
         error_message="Неверный шлюз",
@@ -170,6 +210,10 @@ def service_unavailable_error(error):
     """Handle 503 Service Unavailable errors"""
     real_ip = request.headers.get('X-Forwarded-For', request.remote_addr)
     logger.warning(f'[{real_ip} -> {request.path}] ({request.method}) {error}')
+    # Return JSON for API requests or when client expects JSON
+    if request.accept_mimetypes.accept_json or request.path.startswith('/api') or request.path.startswith(
+                '/.well-known'):
+        return json_error_base_return(error)
     return render_error_page(
         error_code=503,
         error_message="Сервис недоступен",
@@ -179,3 +223,26 @@ def service_unavailable_error(error):
     ), 503
 
 
+def gateway_timeout_error(error):
+    """Handle 504 Gateway Timeout errors"""
+    real_ip = request.headers.get('X-Forwarded-For', request.remote_addr)
+    logger.warning(f'[{real_ip} -> {request.path}] ({request.method}) {error}')
+    if request.accept_mimetypes.accept_json or request.path.startswith('/api') or request.path.startswith(
+                '/.well-known'):
+        return json_error_base_return(error)
+    return render_error_page(
+        error_code=504,
+        error_message="Время ожидания шлюза истекло",
+        error_description="Сервер не получил ответ от upstream-сервера в течение заданного времени.",
+        error_comment="Возможно, проблема на стороне upstream-сервера или конфигурации прокси.",
+        suggestion="Обратитесь к администратору для решения проблемы."
+    ), 504
+
+
+def json_error_base_return(error):
+        return {
+            "error": error.name,
+            "code": error.code,
+            "message": error.description,
+            "path": request.path
+        }, error.code
