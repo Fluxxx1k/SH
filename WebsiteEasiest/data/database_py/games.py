@@ -3,7 +3,7 @@ from __future__ import annotations
 import os, json
 from typing import Optional
 
-from WebsiteEasiest.app2 import memory_info
+from WebsiteEasiest.memory_checker import memory_info
 from WebsiteEasiest.data.data_paths import path_games, path_existed_games
 from WebsiteEasiest.logger import logger
 
