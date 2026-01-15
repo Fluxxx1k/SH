@@ -147,10 +147,27 @@ body {
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.3s;
+    margin-right: 1rem;
 }
 
 .btn-start:hover {
     background-color: #3e8e41;
+    transform: scale(1.05);
+}
+
+.btn-delete {
+    background-color: #f44336;
+    color: white;
+    padding: 1rem 2rem;
+    font-size: 1.2rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.btn-delete:hover {
+    background-color: #d32f2f;
     transform: scale(1.05);
 }
 

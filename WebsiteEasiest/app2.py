@@ -49,7 +49,10 @@ app.route('/game/<game_name>')(abort_on_exception(game_base.game))
 app.route('/game/<game_name>', methods=['POST'])(abort_on_exception(game_base.game_post))
 app.route('/game/<game_name>/vote', methods=['POST'])(abort_on_exception(game_base.game_vote))
 app.route('/game/<game_name>/join', methods=['POST'])(abort_on_exception(game_base.game_join))
-# app.route('/game/<game_name>/start', methods=['POST'])(abort_on_exception(game_base.game_start))
+app.route('/game/<game_name>/start', methods=['POST'])(abort_on_exception(game_base.game_start))
+app.route('/game/<game_name>/end', methods=['POST'])(abort_on_exception(game_base.game_end))
+
+
 
 from WebsiteEasiest.memory_checker import mem_check, memory_info
 

@@ -55,9 +55,12 @@
         </section>
     </main>
 
-    {% if created_by == session['username'] and not is_game_started%}
+    {% if created_by == session['username'] %}
         <div class="game-start">
-            <button id="startGameBtn" class="btn btn-start">Начать игру</button>
+            {% if not is_game_started %}
+                <button id="startGameBtn" class="btn btn-start">Начать игру</button>
+            {% endif %}
+            <button id="deleteGameBtn" class="btn btn-delete">Удалить игру</button>
         </div>
     {% endif %}
     

@@ -2,6 +2,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Game initialization
     const startGameBtn = document.getElementById('startGameBtn');
     const joinGameBtn = document.getElementById('joinGameBtn');
+    const deleteGameBtn = document.getElementById('deleteGameBtn');
     try {
         if (joinGameBtn) {
             joinGameBtn.addEventListener('click', function () {
@@ -51,6 +52,32 @@ document.addEventListener('DOMContentLoaded', function() {
     catch (e) {
         console.error('Ошибка добавления обработчика события startGameBtn:', e);
         alert('Ошибка: не удалось начать игру. Пожалуйста, попробуйте позже: ' + e);
+    }
+    
+    try {
+        if (deleteGameBtn) {
+            deleteGameBtn.addEventListener('click', function () {
+                if (confirm('Вы уверены, что хотите удалить игру? Это действие нельзя отменить.')) {
+                    fetch(`/game/${gameId}/end`, {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'}
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                alert('Игра удалена!');
+                                window.location.href = '/lobby';
+                            } else {
+                                alert('Ошибка: ' + data.message);
+                            }
+                        });
+                }
+            });
+        }
+    }
+    catch (e) {
+        console.error('Ошибка добавления обработчика события deleteGameBtn:', e);
+        alert('Ошибка: не удалось удалить игру. Пожалуйста, попробуйте позже: ' + e);
     }
     
     // Update game data from server
