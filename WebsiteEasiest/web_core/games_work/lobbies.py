@@ -18,7 +18,7 @@ def game_leave():
         abort(404, description=f"Игрок {session['username']} не найден: {player_data}")
     # Remove player from game data
     if 'game' not in player_data or player_data['game'] == '':
-        abort(403, description=f"Игрок {session['username']} не присоединился к какой-либо игре: {player_data['game']}")
+        return {'success': False, 'message': 'Player not in any game'}
     game_name = player_data['game']
     game_found, game_data = get_data_of_game(game_name)
     player_data['game'] = ''
