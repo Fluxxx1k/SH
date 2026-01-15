@@ -95,13 +95,13 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Unified vote handler
-    function sendVote(type, targetPlayer = null) {
+    function sendVote(type, target = null) {
         try {
             const voteData = {
                 voter: username,
                 vote_type: type
             };
-            if (targetPlayer) voteData.target_player = targetPlayer;
+            if (target) voteData.target_player = target;
 
             fetch(`/game/${gameId}/vote`, {
                 method: 'POST',
@@ -112,9 +112,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 .then(data => {
                     if (data.success) {
                         updateGameData();
-                        const msg = targetPlayer
-                            ? `Вы проголосовали за ${targetPlayer}`
-                            : `Ваш голос "${type}" учтен`;
+                        const msg = voteData.vote_type === 'player'
+                            ? `Вы проголосовали за ${target}`
+                            : `Ваш голос "${target}" учтен`;
                         alert(msg);
                     } else {
                         alert('Ошибка при голосовании: ' + data.message);
@@ -131,9 +131,9 @@ document.addEventListener('DOMContentLoaded', function() {
     try {
         document.querySelectorAll('.vote-btn').forEach(button => {
             button.addEventListener('click', function () {
-                const voteType = this.classList.contains('vote-yes') ? 'yes' :
+                const vote = this.classList.contains('vote-yes') ? 'yes' :
                     this.classList.contains('vote-no') ? 'no' : 'pass';
-                sendVote(voteType);
+                sendVote('YesNo', vote);
             });
         });
     }
