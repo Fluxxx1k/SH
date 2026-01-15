@@ -8,6 +8,18 @@ from WebsiteEasiest.settings.web_config import denied_literals
 from WebsiteEasiest.settings.website_settings import MIN_PLAYER_NUM, VOTE_ANONYMOUS, VETO_NUM_BLACK, ANARCHY_SKIP_NUM, \
     BLACK_WIN_NUM, RED_WIN_NUM
 from WebsiteEasiest.stardard_renders import render_error_page
+def create_game_web():
+    if 'username' not in session:
+        return redirect(safe_url_for('login'))
+    from WebsiteEasiest.settings.website_settings import (
+        MAX_PLAYER_NUM,
+        TIME_FORMAT,
+        DATE_FORMAT
+    )
+    return render_template_abort_500('create_game.html', username=session['username'], min_players=MIN_PLAYER_NUM,
+        max_players=MAX_PLAYER_NUM,
+        date_format=DATE_FORMAT, time_format=TIME_FORMAT,
+        vote_delay=30)
 
 
 def create_game_post():
