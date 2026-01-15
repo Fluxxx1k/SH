@@ -4,6 +4,7 @@ import os
 from flask import session, redirect, request, abort
 
 from WebsiteEasiest.Website_featetures.error_handler.safe_functions import safe_url_for, render_template_abort_500
+from WebsiteEasiest.data.data_paths import path_games
 from WebsiteEasiest.logger import logger
 from WebsiteEasiest.settings.web_config import denied_literals
 from WebsiteEasiest.settings.website_settings import MIN_PLAYER_NUM, VOTE_ANONYMOUS, VETO_NUM_BLACK, ANARCHY_SKIP_NUM, \
@@ -110,9 +111,8 @@ def create_game_post():
                                  suggestion='Check your input values')
 
     # Save game
-    games_dir = os.path.join('data', 'games')
-    os.makedirs(games_dir, exist_ok=True)
-    with open(os.path.join(games_dir, f"{game_name}.json"), 'w') as f:
+    os.makedirs(path_games, exist_ok=True)
+    with open(os.path.join(path_games, f"{game_name}.json"), 'w') as f:
         json.dump(game_data, f)
 
     return redirect(safe_url_for('lobby'))

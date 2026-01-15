@@ -14,7 +14,7 @@ os.makedirs(path_players, exist_ok=True)
 os.makedirs(path_IP, exist_ok=True)
 
 logger.debug(f"Paths:"
-             f"\n\t\t{dirname= }"
+             f"\n\t\t{__file__= }"
              f"\n\t\t{dirname= },"
              f"\n\t\t{path_games= },"
              f"\n\t\t{path_existed_games= },"

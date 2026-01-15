@@ -52,7 +52,6 @@ def lobby():
                     'status': game_data.get('status', 'DATA_LOST_STATUS'),
                     'creator': game_data.get('created_by', 'DATA_LOST_CREATOR'),
                     'current_players': game_data.get('current_players', 0),
-
                 })
 
     return render_template_abort_500('lobby.html', username=session['username'], games=games)
