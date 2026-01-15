@@ -44,8 +44,15 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             if (!inputText) {
-                alert('Пожалуйста, введите текст или выберите цвет');
+                alert('Пожалуйста, введите текст или выберите кнопками');
                 return;
+            }
+
+            for (let char of inputText) {
+                if (!['B', 'R', 'X'].includes(char)) {
+                    alert('Введите только B, R или X!');
+                    return;
+                }
             }
             // Here you would normally send the accumulated data to server
             alert(`Отправлено накопленное: ${inputText}`);
