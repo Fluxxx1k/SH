@@ -12,7 +12,7 @@ def client_error(error):
     """Handle 4XX Client errors"""
     real_ip = request.headers.get('X-Forwarded-For', request.remote_addr)
     logger.error(f'[{real_ip} -> {request.path}] ({request.method}) {error}\n{request.__dict__}\n{traceback.format_exc()}\n{session.__dict__}')
-    if request.path.startswith('/api') or request.path.startswith('/.well-known'):
+    if request.method == "POST" or request.path.startswith('/api') or request.path.startswith('/.well-known'):
         return json_error_base_return(error)
     return render_error_page(
         error_code=error.code,
@@ -28,7 +28,7 @@ def bad_request_error(error):
     """Handle 400 Bad Request errors"""
     real_ip = request.headers.get('X-Forwarded-For', request.remote_addr)
     logger.critical(f'[{real_ip} -> {request.path}] ({request.method}) {error}\n{request.__dict__}, \n{traceback.format_exc()}\n{session.__dict__}')
-    if request.path.startswith('/api') or request.path.startswith('/.well-known'):
+    if request.method == "POST" or request.path.startswith('/api') or request.path.startswith('/.well-known'):
         return json_error_base_return(error)
 
     return render_error_page(
@@ -44,7 +44,7 @@ def unauthorized_error(error):
     """Handle 401 Unauthorized errors"""
     real_ip = request.headers.get('X-Forwarded-For', request.remote_addr)
     logger.debug(f'[{real_ip} -> {request.path}] ({request.method}) {error}')
-    if request.path.startswith('/api') or request.path.startswith('/.well-known'):
+    if request.method == "POST" or request.path.startswith('/api') or request.path.startswith('/.well-known'):
         return json_error_base_return(error)
 
     return render_error_page(
@@ -59,7 +59,7 @@ def forbidden_error(error):
     """Handle 403 Forbidden errors"""
     real_ip = request.headers.get('X-Forwarded-For', request.remote_addr)
     logger.debug(f'[{real_ip} -> {request.path}] ({request.method}) {error}')
-    if request.path.startswith('/api') or request.path.startswith('/.well-known'):
+    if request.method == "POST" or request.path.startswith('/api') or request.path.startswith('/.well-known'):
         return json_error_base_return(error)
 
     return render_error_page(
@@ -78,7 +78,7 @@ def not_found_error(error):
     logger.warning(f'[{real_ip} -> {request.path}] ({request.method}) {error}')
 
     # Return JSON for API requests or when client expects JSON
-    if request.path.startswith('/api') or request.path.startswith('/.well-known'):
+    if request.method == "POST" or request.path.startswith('/api') or request.path.startswith('/.well-known'):
         return json_error_base_return(error)
 
     return render_error_page(
@@ -97,7 +97,7 @@ def method_not_allowed_error(error):
     if ('login' in str(request.path) or
             'register' in str(request.path)):
         logger.critical(f'[{real_ip} -> {request.path}] ({request.method}) {error}')
-        if request.path.startswith('/api') or request.path.startswith(
+        if request.method == "POST" or request.path.startswith('/api') or request.path.startswith(
                 '/.well-known'):
                 return json_error_base_return(error)
         return render_error_page(
@@ -110,7 +110,7 @@ def method_not_allowed_error(error):
         ), 405
     else:
         logger.error(f'[{real_ip} -> {request.path}] ({request.method}) {error}')
-        if request.path.startswith('/api') or request.path.startswith(
+        if request.method == "POST" or request.path.startswith('/api') or request.path.startswith(
                 '/.well-known'):
                 return json_error_base_return(error)
         return render_error_page(
@@ -126,7 +126,7 @@ def too_many_requests_error(error):
     real_ip = request.headers.get('X-Forwarded-For', request.remote_addr)
     logger.warning(f'[{real_ip} -> {request.path}] ({request.method}) {error}')
     # Return JSON for API requests or when client expects JSON
-    if request.path.startswith('/api') or request.path.startswith(
+    if request.method == "POST" or request.path.startswith('/api') or request.path.startswith(
                 '/.well-known'):
                 return json_error_base_return(error)
     return render_error_page(
@@ -143,7 +143,7 @@ def server_error(error):
     real_ip = request.headers.get('X-Forwarded-For', request.remote_addr)
     logger.error(f'[{real_ip} -> {request.path}] ({request.method}) {error}\n{request.__dict__}\n{traceback.format_exc()}\n{session.__dict__}')
     # Return JSON for API requests or when client expects JSON
-    if request.path.startswith('/api') or request.path.startswith(
+    if request.method == "POST" or request.path.startswith('/api') or request.path.startswith(
                 '/.well-known'):
                 return json_error_base_return(error)
     return render_error_page(
@@ -162,7 +162,7 @@ def internal_server_error(error):
     logger.critical(f'[{real_ip} -> {request.path}] ({request.method}) {error}\n{request.__dict__}\n{traceback.format_exc()}\n{session.__dict__}')
     debug_info = traceback.format_exc()
     # Return JSON for API requests or when client expects JSON
-    if request.path.startswith('/api') or request.path.startswith(
+    if request.method == "POST" or request.method == "POST" or request.path.startswith('/api') or request.path.startswith(
                 '/.well-known'):
                 return json_error_base_return(error)
     return render_error_page(
@@ -179,7 +179,7 @@ def not_implemented_error(error):
     real_ip = request.headers.get('X-Forwarded-For', request.remote_addr)
     logger.error(f'[{real_ip} -> {request.path}] ({request.method}) {error}')
     # Return JSON for API requests or when client expects JSON
-    if request.path.startswith('/api') or request.path.startswith(
+    if request.method == "POST" or request.path.startswith('/api') or request.path.startswith(
                 '/.well-known'):
                 return json_error_base_return(error)
     return render_error_page(
@@ -195,7 +195,7 @@ def bad_gateway_error(error):
     real_ip = request.headers.get('X-Forwarded-For', request.remote_addr)
     logger.warning(f'[{real_ip} -> {request.path}] ({request.method}) {error}')
     # Return JSON for API requests or when client expects JSON
-    if request.path.startswith('/api') or request.path.startswith(
+    if request.method == "POST" or request.path.startswith('/api') or request.path.startswith(
                 '/.well-known'):
         return json_error_base_return(error)
     return render_error_page(
@@ -211,7 +211,7 @@ def service_unavailable_error(error):
     real_ip = request.headers.get('X-Forwarded-For', request.remote_addr)
     logger.warning(f'[{real_ip} -> {request.path}] ({request.method}) {error}')
     # Return JSON for API requests or when client expects JSON
-    if request.path.startswith('/api') or request.path.startswith(
+    if request.method == "POST" or request.path.startswith('/api') or request.path.startswith(
                 '/.well-known'):
         return json_error_base_return(error)
     return render_error_page(
@@ -227,7 +227,7 @@ def gateway_timeout_error(error):
     """Handle 504 Gateway Timeout errors"""
     real_ip = request.headers.get('X-Forwarded-For', request.remote_addr)
     logger.warning(f'[{real_ip} -> {request.path}] ({request.method}) {error}')
-    if request.path.startswith('/api') or request.path.startswith('/.well-known'):
+    if request.method == "POST" or request.path.startswith('/api') or request.path.startswith('/.well-known'):
         return json_error_base_return(error)
     return render_error_page(
         error_code=504,
