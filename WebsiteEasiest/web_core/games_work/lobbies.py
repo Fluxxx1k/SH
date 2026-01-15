@@ -4,7 +4,7 @@ from flask import session, redirect, abort
 
 from WebsiteEasiest.Website_featetures.error_handler.safe_functions import render_template_abort_500
 from WebsiteEasiest.Website_featetures.error_handler.safe_functions import safe_url_for as url_for
-from WebsiteEasiest.data.database_py.games import get_data_of_game, save_data_of_game
+from WebsiteEasiest.data.database_py.games import get_data_of_game, save_data_of_game, end_game
 from WebsiteEasiest.data.data_paths import path_games
 from WebsiteEasiest.data.database_py.players import save_data_of_player, get_data_of_player
 from WebsiteEasiest.logger import logger
@@ -26,6 +26,8 @@ def game_leave():
     if game_found and 'players' in game_data and session['username'] in game_data['players']:
         game_data['players'].remove(session['username'])
         game_data['current_players'] -= 1
+        if game_data['current_players'] == 0:
+            end_game(game_name)
         save_data_of_game(game_name, game_data)
         return {'success': True, 'message': 'Disconnected from game room'}
     else:

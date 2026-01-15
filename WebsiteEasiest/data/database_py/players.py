@@ -156,3 +156,20 @@ def save_data_of_player(player_name: str, player_data: dict) -> tuple[bool, Opti
         return False, repr(e)
     else:
         return True, None
+
+def add_game_to_player(player_name: str, game_name: str):
+    try:
+        with open(os.path.join(path_players, player_name + '.json'), 'r') as f:
+            player_data = json.load(f)
+            player_data['game'] = player_data.get('game', '')
+            if player_data['game'] != '':
+                return False, repr(ValueError(f"Player {repr(player_name)} already in game {repr(player_data['game'])}"))
+            if game_name not in player_data['game']:
+                player_data['game'] = game_name
+                with open(os.path.join(path_players, player_name + '.json'), 'w') as f:
+                    json.dump(player_data, f, indent=4, ensure_ascii=False)
+    except Exception as e:
+        logger.error(f"Error adding game ({repr(game_name)}) to player ({repr(player_name)}): {repr(e)}")
+        return False, repr(e)
+    else:
+        return True, None

@@ -5,6 +5,7 @@ from flask import session, redirect, request, abort
 
 from WebsiteEasiest.Website_featetures.error_handler.safe_functions import safe_url_for, render_template_abort_500
 from WebsiteEasiest.data.data_paths import path_games
+from WebsiteEasiest.data.database_py.players import add_game_to_player, get_data_of_player
 from WebsiteEasiest.logger import logger
 from WebsiteEasiest.settings.web_config import denied_literals
 from WebsiteEasiest.settings.website_settings import MIN_PLAYER_NUM, VOTE_ANONYMOUS, VETO_NUM_BLACK, ANARCHY_SKIP_NUM, \
@@ -27,10 +28,27 @@ def create_game():
 
 
 
-
 def create_game_post():
     if 'username' not in session:
         return redirect(safe_url_for('login'))
+    found_player, player_data = get_data_of_player(session['username'])
+    if not found_player:
+        logger.debug(f'Invalid input for game creation: The player {repr(session["username"])} is not found.')
+        return render_error_page(400,
+                                 f'Invalid input',
+                                 f"The player {repr(session['username'])} is not found.",
+                                 error_comment='You must enter a valid player name.',
+                                 debug_info=repr(session['username']),
+                                 suggestion='Check your input values')
+    if player_data['game'] != '':
+        logger.debug(f'Invalid input for game creation: The player {repr(session["username"])} is already in game {repr(player_data["game"])}.')
+        return render_error_page(400,
+                                 f'Invalid input',
+                                 f"The player {repr(session['username'])} is already in game {repr(player_data['game'])}.",
+                                 error_comment='You must enter a valid player name.',
+                                 debug_info=repr(session['username']),
+                                 suggestion='Check your input values')
+
     from WebsiteEasiest.settings.website_settings import (
         MAX_PLAYER_NUM,
         TIME_FORMAT,
@@ -114,5 +132,14 @@ def create_game_post():
     os.makedirs(path_games, exist_ok=True)
     with open(os.path.join(path_games, f"{game_name}.json"), 'w') as f:
         json.dump(game_data, f)
+    found, error = add_game_to_player(session['username'], game_name)
+    if not found:
+        logger.error(f'Error adding game ({repr(game_name)}) to player ({repr(session["username"])}) : {error}')
+        return render_error_page(500,
+                                 f'Error adding game to player',
+                                 f"Error adding game ({repr(game_name)}) to player ({repr(session['username'])}) : {error}",
+                                 error_comment='This may mean that the player is already in another game.',
+                                 debug_info=repr(error),
+                                 suggestion='Contact the administrator.')
 
     return redirect(safe_url_for('lobby'))
