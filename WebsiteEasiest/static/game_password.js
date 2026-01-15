@@ -2,7 +2,6 @@ document.getElementById('passwordForm').addEventListener('submit', async functio
     e.preventDefault();
 
     const password = document.getElementById('password').value;
-    const gameName = '{{ game_name }}';
 
     try {
         const response = await fetch(`/game/${gameName}/verify_password`, {

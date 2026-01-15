@@ -15,14 +15,11 @@ def game(game_name):
     player_found, player_data = get_data_of_player(session['username'])
     if not player_found:
         abort(401, description=f"Игрок {session['username']} не найден: {player_data}")
-    print('game_name', game_name)
-    print('player_data', player_data)
-
     # Load game data
     game_found, game_data = get_data_of_game(game_name)
     if not game_found:
         abort(404, description=f"Игра {game_name} не найдена: {game_data}")
-    if game_name != player_data['game'] and game_data.get('password'):
+    if game_name not in player_data.get('game_access', []) and game_data.get('password'):
         return redirect(f'/game/{game_name}/password')
 
     # Get players list
@@ -97,12 +94,7 @@ def game_join(game_name):
     player_found, player_data = get_data_of_player(session['username'])
     if not player_found:
         abort(401, description=f"Игрок {session['username']} не найден: {player_data}")
-    if player_data.get('game') == game_name:
-        return {'success': False, 'message': 'Вы уже присоединились к этой игре'}
 
-    # Add player to game data
-    if 'players' not in game_data:
-        game_data['players'] = []
 
     if session['username'] not in game_data['players']:
         game_data['players'].append(session['username'])
@@ -115,8 +107,14 @@ def game_join(game_name):
         save_data_of_game(game_name, game_data)
         logger.info(f"Игрок {session['username']} присоединился к игре {game_name}")
         return {'success': True, 'message': 'Вы успешно присоединились к игре'}
-
-    return {'success': False, 'message': 'Вы уже присоединились к этой игре'}
+    else:
+        game_data['players'].append(session['username'])
+        game_data['current_players'] = len(game_data['players'])
+        save_data_of_game(game_name, game_data)
+        logger.warning(f"Игрок {session['username']} пытался присоединиться к игре {game_name}, но уже присоединился")
+        if player_data.get('game') == game_name:
+            return {'success': False, 'message': 'Вы уже присоединились к этой игре по данным игрока и игры'}
+        return {'success': False, 'message': 'Вы уже присоединились к этой игре по данным игры'}
 
 
 
@@ -198,8 +196,8 @@ def game_verify_password(game_name):
     player_found, player_data = get_data_of_player(session['username'])
     if not player_found:
         abort(401, description=f"Игрок {session['username']} не найден: {player_data}")
-    
-    player_data['game'] = game_name
+
+    player_data['game_access'] = player_data.get('game_access', []) + [game_name]
     save_data_of_player(session['username'], player_data)
-    
+
     return {'success': True, 'message': 'Пароль верный'}
