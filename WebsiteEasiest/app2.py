@@ -56,7 +56,7 @@ app.route('/game/<game_name>/end', methods=['POST'])(abort_on_exception(game_bas
 
 
 
-from WebsiteEasiest.memory_checker import mem_check, memory_info
+from WebsiteEasiest.memory_checker import mem_check
 
 
 if __name__ == '__main__':
