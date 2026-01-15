@@ -14,17 +14,16 @@ def game(game_name):
     # Load player data
     player_found, player_data = get_data_of_player(session['username'])
     if not player_found:
-
         abort(401, description=f"Игрок {session['username']} не найден: {player_data}")
     print('game_name', game_name)
     print('player_data', player_data)
-    if game_name != player_data['game']:
-        return redirect(f'/game/{game_name}/password')
 
     # Load game data
     game_found, game_data = get_data_of_game(game_name)
     if not game_found:
         abort(404, description=f"Игра {game_name} не найдена: {game_data}")
+    if game_name != player_data['game'] and game_data.get('password'):
+        return redirect(f'/game/{game_name}/password')
 
     # Get players list
     players = []
@@ -174,3 +173,33 @@ def game_password(game_name):
     if not player_found:
         abort(401, description=f"Игрок {session['username']} не найден: {player_data}")
     return render_template_abort_500('game_password.html', game_name=game_name)
+
+
+def game_verify_password(game_name):
+    if 'username' not in session:
+        abort(401, description="Необходимо войти в систему")
+    if game_name == '':
+        abort(404, description="Имя игры не может быть пустым")
+    
+    data = request.get_json()
+    if not data or 'password' not in data:
+        return {'success': False, 'description': "Неверные данные запроса"}
+    
+    game_found, game_data = get_data_of_game(game_name)
+    if not game_found:
+        abort(404, description=f"Игра {game_name} не найдена: {game_data}")
+    
+    # Check if game has password and it matches
+    logger.debug(f'User {repr(session["username"])} tries to log in in game {repr(game_name)} with password {repr(data["password"])} when the password is {repr(game_data.get("password"))}')
+    if game_data.get('password') and game_data['password'] != data['password']:
+        return {'success': False, 'message': 'Неверный пароль игры'}
+    
+    # Update player's game reference
+    player_found, player_data = get_data_of_player(session['username'])
+    if not player_found:
+        abort(401, description=f"Игрок {session['username']} не найден: {player_data}")
+    
+    player_data['game'] = game_name
+    save_data_of_player(session['username'], player_data)
+    
+    return {'success': True, 'message': 'Пароль верный'}

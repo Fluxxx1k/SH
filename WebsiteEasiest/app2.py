@@ -50,6 +50,8 @@ app.route('/game/<game_name>', methods=['POST'])(abort_on_exception(game_base.ga
 app.route('/game/<game_name>/vote', methods=['POST'])(abort_on_exception(game_base.game_vote))
 app.route('/game/<game_name>/join', methods=['POST'])(abort_on_exception(game_base.game_join))
 app.route('/game/<game_name>/start', methods=['POST'])(abort_on_exception(game_base.game_start))
+app.route('/game/<game_name>/password')(abort_on_exception(game_base.game_password))
+app.route('/game/<game_name>/verify_password', methods=['POST'])(abort_on_exception(game_base.game_verify_password))
 app.route('/game/<game_name>/end', methods=['POST'])(abort_on_exception(game_base.game_end))
 
 

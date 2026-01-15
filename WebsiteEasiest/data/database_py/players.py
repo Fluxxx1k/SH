@@ -161,10 +161,9 @@ def add_game_to_player(player_name: str, game_name: str):
     try:
         with open(os.path.join(path_players, player_name + '.json'), 'r') as f:
             player_data = json.load(f)
-            player_data['game'] = player_data.get('game', '')
-            if player_data['game'] != '':
-                return False, repr(ValueError(f"Player {repr(player_name)} already in game {repr(player_data['game'])}"))
-            if game_name not in player_data['game']:
+            if player_data.get('game', '') != '' and game_name != '':
+                return False, repr(ValueError(f"Player {repr(player_name)} already in game {repr(player_data.get('game', ''))}"))
+            if game_name != player_data.get('game', ''):
                 player_data['game'] = game_name
                 with open(os.path.join(path_players, player_name + '.json'), 'w') as f:
                     json.dump(player_data, f, indent=4, ensure_ascii=False)

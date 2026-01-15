@@ -27,7 +27,7 @@ def game_leave():
     if game_found:
         if game_data.get('created_by', '') == session['username']:
             abort(403, description="Нельзя покинуть игру, если вы её создали")
-        if 'players' in game_data and session['username'] in game_data['players']:
+        elif 'players' in game_data and session['username'] in game_data['players']:
             game_data['players'].remove(session['username'])
             game_data['current_players'] -= 1
             if game_data['current_players'] == 0:
