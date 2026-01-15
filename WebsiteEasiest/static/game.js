@@ -1,4 +1,59 @@
 document.addEventListener('DOMContentLoaded', function() {
+    // Color voting functionality
+    const colorBlackBtn = document.querySelector('.color-black');
+    const colorRedBtn = document.querySelector('.color-red');
+    const colorUnknownBtn = document.querySelector('.color-unknown');
+    const colorInput = document.querySelector('.color-input');
+    const colorClearBtn = document.querySelector('.color-clear-btn');
+    const colorSubmitBtn = document.querySelector('.color-submit-btn');
+
+    
+    if (colorBlackBtn) {
+        colorBlackBtn.addEventListener('click', () => {
+            colorInput.value += 'B';
+        });
+    }
+    
+    if (colorRedBtn) {
+        colorRedBtn.addEventListener('click', () => {
+            colorInput.value += 'R';
+        });
+    }
+    
+    if (colorUnknownBtn) {
+        colorUnknownBtn.addEventListener('click', () => {
+            colorInput.value += 'X';
+        });
+    }
+    
+    if (colorClearBtn) {
+        colorClearBtn.addEventListener('click', () => {
+            colorInput.value = '';
+        });
+    }
+    
+    let accumulatedText = '';
+    
+    if (colorSubmitBtn && colorInput) {
+        colorSubmitBtn.addEventListener('click', () => {
+            const inputText = colorInput.value.trim();
+            
+            if (inputText.length > 3) {
+                alert('Нельзя отправить более 3 символов!');
+                return;
+            }
+            
+            if (!inputText) {
+                alert('Пожалуйста, введите текст или выберите цвет');
+                return;
+            }
+            // Here you would normally send the accumulated data to server
+            alert(`Отправлено накопленное: ${inputText}`);
+            
+            // Clear input but keep accumulated text
+            colorInput.value = '';
+        });
+    }
     // Check if mobile device
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     
@@ -92,6 +147,10 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Update game data from server
     function updateGameData() {
+        // Clear color selection on game update
+        if (colorInput) {
+            colorInput.value = '';
+        }
         // Scroll to top of action log on mobile after update
         if (isMobile) {
             const logTable = document.querySelector('.log-table');
