@@ -21,6 +21,8 @@ def game_leave():
         return {'success': False, 'message': 'Player not in any game'}
     game_name = player_data['game']
     game_found, game_data = get_data_of_game(game_name)
+    if game_data.get('status', '') == 'playing':
+        abort(403, description="Нельзя покинуть игру, пока она идет")
     player_data['game'] = ''
     save_data_of_player(session['username'], player_data)
     if game_found and 'players' in game_data and session['username'] in game_data['players']:

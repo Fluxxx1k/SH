@@ -1,4 +1,4 @@
-from flask import session, redirect, request, abort
+from flask import session, redirect, request
 
 from WebsiteEasiest.Website_featetures.error_handler.safe_functions import safe_url_for, render_template_abort_500
 from WebsiteEasiest.data.database_py.games import create_game_db
@@ -16,7 +16,9 @@ def create_game():
         TIME_FORMAT,
         DATE_FORMAT
     )
-    return render_template_abort_500('create_game.html', username=session['username'], min_players=MIN_PLAYER_NUM,
+    return render_template_abort_500('create_game.html',
+        username=session['username'],
+        min_players=MIN_PLAYER_NUM,
         max_players=MAX_PLAYER_NUM,
         date_format=DATE_FORMAT, time_format=TIME_FORMAT,
         vote_delay=30)
