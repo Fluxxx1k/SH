@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Literal, Iterable
 
 from WebsiteEasiest.data.database_py.games import get_data_of_game
-from WebsiteEasiest.data.database_py.players import get_data_for_player
+from WebsiteEasiest.data.database_py.players import get_data_of_player
 from WebsiteEasiest.logger import logger
 from core.players.abstract_player import AbstractPlayer
 
@@ -11,7 +11,7 @@ from core.players.abstract_player import AbstractPlayer
 class WebPlayer(AbstractPlayer):
     def __init__(self, index, name, role):
         super().__init__(index, name, role)
-        self.game_name = get_data_for_player(self.name)[1]['game']
+        self.game_name = get_data_of_player(self.name)[1]['game']
 
     def president(self, cards: str | list[str], cnc: "AbstractPlayer"):
         pass

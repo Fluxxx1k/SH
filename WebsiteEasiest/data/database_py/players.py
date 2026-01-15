@@ -51,7 +51,7 @@ def create_player(player_name: str, player_password: str) -> tuple[bool, Optiona
         logger.error(f"Error creating player {repr(player_name)} with password {repr(player_password)}: {repr(e)}")
         return False, repr(e)
 
-def get_data_for_player(player_name) -> tuple[bool, dict | str]:
+def get_data_of_player(player_name) -> tuple[bool, dict | str]:
     logger.debug(f"Getting data for player {repr(player_name)}")
     try:
         if exists_player(player_name):
@@ -83,7 +83,7 @@ def login_player(player_name: str, player_password: str) -> tuple[bool, Optional
         if not exists_player(player_name):
             return False, repr(FileNotFoundError(f'Player "{player_name}" not found'))
         else:
-            data = get_data_for_player(player_name)
+            data = get_data_of_player(player_name)
             if data[0]:
                 if data[1]['player_password'] == player_password:
                     save_ip(player_name)

@@ -30,7 +30,7 @@
                         </div>
                         {% if status != 'started'%}
                         <a href="{{ safe_url_for('game', game_name=game.name) }}" class="btn btn-primary">Присоединиться</a>
-                        {% endif %}
+                       {% endif %}
                     </div>
                     {% endfor %}
                 </div>
@@ -39,6 +39,10 @@
                     <div class="action-buttons">
                         <a href="{{ safe_url_for('create_game') }}" class="btn btn-primary">Создать игру</a>
                     </div>
+                    <form action="{{ safe_url_for('game_leave') }}" method="POST" style="display: inline;">
+                        <button type="submit" class="btn btn-danger">Выйти</button>
+                    </form>
+
                 </div>
             </div>
         </main>
