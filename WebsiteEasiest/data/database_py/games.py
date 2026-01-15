@@ -53,7 +53,7 @@ def get_data_of_game(game_name: str) -> tuple[bool, dict | str]:
             return False, repr(FileNotFoundError(f'Game "{game_name}" not found'))
     except Exception as e:
         logger.error(repr(e))
-        return False, repr(e)
+        return False, e.__class__.__name__
 
 
 def save_data_of_game(game_name: str, game_data: dict) -> bool:
@@ -106,5 +106,6 @@ def end_game_db(game_name: str, game_data: dict = None) -> tuple[bool, Optional[
     except FileExistsError as e:
         return False, f'Game "{game_name}" already existed, data will be lost: {repr(e)}'
     except Exception as e:
-        return False, repr(e) + f' Game "{game_name}" will be lost'
+        logger.error(repr(e))
+        return False, e.__class__.__name__ + f' Game "{game_name}" will be lost'
 

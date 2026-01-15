@@ -59,8 +59,8 @@ def get_data_of_player(player_name) -> tuple[bool, dict | str]:
         else:
             return False, repr(FileNotFoundError(f'Player "{player_name}" not found'))
     except Exception as e:
-        print(repr(e))
-        return False, repr(e)
+        logger.error(repr(e))
+        return False, e.__class__.__name__
 
 def login_player(player_name: str, player_password: str) -> tuple[bool, Optional[str]]:
     logger.debug(f"Logging in player {repr(player_name)} with password {repr(player_password)}")
@@ -94,8 +94,8 @@ def login_player(player_name: str, player_password: str) -> tuple[bool, Optional
             else:
                 return False, data[1]
     except Exception as e:
-        print(repr(e))
-        return False, repr(e)
+        logger.critical(repr(e))
+        return False, e.__class__.__name__
 
 
 def save_ip(player_name: str, success:bool =None, creator: bool=False, spec:str=''):
@@ -153,7 +153,7 @@ def save_data_of_player(player_name: str, player_data: dict) -> tuple[bool, Opti
             json.dump(player_data, f, indent=4, ensure_ascii=False)
     except Exception as e:
         logger.error(f"Error saving player's ({repr(player_name)}) data: {repr(e)}")
-        return False, repr(e)
+        return False, e.__class__.__name__
     else:
         return True, None
 
@@ -170,6 +170,6 @@ def add_game_to_player(player_name: str, game_name: str):
                     json.dump(player_data, f, indent=4, ensure_ascii=False)
     except Exception as e:
         logger.error(f"Error adding game ({repr(game_name)}) to player ({repr(player_name)}): {repr(e)}")
-        return False, repr(e)
+        return False, e.__class__.__name__
     else:
         return True, None
