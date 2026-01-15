@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import os, json
 from typing import Optional
+
+from WebsiteEasiest.app2 import memory_info
 from WebsiteEasiest.data.data_paths import path_games, path_existed_games
 from WebsiteEasiest.logger import logger
 
@@ -36,6 +38,8 @@ def deep_check_exists_game(game_name: str, default_on_error: bool = True) -> boo
     logger.debug(f"Deep checking if game {repr(game_name)} exists or existed")
     exists = exists_game(game_name, default_on_error)
     existed = existed_game(game_name, default_on_error)
+    print(f'\033[102m{game_name} exists: {exists}, existed: {existed}\033[0m')
+
     return exists or existed
 
 
@@ -65,26 +69,24 @@ def save_data_of_game(game_name: str, game_data: dict) -> bool:
         logger.error(repr(e))
     return False
 
-def create_game(game_name: str, creator: str, password: str=None) -> tuple[bool, Optional[str]]:
+def create_game(game_name: str, creator: str, password: str=None, data: dict=None) -> tuple[bool, Optional[str]]:
     logger.debug(f"Creating game {repr(game_name)} with creator {repr(creator)} and password {repr(password)}")
     from WebsiteEasiest.settings.web_config import New_games_allowed
     if not New_games_allowed:
-        return False, repr(PermissionError('New games are not allowed'))
+        return False, repr(PermissionError(f'New games are not allowed: {memory_info}'))
     try:
         if len(game_name) < 3:
             return False, repr(ValueError('Game name cannot be less than 3 characters'))
         if password == '':
             password = None
-        if deep_check_exists_game(game_name):
-            logger.debug(f'Game {repr(game_name)} already exists')
-            return False, repr(FileExistsError(f'Game "{game_name}" already exists'))
+        if deep_check_exists_game(game_name, True):
+            logger.debug(f'Game {repr(game_name)} already exists or existed')
+            return False, repr(FileExistsError(f'Game "{game_name}" already exists or existed'))
         else:
             open(os.path.join(path_games, game_name + '.json'), 'w+').close()
             save_data_of_game(game_name, {
-                'game_name': game_name,
-                'password': password,
                 'creator': creator,
-                'players': [creator],
+                **(data or {})
             })
         return True, None
     except Exception as e:

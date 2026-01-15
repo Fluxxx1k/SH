@@ -1,10 +1,7 @@
-import json
-import os
-
 from flask import session, redirect, request, abort
 
 from WebsiteEasiest.Website_featetures.error_handler.safe_functions import safe_url_for, render_template_abort_500
-from WebsiteEasiest.data.data_paths import path_games
+from WebsiteEasiest.data.database_py.games import create_game
 from WebsiteEasiest.data.database_py.players import add_game_to_player, get_data_of_player
 from WebsiteEasiest.logger import logger
 from WebsiteEasiest.settings.web_config import denied_literals
@@ -13,24 +10,10 @@ from WebsiteEasiest.settings.website_settings import MIN_PLAYER_NUM, VOTE_ANONYM
 from WebsiteEasiest.stardard_renders import render_error_page
 
 
-def create_game():
-    if 'username' not in session:
-        return redirect(safe_url_for('login'))
-    from WebsiteEasiest.settings.website_settings import (
-        MAX_PLAYER_NUM,
-        TIME_FORMAT,
-        DATE_FORMAT
-    )
-    return render_template_abort_500('create_game.html', username=session['username'], min_players=MIN_PLAYER_NUM,
-        max_players=MAX_PLAYER_NUM,
-        date_format=DATE_FORMAT, time_format=TIME_FORMAT,
-        vote_delay=30)
-
-
-
 def create_game_post():
     if 'username' not in session:
         return redirect(safe_url_for('login'))
+
     found_player, player_data = get_data_of_player(session['username'])
     if not found_player:
         logger.debug(f'Invalid input for game creation: The player {repr(session["username"])} is not found.')
@@ -129,9 +112,15 @@ def create_game_post():
                                  suggestion='Check your input values')
 
     # Save game
-    os.makedirs(path_games, exist_ok=True)
-    with open(os.path.join(path_games, f"{game_name}.json"), 'w') as f:
-        json.dump(game_data, f)
+    success, error = create_game(game_name, session['username'], data=game_data, password=game_password)
+    if not success:
+        logger.error(f'Error creating game ({repr(game_name)}) : {error}')
+        return render_error_page(500,
+                                 f'Error creating game',
+                                 f"Error creating game ({repr(game_name)}) : {error}",
+                                 error_comment='This may mean that the game name is already taken or that the game password is invalid.',
+                                 debug_info=repr(error),
+                                 suggestion='Check your input values')
     found, error = add_game_to_player(session['username'], game_name)
     if not found:
         logger.error(f'Error adding game ({repr(game_name)}) to player ({repr(session["username"])}) : {error}')
