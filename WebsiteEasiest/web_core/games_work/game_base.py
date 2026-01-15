@@ -27,12 +27,14 @@ def game(game_name):
             'role': 'creator' if player_name == game_data['created_by'] else 'participant',
         })
 
+
     return render_template_abort_500('game.html',
                                      created_by=game_data['created_by'],
                                      game_name=game_name,
                                      players=players,
                                      is_game_started=game_data['status'] == 'started',
-                                     votes=game_data.get('votes', []))
+                                     votes=game_data.get('votes', []),
+                                     in_game= session['username'] in game_data['players'])
 
 
 def game_post(game_name):
