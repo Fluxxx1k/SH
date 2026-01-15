@@ -41,7 +41,7 @@ app.route('/lobby/leave', methods=['POST'])(abort_on_exception(lobbies.game_leav
 
 
 from WebsiteEasiest.web_core.games_work import game_creation
-app.route('/create_game')(abort_on_exception(game_creation.create_game_web))
+app.route('/create_game')(abort_on_exception(game_creation.create_game))
 app.route('/create_game', methods=['POST'])(abort_on_exception(game_creation.create_game_post))
 
 from WebsiteEasiest.web_core.games_work import game_base

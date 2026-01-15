@@ -1,14 +1,14 @@
 from flask import session, redirect, request, abort
 
 from WebsiteEasiest.Website_featetures.error_handler.safe_functions import safe_url_for, render_template_abort_500
-from WebsiteEasiest.data.database_py.games import create_game
+from WebsiteEasiest.data.database_py.games import create_game_db
 from WebsiteEasiest.data.database_py.players import add_game_to_player, get_data_of_player
 from WebsiteEasiest.logger import logger
 from WebsiteEasiest.settings.web_config import denied_literals
 from WebsiteEasiest.settings.website_settings import MIN_PLAYER_NUM, VOTE_ANONYMOUS, VETO_NUM_BLACK, ANARCHY_SKIP_NUM, \
     BLACK_WIN_NUM, RED_WIN_NUM
 from WebsiteEasiest.stardard_renders import render_error_page
-def create_game_web():
+def create_game():
     if 'username' not in session:
         return redirect(safe_url_for('login'))
     from WebsiteEasiest.settings.website_settings import (
@@ -124,7 +124,7 @@ def create_game_post():
                                  suggestion='Check your input values')
 
     # Save game
-    success, error = create_game(game_name, session['username'], data=game_data, password=game_password)
+    success, error = create_game_db(game_name, session['username'], password=game_password, data=game_data)
     if not success:
         logger.error(f'Error creating game ({repr(game_name)}) : {error}')
         return render_error_page(500,

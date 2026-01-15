@@ -69,7 +69,7 @@ def save_data_of_game(game_name: str, game_data: dict) -> bool:
         logger.error(repr(e))
     return False
 
-def create_game(game_name: str, creator: str, password: str=None, data: dict=None) -> tuple[bool, Optional[str]]:
+def create_game_db(game_name: str, creator: str, password: str=None, data: dict=None) -> tuple[bool, Optional[str]]:
     logger.debug(f"Creating game {repr(game_name)} with creator {repr(creator)} and password {repr(password)}")
     from WebsiteEasiest.settings.web_config import New_games_allowed
     if not New_games_allowed:

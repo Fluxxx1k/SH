@@ -37,7 +37,7 @@
 
                 <div class="lobby-actions">
                     <div class="action-buttons">
-                        <a href="{{ safe_url_for('create_game_web') }}" class="btn btn-primary">Создать игру</a>
+                        <a href="{{ safe_url_for('create_game') }}" class="btn btn-primary">Создать игру</a>
                     </div>
                     <form action="{{ safe_url_for('game_leave') }}" method="POST" style="display: inline;">
                         <button type="submit" class="btn btn-danger">Выйти</button>
