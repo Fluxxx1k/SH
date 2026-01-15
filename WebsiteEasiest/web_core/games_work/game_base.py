@@ -32,7 +32,7 @@ def game(game_name):
                                      created_by=game_data['created_by'],
                                      game_name=game_name,
                                      players=players,
-                                     is_game_started=game_data['status'] == 'started',
+                                     is_game_started=game_data['status'] == 'playing',
                                      votes=game_data.get('votes', []),
                                      in_game= session['username'] in game_data['players'])
 
@@ -111,3 +111,28 @@ def game_join(game_name):
         return {'success': True, 'message': 'Вы успешно присоединились к игре'}
 
     return {'success': False, 'message': 'Вы уже присоединились к этой игре'}
+
+
+
+
+
+def game_start(game_name):
+    if 'username' not in session:
+        abort(401, description="Необходимо войти в систему")
+    if game_name == '':
+        abort(404, description="Имя игры не может быть пустым")
+    game_found, game_data = get_data_of_game(game_name)
+    if not game_found:
+        abort(404, description=f"Игра {game_name} не найдена: {game_data}")
+    if game_data['status'] == 'playing':
+        return {'success': False, 'message': 'Игра уже начата'}
+    player_found, player_data = get_data_of_player(session['username'])
+    if not player_found:
+        abort(401, description=f"Игрок {session['username']} не найден: {player_data}")
+    if player_data.get('game') != game_name:
+        abort(403, description=f"Игрок {session['username']} не присоединился к игре {game_name}")
+    if game_data['created_by'] != session['username']:
+        abort(403, description=f"Игрок {session['username']} не является создателем игры {game_name}")
+    game_data['status'] = 'playing'
+    save_data_of_game(game_name, game_data)
+    return {'success': True, 'message': 'Игра успешно начата'}

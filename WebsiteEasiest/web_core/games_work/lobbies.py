@@ -6,7 +6,7 @@ from WebsiteEasiest.Website_featetures.error_handler.safe_functions import rende
 from WebsiteEasiest.Website_featetures.error_handler.safe_functions import safe_url_for as url_for
 from WebsiteEasiest.data.database_py.games import get_data_of_game, save_data_of_game, end_game
 from WebsiteEasiest.data.data_paths import path_games
-from WebsiteEasiest.data.database_py.players import save_data_of_player, get_data_of_player
+from WebsiteEasiest.data.database_py.players import save_data_of_player, get_data_of_player, add_game_to_player
 from WebsiteEasiest.logger import logger
 
 
@@ -23,17 +23,25 @@ def game_leave():
     game_found, game_data = get_data_of_game(game_name)
     if game_data.get('status', '') == 'playing':
         abort(403, description="Нельзя покинуть игру, пока она идет")
-    player_data['game'] = ''
-    save_data_of_player(session['username'], player_data)
-    if game_found and 'players' in game_data and session['username'] in game_data['players']:
-        game_data['players'].remove(session['username'])
-        game_data['current_players'] -= 1
-        if game_data['current_players'] == 0:
-            end_game(game_name)
-        save_data_of_game(game_name, game_data)
-        return {'success': True, 'message': 'Disconnected from game room'}
+
+    if game_found:
+        if game_data.get('created_by', '') == session['username']:
+            abort(403, description="Нельзя покинуть игру, если вы её создали")
+        if 'players' in game_data and session['username'] in game_data['players']:
+            game_data['players'].remove(session['username'])
+            game_data['current_players'] -= 1
+            if game_data['current_players'] == 0:
+                end_game(game_name)
+            save_data_of_game(game_name, game_data)
+            add_game_to_player(session['username'], '')
+            return {'success': True, 'message': 'Disconnected from game room'}
+        else:
+            logger.warning(f"Игрок {session['username']} пытался отключиться от игры {game_name}, но он не был присоединен к этой игре")
+            add_game_to_player(session['username'], '')
+            return {'success': True, 'message': 'Player not in game'}
     else:
-        logger.warning(f"Игрок {session['username']} пытался отключиться от игры {game_name}, но {'он не был присоединен к этой игре' if game_found else f'что-то пошло не так: {game_data}'}")
+        add_game_to_player(session['username'], '')
+        logger.warning(f"Игрок {session['username']} пытался отключиться от игры {game_name}, но что-то пошло не так: {game_data}")
         return {'success': True, 'message': 'Disconnected from game room, but it\'s don\'t exist'}
 
 
