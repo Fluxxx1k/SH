@@ -145,3 +145,14 @@ def save_ip(player_name: str, success:bool =None, creator: bool=False, spec:str=
             logger.error(f"Error logging player's ({repr(player_name)}) IP: {repr(e)} {repr(e2)}")
     else:
         logger.info(f"Saved player's ({repr(player_name)}) IP {repr(real_ip)}")
+
+
+def save_data_of_player(player_name: str, player_data: dict) -> tuple[bool, Optional[str]]:
+    try:
+        with open(os.path.join(path_players, player_name + '.json'), 'w+') as f:
+            json.dump(player_data, f, indent=4, ensure_ascii=False)
+    except Exception as e:
+        logger.error(f"Error saving player's ({repr(player_name)}) data: {repr(e)}")
+        return False, repr(e)
+    else:
+        return True, None

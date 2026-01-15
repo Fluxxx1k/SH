@@ -89,27 +89,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Socket.IO connection for real-time updates
-    const socket = io(`/game/${gameId}`);
-    
-    socket.on('connect', () => {
-        console.log('Connected to game room');
-    });
-    
-    socket.on('vote_update', (data) => {
-        const logTable = document.querySelector('.log-table');
-        const logEntry = document.createElement('div');
-        logEntry.className = 'log-entry';
-        
-        if (data.target) {
-            logEntry.textContent = `${data.voter} проголосовал за ${data.target}`;
-        } else {
-            logEntry.textContent = `${data.voter} проголосовал ${data.type}`;
-        }
-        
-        logTable.appendChild(logEntry);
-        logTable.scrollTop = logTable.scrollHeight;
-    });
+
     
     function updatePlayerList(players) {
         const playerList = document.querySelector('.players');

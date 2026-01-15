@@ -2,11 +2,11 @@ import os
 from datetime import datetime
 
 from flask import redirect, session, abort, request, jsonify
-from flask_socketio import emit
 
 from WebsiteEasiest.Website_featetures.error_handler.safe_functions import safe_url_for, render_template_abort_500
-from WebsiteEasiest.app_globs import socketio
 from WebsiteEasiest.data.database_py.games import get_data_of_game, save_data_of_game, exists_game
+from WebsiteEasiest.data.database_py.players import get_data_for_player, save_data_of_player
+from WebsiteEasiest.logger import logger
 
 from WebsiteEasiest.settings.website_settings import get_roles
 
@@ -72,72 +72,55 @@ def game_vote(game_name):
     }
     save_data_of_game(game_name, game_data)
 
-    # Broadcast vote to all clients
-    socketio.emit('vote_update', {
-        'voter': vote_data['voter'],
-        'type': vote_data['vote_type'],
-        'target': vote_data.get('target_player')
-    }, room=game_name)
+    return {'success': True, 'message': "Vote registered"}
 
-    return {'success': True}
-def game_ws(game_name):
+
+
+def game_join(game_name):
     if 'username' not in session:
         abort(401, description="Необходимо войти в систему")
     if game_name == '':
         abort(404, description="Имя игры не может быть пустым")
-    if not exists_game(game_name):
-        abort(404, description=f"Игра {game_name} не найдена")
-    @socketio.on('connect', namespace=f'/game/{game_name}')
-    def handle_connect():
-        emit('status', {'message': 'Connected to game room'})
-
-def game_start(game_name):
-    print(f'game_start ({game_name})  |  {"not logged in" if "username" not in session else session["username"]}')
-    if 'username' not in session:
-        return jsonify({'success': False, 'message': 'Not authenticated'}), 401
-    game = get_data_of_game(game_name)
-    if not game[0]:
-        return jsonify({'success': False, 'message': f'Game {game_name} not found: {game[1]}'}), 404
-    else:
-        game_data = game[1]
-    # Load game data
+    game_found, game_data = get_data_of_game(game_name)
+    if not game_found:
+        abort(404, description=f"Игра {game_name} не найдена: {game_data}")
     if game_data['status'] == 'started':
-        return jsonify({'success': False, 'message': 'Game already started'}), 400
-    if game_data['current_players'] < game_data['min_players']:
-        return jsonify({'success': False, 'message': 'Not enough players'}), 400
-    # Load game data
-    game_file = os.path.join('data', 'games', f'{game_name}.json')
-    if not os.path.exists(game_file):
-        return jsonify({'success': False, 'message': 'Game not found in server files'}), 404
+        abort(403, description=f"Игра {game_name} уже не начата")
+    player_found, player_data = get_data_for_player(session['username'])
+    if not player_found:
+        abort(404, description=f"Игрок {session['username']} не найден: {player_data}")
+    if player_data['game'] != game_name:
+        abort(403, description=f"Игрок {session['username']} уже присоединился к другой игре: {player_data['game']}")
+    # Add player to game data
+    if 'players' not in game_data:
+        game_data['players'] = []
+    if session['username'] not in game_data['players']:
+        game_data['players'].append(session['username'])
+        game_data['current_players'] += 1
+        save_data_of_game(game_name, game_data)
+        logger.info(f"Игрок {session['username']} присоединился к игре {game_name}")
+        return {'success': True, 'message': 'Connected to game room'}
+    else:
+        return {'success': False, 'message': 'You are already connected to this game room'}
 
+def game_leave():
+    if 'username' not in session:
+        abort(401, description="Необходимо войти в систему")
+    player_found, player_data = get_data_for_player(session['username'])
+    if not player_found:
+        abort(404, description=f"Игрок {session['username']} не найден: {player_data}")
+    # Remove player from game data
+    if 'game' not in player_data or player_data['game'] == '':
+        abort(403, description=f"Игрок {session['username']} не присоединился к какой-либо игре: {player_data['game']}")
+    game_name = player_data['game']
+    game_found, game_data = get_data_of_game(game_name)
+    player_data['game'] = ''
+    save_data_of_player(session['username'], player_data)
+    if game_found and 'players' in game_data and session['username'] in game_data['players']:
+        game_data['players'].remove(session['username'])
+        save_data_of_game(game_name, game_data)
+        return {'success': True, 'message': 'Disconnected from game room'}
+    else:
+        logger.warning(f"Игрок {session['username']} пытался отключиться от игры {game_name}, но {'он не был присоединен к этой игре' if game_found else f'что-то пошло не так: {game_data}'}")
+        return {'success': True, 'message': 'Disconnected from game room, but it\'s don\'t exist'}
 
-    # Check if user is the creator
-    if game_data['created_by'] != session['username']:
-        return jsonify({'success': False, 'message': 'Only game creator can start the game'}), 403
-
-    roles = get_roles(game_data['current_players'])
-    players = [WebPlayer(i, game_data['players'], roles[i]) for i in range(len(game_data['players']))]
-    from webplayers.web_game import WebGame
-    import threading
-    
-    def run_game():
-        game = WebGame(game_name, players)
-        WebGame.globs = GlobalStorage(game_name,
-                                    roles=roles[0],
-                                    players=players,
-                                    count_players=game_data['current_players'],
-                                    )
-        while game.take_move() != 0:
-            continue
-
-    # Start game in separate thread
-    game_thread = threading.Thread(target=run_game)
-    game_thread.daemon = True
-    game_thread.start()
-
-    # Update game status
-    game_data['status'] = 'started'
-    with open(game_file, 'w', encoding='utf-8') as f:
-        json.dump(game_data, f)
-
-    return jsonify({'success': True, 'message': 'Game started'})

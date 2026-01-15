@@ -1,12 +1,10 @@
 import os, time
 
 from flask import abort, session
-from flask_socketio import emit
-
 from WebsiteEasiest.data.database_py.games import count_games, exists_game
 from WebsiteEasiest.data.database_py.players import count_players
 from WebsiteEasiest.logger import logger
-from WebsiteEasiest.app_globs import app, socketio
+from WebsiteEasiest.app_globs import app
 from WebsiteEasiest.Website_featetures.error_handler.safe_functions import safe_url_for as url_for, render_template_abort_500 as render_template
 from WebsiteEasiest.Website_featetures.error_handler.render_error import abort_on_exception
 
@@ -51,7 +49,8 @@ from WebsiteEasiest.web_core.games_work import game_base
 app.route('/game/<game_name>')(abort_on_exception(game_base.game))
 app.route('/game/<game_name>', methods=['POST'])(abort_on_exception(game_base.game_post))
 app.route('/game/<game_name>/vote', methods=['POST'])(abort_on_exception(game_base.game_vote))
-app.route('/game/<game_name>/ws')(abort_on_exception(game_base.game_ws))
+app.route('/game/<game_name>/join', methods=['POST'])(abort_on_exception(game_base.game_join))
+
 app.route('/game/<game_name>/start', methods=['POST'])(abort_on_exception(game_base.game_start))
 
 from WebsiteEasiest.web_core.server_spec.shutdown import shutdown_server
