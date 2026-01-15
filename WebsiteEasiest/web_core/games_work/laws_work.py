@@ -4,11 +4,14 @@ from WebsiteEasiest.data.database_py.games import get_data_of_game, save_data_of
 from WebsiteEasiest.logger import logger
 
 
-def check_law(law: str, need_len: int = 3) -> bool:
+def check_law(law: str, need_len: int = 3, allowed_x: bool = True) -> bool:
+    allowed_literals = ['B', 'R']
+    if allowed_x:
+        allowed_literals.append('X')
     if len(law) != need_len:
         return False
     for char in law:
-        if char not in ['B', 'R', 'X']:
+        if char not in allowed_literals:
             return False
     return True
 
@@ -43,12 +46,13 @@ def laws_vote(game_name: str) -> dict:
                 else:
                     return {'success': False, 'message': 'Некорректный закон. Используйте только B, R, X длины 2'}
             elif game_data.get('ccp') is None:
-                if check_law(law, 1):
+                if check_law(law, 1, allowed_x=game_data.get('veto', False)):
                     game_data['ccp'] = law
+                    game_data['chancellor-lock'] = True
                     save_data_of_game(game_name, game_data)
                     return {'success': True, 'message': 'Канцлер принял закон'}
                 else:
-                    return {'success': False, 'message': 'Некорректный закон. Используйте только B, R, X длины 1'}
+                    return {'success': False, 'message': 'Некорректный закон. Используйте только B, R длины 1, если veto=False, иначе можно X'}
             else:
                 logger.warning(
                     f"Неизвестная ситуация с законом {law} в игре {game_name} с канцлером {session['username']}: {game_data}")
@@ -69,13 +73,13 @@ def laws_vote(game_name: str) -> dict:
             else:
                 return {'success': False, 'message': 'Некорректный закон. Используйте только B, R, X длины 3'}
         elif game_data.get('ccg') is None:
-            if check_law(law, 2):
+            if check_law(law, 2, allowed_x=False):
                 game_data['ccg'] = law
                 game_data['president-lock'] = True
                 save_data_of_game(game_name, game_data)
                 return {'success': True, 'message': 'Президент передал законы канцлеру'}
             else:
-                return {'success': False, 'message': 'Некорректный закон. Используйте только B, R, X длины 2'}
+                return {'success': False, 'message': 'Некорректный закон. Используйте только B, R длины 2'}
         else:
             game_data['cps'] = None
             game_data['ccg'] = None
