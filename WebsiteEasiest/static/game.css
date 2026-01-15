@@ -154,6 +154,28 @@ body {
     transform: scale(1.05);
 }
 
+.game-join {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+}
+
+.btn-join {
+    background-color: #2196F3;
+    color: white;
+    padding: 1rem 2rem;
+    font-size: 1.2rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.btn-join:hover {
+    background-color: #0b7dda;
+    transform: scale(1.05);
+}
+
 .player-list {
     grid-column: 2;
     grid-row: 2;

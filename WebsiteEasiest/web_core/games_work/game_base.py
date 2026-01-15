@@ -85,21 +85,27 @@ def game_join(game_name):
     if not game_found:
         abort(404, description=f"Игра {game_name} не найдена: {game_data}")
     if game_data['status'] == 'started':
-        abort(403, description=f"Игра {game_name} уже не начата")
+        return {'success': False, 'message': 'Игра уже начата'}
     player_found, player_data = get_data_of_player(session['username'])
     if not player_found:
-        abort(404, description=f"Игрок {session['username']} не найден: {player_data}")
-    if player_data['game'] != game_name:
-        abort(403, description=f"Игрок {session['username']} уже присоединился к другой игре: {player_data['game']}")
+        abort(401, description=f"Игрок {session['username']} не найден: {player_data}")
+    if player_data.get('game') == game_name:
+        return {'success': False, 'message': 'Вы уже присоединились к этой игре'}
+
     # Add player to game data
     if 'players' not in game_data:
         game_data['players'] = []
+
     if session['username'] not in game_data['players']:
         game_data['players'].append(session['username'])
         game_data['current_players'] += 1
+
+        # Update player data
+        player_data['game'] = game_name
+        save_data_of_player(session['username'], player_data)
+
         save_data_of_game(game_name, game_data)
         logger.info(f"Игрок {session['username']} присоединился к игре {game_name}")
-        return {'success': True, 'message': 'Connected to game room'}
-    else:
-        return {'success': False, 'message': 'You are already connected to this game room'}
+        return {'success': True, 'message': 'Вы успешно присоединились к игре'}
 
+    return {'success': False, 'message': 'Вы уже присоединились к этой игре'}

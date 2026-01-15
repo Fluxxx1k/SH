@@ -60,6 +60,12 @@
             <button id="startGameBtn" class="btn btn-start">Начать игру</button>
         </div>
     {% endif %}
+    
+    {% if not is_game_started %}
+        <div class="game-join">
+            <button id="joinGameBtn" class="btn btn-join">Присоединиться к игре</button>
+        </div>
+    {% endif %}
 
     <script>
         const gameId = '{{ game_name }}';

@@ -1,6 +1,27 @@
 document.addEventListener('DOMContentLoaded', function() {
     // Game initialization
     const startGameBtn = document.getElementById('startGameBtn');
+    const joinGameBtn = document.getElementById('joinGameBtn');
+    
+    if (joinGameBtn) {
+        joinGameBtn.addEventListener('click', function() {
+            if (confirm('Вы уверены, что хотите присоединиться к игре?')) {
+                fetch(`/game/${gameId}/join`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'}
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Вы успешно присоединились к игре!');
+                        location.reload();
+                    } else {
+                        alert('Ошибка: ' + data.message);
+                    }
+                });
+            }
+        });
+    }
     if (startGameBtn) {
         startGameBtn.addEventListener('click', function() {
             if (confirm('Вы уверены, что хотите начать игру?')) {
@@ -11,9 +32,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        alert('Игра начата!');
-                        updateVoteLog();
-                    } else {
+                alert('Игра начата!');
+                updateGameData();
+            } else {
                         alert('Ошибка: ' + data.message);
                     }
                 });
@@ -21,15 +42,22 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Update vote log from server
-    function updateVoteLog() {
+    // Update game data from server
+    function updateGameData() {
         fetch(`/game/${gameId}`)
             .then(response => response.json())
             .then(data => {
-                const logTable = document.querySelector('.log-table');
-                logTable.innerHTML = '';
-                
-                data.votes.forEach(vote => {
+                updateVoteLog(data.votes);
+                updatePlayerList(data.players);
+            });
+    }
+    
+    // Update vote log from server
+     function updateVoteLog(votes) {
+         const logTable = document.querySelector('.log-table');
+         logTable.innerHTML = '';
+         
+         votes.forEach(vote => {
                     const logEntry = document.createElement('div');
                     logEntry.className = 'log-entry';
                     
@@ -41,7 +69,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     
                     logTable.appendChild(logEntry);
                 });
-            });
     }
     
     // Unified vote handler
@@ -60,7 +87,7 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                updateVoteLog();
+                updateGameData();
                 const msg = targetPlayer 
                     ? `Вы проголосовали за ${targetPlayer}` 
                     : `Ваш голос "${type}" учтен`;
