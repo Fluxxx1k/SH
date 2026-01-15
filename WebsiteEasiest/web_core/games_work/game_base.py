@@ -1,18 +1,25 @@
 import os
 from datetime import datetime
 
-from flask import redirect, session, abort, request, jsonify
+from flask import redirect, session, abort, request
 
 from WebsiteEasiest.Website_featetures.error_handler.safe_functions import safe_url_for, render_template_abort_500
 from WebsiteEasiest.data.database_py.games import get_data_of_game, save_data_of_game, exists_game, end_game_db
 from WebsiteEasiest.data.database_py.players import get_data_of_player, save_data_of_player
 from WebsiteEasiest.logger import logger
 
-from WebsiteEasiest.settings.website_settings import get_roles
-
 def game(game_name):
     if 'username' not in session:
         return redirect(safe_url_for('login'))
+    # Load player data
+    player_found, player_data = get_data_of_player(session['username'])
+    if not player_found:
+
+        abort(401, description=f"Игрок {session['username']} не найден: {player_data}")
+    print('game_name', game_name)
+    print('player_data', player_data)
+    if game_name != player_data['game']:
+        return redirect(f'/game/{game_name}/password')
 
     # Load game data
     game_found, game_data = get_data_of_game(game_name)
@@ -153,3 +160,17 @@ def game_end(game_name):
     game_data['status'] = 'ended'
     end_game_db(game_name, game_data)
     return {'success': True, 'message': 'Игра успешно завершена'}
+
+
+def game_password(game_name):
+    if 'username' not in session:
+        abort(401, description="Необходимо войти в систему")
+    if game_name == '':
+        abort(404, description="Имя игры не может быть пустым")
+    game_found, game_data = get_data_of_game(game_name)
+    if not game_found:
+        abort(404, description=f"Игра {game_name} не найдена: {game_data}")
+    player_found, player_data = get_data_of_player(session['username'])
+    if not player_found:
+        abort(401, description=f"Игрок {session['username']} не найден: {player_data}")
+    return render_template_abort_500('game_password.html', game_name=game_name)
