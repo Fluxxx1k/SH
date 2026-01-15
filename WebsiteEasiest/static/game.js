@@ -1,4 +1,14 @@
 document.addEventListener('DOMContentLoaded', function() {
+    // Check if mobile device
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    
+    // Adjust log table height for mobile
+    if (isMobile) {
+        const logTable = document.querySelector('.log-table');
+        if (logTable) {
+            logTable.style.height = '40vh';
+        }
+    }
     // Game initialization
     const startGameBtn = document.getElementById('startGameBtn');
     const joinGameBtn = document.getElementById('joinGameBtn');
@@ -82,6 +92,13 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Update game data from server
     function updateGameData() {
+        // Scroll to top of action log on mobile after update
+        if (isMobile) {
+            const logTable = document.querySelector('.log-table');
+            if (logTable) {
+                logTable.scrollTop = 0;
+            }
+        }
         try {
             fetch(`/game/${gameId}`)
                 .then(response => response.json())

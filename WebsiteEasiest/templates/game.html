@@ -2,7 +2,8 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="mobile-web-app-capable" content="yes">
     <title>Игра {{ (game_name) }}</title>
     <link rel="stylesheet" href="{{ safe_url_for('static', filename='game.css') }}">
 </head>
@@ -16,13 +17,6 @@
     </header>
 
     <main class="game-container">
-        <section class="action-log">
-            <h2>Журнал действий</h2>
-            <div class="log-table">
-                {{ log_table | safe }}
-            </div>
-        </section>
-
         <section class="voting-section">
             <h2>Голосование</h2>
             <div class="vote-buttons">
@@ -52,6 +46,13 @@
                     </li>
                 {% endfor %}
             </ul>
+        </section>
+
+        <section class="action-log">
+            <h2>Журнал действий</h2>
+            <div class="log-table">
+                {{ log_table | safe }}
+            </div>
         </section>
     </main>
 
