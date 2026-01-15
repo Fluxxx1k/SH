@@ -32,8 +32,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    let accumulatedText = '';
-    
+
     if (colorSubmitBtn && colorInput) {
         colorSubmitBtn.addEventListener('click', () => {
             const inputText = colorInput.value.trim();
@@ -54,11 +53,29 @@ document.addEventListener('DOMContentLoaded', function() {
                     return;
                 }
             }
-            // Here you would normally send the accumulated data to server
-            alert(`Отправлено накопленное: ${inputText}`);
-            
-            // Clear input but keep accumulated text
-            colorInput.value = '';
+            // Send accumulated data to server
+            fetch(`/game/${gameId}/laws_vote`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    username: username,
+                    laws: inputText
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(`Отправлено накопленное: ${inputText}`);
+                    // Clear input but keep accumulated text
+                    colorInput.value = '';
+                } else {
+                    alert('Ошибка при отправке: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Ошибка сети при отправке ' + error);
+            });
         });
     }
     // Check if mobile device
