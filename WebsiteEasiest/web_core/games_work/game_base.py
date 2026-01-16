@@ -116,8 +116,10 @@ def game_join(game_name):
         return {'success': False, 'message': 'Вы уже присоединились к этой игре по данным игры'}
 
 
-
-
+def game_thread(game_name):
+    wg_response = 0
+    while wg_response == 0:
+        wg_response = (game_name)
 
 def game_start(game_name):
     if 'username' not in session:
@@ -138,6 +140,7 @@ def game_start(game_name):
         abort(403, description=f"Игрок {session['username']} не является создателем игры {game_name}")
     game_data['status'] = 'playing'
     save_data_of_game(game_name, game_data)
+
     return {'success': True, 'message': 'Игра успешно начата'}
 
 def game_end(game_name):

@@ -1,20 +1,16 @@
 import os
 import json
 from datetime import datetime
-from typing import Iterable, Literal
 
-from flask import Flask, request, redirect, session, jsonify
+from flask import request, redirect, session, jsonify
 
 import user_settings
-from WebsiteEasiest.data.database_py.games import count_games, get_data_of_game
-from WebsiteEasiest.data.database_py.players import count_players
-from WebsiteEasiest.webplayers.web_game import WebPlayer
+from WebsiteEasiest.data.database_py.games import get_data_of_game
+from WebsiteEasiest.old.webplayers.web_game import WebPlayer
 from Website_featetures.error_handler.safe_functions import *
 from Website_featetures.error_handler.undefined import SilentUndefined
 from WebsiteEasiest.data.database_work import exists_player, create_player, login_player
 from core.globalstorage import GlobalStorage
-from core.players.abstract_player import AbstractPlayer
-from cli.colors import RED_TEXT_BRIGHT, GREEN_TEXT_BRIGHT, RESET_TEXT, YELLOW_TEXT, YELLOW_TEXT_BRIGHT, GREEN_TEXT
 from app_globs import app
 
 
@@ -76,7 +72,7 @@ def game_start(game_name):
     if games_dict[game_name]['current_players'] < games_dict[game_name]['min_players']:
         return jsonify({'success': False, 'message': 'Not enough players'}), 400
     # Load game data
-    game_file = os.path.join('data', 'games', f'{game_name}.json')
+    game_file = os.path.join('../data', 'games', f'{game_name}.json')
     if not os.path.exists(game_file):
         return jsonify({'success': False, 'message': 'Game not found in server files'}), 404
     

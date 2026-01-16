@@ -199,20 +199,7 @@ class WebPlayer(AbstractPlayer):
         self._vote = None
         self._action = None
         
-    def has_voted(self) -> bool:
-        """Check if player has submitted a vote"""
-        return self._vote is not None
-        
-    def get_vote(self) -> Literal[-1, 0, 1]:
-        """Get and clear player's vote (1=YES, -1=NO, 0=PASS)"""
-        vote = self._vote
-        self._vote = None
-        return vote
-        
-    def set_vote(self, vote: Literal[-1, 0, 1]):
-        """Set player's vote from web interface"""
-        self._vote = vote
-        
+
     def has_action(self) -> bool:
         """Check if player has submitted an action"""
         return self._action is not None

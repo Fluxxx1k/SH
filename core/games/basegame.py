@@ -4,6 +4,7 @@ import datetime
 from typing import Literal
 
 import user_settings
+from WebsiteEasiest.logger import logger
 from core.players.abstract_player import AbstractPlayer
 from core.logs.HTML_colors import purple_c, pr_c
 from core.logs.HTML_logs import color_of_HTML_roles
@@ -103,7 +104,7 @@ class BaseGame(AbstractGame):
                     self.globs.PLAYERS[self.cnc.num].degov()
                 return -1
         else:
-            print(f"WTH?!!!! {ccp} isn't 'B' or 'R'")
+            logger.critical(f"WTH?!!!! {ccp} isn't 'B' or 'R'")
         return 0
     def take_move(self) -> Literal[-1, 0, 1]:
         if self.is_end():
@@ -201,7 +202,7 @@ class BaseGame(AbstractGame):
 
     def stop_game(self):
         import pickle
-        pickle.dump(self, open(f"{self.name}{self.id}.pickle", "wb"))
+        pickle.dump(self, open(f"{self.name}{self.id}.pickle", "wb+"))
 
     def voting(self):
         return sum([player.vote_for_pair(self.prs, self.cnc) for player in self.players])
