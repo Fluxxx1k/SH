@@ -333,3 +333,28 @@ body {
     color: #aaa;
     font-style: italic;
 }
+
+
+
+/* Log Refresh Button */
+.btn-refresh {
+    background: linear-gradient(45deg, #4169E1, #1E90FF);
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+}
+
+.btn-refresh:hover {
+    background: linear-gradient(45deg, #1E90FF, #4169E1);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(65, 105, 225, 0.4);
+}
+
