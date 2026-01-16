@@ -144,5 +144,5 @@ def create_game_post():
                                  error_comment='This may mean that the player is already in another game.',
                                  debug_info=repr(error),
                                  suggestion='Contact the administrator.')
-
+    player_data['game_access'] = player_data.get('game_access', []) + [game_name]
     return redirect(safe_url_for('lobby'))

@@ -18,7 +18,7 @@ def game(game_name):
     game_found, game_data = get_data_of_game(game_name)
     if not game_found:
         abort(404, description=f"Игра {game_name} не найдена: {game_data}")
-    if game_name not in player_data.get('game_access', []) and game_data.get('password'):
+    if game_name not in player_data.get('game_access', []) and game_data.get('password') and game_data.get('created_by') != session['username']:
         return redirect(f'/game/{game_name}/password')
 
     # Get players list
