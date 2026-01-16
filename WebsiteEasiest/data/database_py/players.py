@@ -169,17 +169,35 @@ def save_data_of_player(player_name: str, player_data: dict) -> tuple[bool, Opti
         return True, None
 
 def add_game_to_player(player_name: str, game_name: str):
-    logger.debug(f"Adding game ({repr(game_name)}) to player ({repr(player_name)})")
-    try:
-        found_player, player_data = get_data_of_player(player_name)
-        if not found_player:
-            return False, f"Player {repr(player_name)} not found"
-        if player_data.get('game', '') != '' and game_name != '':
-            return False, f"Player {repr(player_name)} already in game {repr(player_data.get('game', ''))}"
-        if game_name != player_data.get('game'):
-            player_data['game'] = game_name
-    except Exception as e:
-        logger.error(f"Error adding game ({repr(game_name)}) to player ({repr(player_name)}): {repr(e)}")
-        return False, e.__class__.__name__
+    if game_name != '' and game_name is not None:
+        logger.debug(f"Adding game ({repr(game_name)}) to player ({repr(player_name)})")
+
+        try:
+            found_player, player_data = get_data_of_player(player_name)
+            if not found_player:
+                return False, f"Player {repr(player_name)} not found"
+            if player_data.get('game', '') != '' and game_name != '':
+                return False, f"Player {repr(player_name)} already in game {repr(player_data.get('game', ''))}"
+            if game_name != player_data.get('game'):
+                player_data['game'] = game_name
+                player_data['game_access'] = player_data.get('game_access', []) + [game_name]
+        except Exception as e:
+            logger.error(f"Error adding game ({repr(game_name)}) to player ({repr(player_name)}): {repr(e)}")
+            return False, e.__class__.__name__
+        else:
+            return True, None
     else:
-        return True, None
+        logger.debug(f"Removing game from player {player_name}")
+        try:
+            found_player, player_data = get_data_of_player(player_name)
+            if not found_player:
+                return False, f"Player {repr(player_name)} not found"
+            try:
+                player_data['game_access'].remove(player_data['game'])
+            except Exception as e:
+                logger.warning(f'Error in removing game ({repr(game_name)}) from game access list ({player_data.get("game_access")}) for player ({player_name}): {repr(e)}')
+            player_data['game'] = ''
+            return True, None
+        except Exception as e:
+            logger.error("Can't remove game from player")
+            return False, e.__class__.__name__

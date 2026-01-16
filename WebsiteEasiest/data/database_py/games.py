@@ -107,12 +107,11 @@ def create_game_db(game_name: str, creator: str, password: str=None, data: dict=
 def end_game_db(game_name: str, game_data: dict = None) -> tuple[bool, Optional[str]]:
     logger.debug(f"Ending game {repr(game_name)} with data {game_data}")
     try:
-        if game_data is not None:
-            save_data_of_game(game_name, game_data)
-        else:
+        if game_data is None:
             game_found, game_data = get_data_of_game(game_name)
             if not game_found:
                 return False, game_data
+        save_data_of_game(game_name, game_data)
         players = game_data.get('players')
         if players is None:
             logger.warning(f'Game {repr(game_name)} has no players')

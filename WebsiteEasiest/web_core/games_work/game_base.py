@@ -1,4 +1,3 @@
-import pprint
 from datetime import datetime
 
 from flask import redirect, session, abort, request
@@ -174,6 +173,8 @@ def game_password(game_name):
     player_found, player_data = get_data_of_player(session['username'])
     if not player_found:
         abort(401, description=f"Игрок {session['username']} не найден: {player_data}")
+    if game_data['created_by'] == session['username']:
+        return redirect(safe_url_for('game', game_name=game_name))
     return render_template_abort_500('game_password.html', game_name=game_name)
 
 
