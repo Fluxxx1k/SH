@@ -1,7 +1,10 @@
+from flask import session, abort
+
 from WebsiteEasiest.data.database_py.games import count_games, exists_game, save_data_of_game
 from WebsiteEasiest.data.database_py.players import count_players
 from WebsiteEasiest.app_globs import app
-from WebsiteEasiest.Website_featetures.error_handler.safe_functions import safe_url_for as url_for, render_template_abort_500 as render_template
+from WebsiteEasiest.Website_featetures.error_handler.safe_functions import safe_url_for as url_for, \
+    render_template_abort_500 as render_template, render_template_abort_500
 from WebsiteEasiest.Website_featetures.error_handler.render_error import abort_on_exception
 
 
@@ -55,6 +58,15 @@ app.route('/game/<game_name>/verify_password', methods=['POST'])(abort_on_except
 app.route('/game/<game_name>/end', methods=['POST'])(abort_on_exception(game_base.game_end))
 app.route('/game/<game_name>/logs', methods=['GET'])(abort_on_exception(game_base.get_game_logs))
 
+@app.route('/clear_cache')
+def clear_cache():
+    if 'username' not in session:
+        abort(401)
+    from WebsiteEasiest.data.database_py.players import players_data_dict
+    from WebsiteEasiest.data.database_py.games import games_data_dict
+    players_data_dict.clear()
+    games_data_dict.clear()
+    return 'Cleared cache'
 
 from WebsiteEasiest.web_core.games_work import laws_work
 app.route('/game/<game_name>/laws_vote', methods=['POST'])(abort_on_exception(laws_work.laws_vote))

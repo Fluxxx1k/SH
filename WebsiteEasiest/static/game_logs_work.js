@@ -19,6 +19,7 @@ function coloring(text) {
 
 
 function processLogs(logData) {
+    if (logData.action) alert(logData.action);
     console.log(logData)
     if(!logData.success) {
         alert(logData.message);
@@ -104,6 +105,7 @@ function processLogs(logData) {
     });
     
     logTable.appendChild(table);
+
 }
 
 // Add event listener for refresh button

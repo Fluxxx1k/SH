@@ -237,8 +237,9 @@ def get_game_logs(game_name):
                 ]
     x = {
         'success': True,
-        'logs': game_data.get('logs', predata)[count:]
+        'logs': game_data.get('logs', predata)[count:],
+        'action': game_data.get('action', "Unknown action"),
         }
     if x['logs'] == []:
-        return {'success': False, 'message': "No new logs"}
+        return {'success': False, 'message': "No new logs", "action":x['action']}
     return x
