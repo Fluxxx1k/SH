@@ -9,6 +9,9 @@ from WebsiteEasiest.logger import logger
 from WebsiteEasiest.settings.web_config import denied_literals
 from WebsiteEasiest.data.data_paths import path_players, path_IP
 
+
+players_data_dict: dict[str, dict] = {}
+
 def exists_player(name: str, default_on_error: bool = True) -> bool:
     logger.debug(f"Checking if player {repr(name)} exists")
     try:
@@ -40,6 +43,10 @@ def create_player(player_name: str, player_password: str) -> tuple[bool, Optiona
         if exists_player(player_name):
             return False, repr(FileExistsError(f'Player "{player_name}" already exists'))
         else:
+            players_data_dict[player_name] = {'player_name': player_name,
+                           'player_password': player_password,
+                           'game': ''
+                           }
             with open(os.path.join(path_players, player_name + '.json'), 'w+') as f:
                 json.dump({'player_name': player_name,
                            'player_password': player_password,
@@ -52,10 +59,14 @@ def create_player(player_name: str, player_password: str) -> tuple[bool, Optiona
         return False, repr(e)
 
 def get_data_of_player(player_name) -> tuple[bool, dict | str]:
-    logger.debug(f"Getting data for player {repr(player_name)}")
+    if player_name in players_data_dict:
+        logger.debug(f"Getting data for player {repr(player_name)} from cache")
+        return True, players_data_dict[player_name]
     try:
+        logger.debug(f"Getting data for player {repr(player_name)} from file")
         if exists_player(player_name):
-            return True, json.load(open(os.path.join(path_players, player_name + '.json'), encoding='utf-8'))
+            players_data_dict[player_name] = json.load(open(os.path.join(path_players, player_name + '.json'), encoding='utf-8'))
+            return True, players_data_dict[player_name]
         else:
             return False, repr(FileNotFoundError(f'Player "{player_name}" not found'))
     except Exception as e:
@@ -86,7 +97,7 @@ def login_player(player_name: str, player_password: str) -> tuple[bool, Optional
             data = get_data_of_player(player_name)
             if data[0]:
                 if data[1]['player_password'] == player_password:
-                    save_ip(player_name)
+                    save_ip(player_name, success=True)
                     return True, None
                 else:
                     save_ip(player_name, success=False)

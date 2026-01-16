@@ -8,6 +8,9 @@ from WebsiteEasiest.data.data_paths import path_games, path_existed_games
 from WebsiteEasiest.logger import logger
 
 
+games_data_dict: dict[str, dict] = {}
+
+
 def count_games(active: bool = True, default_on_error: int = 0) -> int:
     logger.debug(f"Counting games {'active' if active else 'existed'}")
     try:
@@ -45,10 +48,14 @@ def deep_check_exists_game(game_name: str, default_on_error: bool = True) -> boo
 
 
 def get_data_of_game(game_name: str) -> tuple[bool, dict | str]:
-    logger.debug(f"Getting data of game {repr(game_name)}")
+    if game_name in games_data_dict:
+        logger.debug(f"Getting data of game {repr(game_name)} from cache")
+        return True, games_data_dict[game_name]
     try:
+        logger.debug(f"Getting data of game {repr(game_name)} from file")
         if exists_game(game_name):
-            return True, json.load(open(os.path.join(path_games, game_name + '.json'), encoding='utf-8'))
+            games_data_dict[game_name] = json.load(open(os.path.join(path_games, game_name + '.json'), encoding='utf-8'))
+            return True, games_data_dict[game_name]
         else:
             return False, repr(FileNotFoundError(f'Game "{game_name}" not found'))
     except Exception as e:
@@ -102,6 +109,7 @@ def end_game_db(game_name: str, game_data: dict = None) -> tuple[bool, Optional[
         if game_data is not None:
             save_data_of_game(game_name, game_data)
         os.replace(os.path.join(path_games, game_name + '.json'), os.path.join(path_existed_games, game_name + '.json'))
+        games_data_dict.pop(game_name, None)
         return True, None
     except FileExistsError as e:
         return False, f'Game "{game_name}" already existed, data will be lost: {repr(e)}'
