@@ -1,3 +1,4 @@
+import pprint
 from datetime import datetime
 
 from flask import redirect, session, abort, request
@@ -206,14 +207,36 @@ def game_verify_password(game_name):
 
 
 def get_game_logs(game_name):
-        if 'username' not in session:
-            abort(401, description="Необходимо войти в систему")
-        if game_name == '':
-            abort(404, description="Имя игры не может быть пустым")
-        game_found, game_data = get_data_of_game(game_name)
-        if not game_found:
-            abort(404, description=f"Игра {game_name} не найдена: {game_data}")
-        player_found, player_data = get_data_of_player(session['username'])
-        if not player_found:
-            abort(401, description=f"Игрок {session['username']} не найден: {player_data}")
-        return {'success': True, 'logs': game_data.get('logs', [{'cps': 'CPS', 'ccs': 'CCS', 'ccp': 'CCP', 'cpsa': "CPSA", 'prs': 'PRS', 'cnc': "CNC", 'special': 'No logs'}])}
+    count = request.args.get('count', default=0, type=int)
+    if count < 0:
+        logger.warning(f"Count is below zero: {count}, replacing with 0")
+        count = 0
+    logger.debug(f'User {repr(session.get("username"))} requests logs of game {repr(game_name)} with count {repr(count)}')
+    if 'username' not in session:
+        abort(401, description="Необходимо войти в систему")
+    if game_name == '':
+        abort(404, description="Имя игры не может быть пустым")
+    game_found, game_data = get_data_of_game(game_name)
+    if not game_found:
+        abort(404, description=f"Игра {game_name} не найдена: {game_data}")
+    player_found, player_data = get_data_of_player(session['username'])
+    if not player_found:
+        abort(401, description=f"Игрок {session['username']} не найден: {player_data}")
+    if not isinstance(count, int):
+        return {'success': False, 'message': f"Count must be an integer, not {type(count)}"}, 400
+    predata = [ #{'cps': 'CPS',
+                # 'ccs': 'CCS',
+                # 'ccp': 'CCP',
+                # 'cpsa': "CPSA",
+                # 'prs': 'PRS',
+                # 'cnc': "CNC",
+                # 'special': 'No logs'}
+                # for _ in range(10)
+                ]
+    x = {
+        'success': True,
+        'logs': game_data.get('logs', predata)[count:]
+        }
+    if x['logs'] == []:
+        return {'success': False, 'message': "No new logs"}
+    return x

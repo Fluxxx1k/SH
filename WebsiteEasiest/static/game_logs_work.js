@@ -21,24 +21,32 @@ function coloring(text) {
 function processLogs(logData) {
     console.log(logData)
     if(!logData.success) {
-        alert(logData.message)
+        alert(logData.message);
+        return;
     }
     logData = logData.logs;
     const logTable = document.querySelector('.log-table');
-    logTable.innerHTML = '';
-    
-    const table = document.createElement('table');
-    table.className = 'log-table-content';
-    
-    // Create table header
-    const headerRow = document.createElement('tr');
-    ['President', 'Chancellor', 'CPS', 'CCS', "CCP", "CPSA", 'SPECIAL'].forEach(text => {
-        const th = document.createElement('th');
-        th.textContent = text;
-        headerRow.appendChild(th);
-    });
-    table.appendChild(headerRow);
-    
+    console.log(logTable);
+    const table1 = document.querySelector('.log-table-content');
+    let table;
+    if (!table1) {
+        const newTable = document.createElement('table');
+        newTable.className = 'log-table-content';
+        table = newTable;
+    } else {
+        table = table1;
+    }
+
+    if (document.querySelectorAll('.log-table-content tr').length - 1 < 1) {
+        // Create table header
+        const headerRow = document.createElement('tr');
+        ['President', 'Chancellor', 'CPS', 'CCS', "CCP", "CPSA", 'SPECIAL'].forEach(text => {
+            const th = document.createElement('th');
+            th.textContent = text;
+            headerRow.appendChild(th);
+        });
+        table.appendChild(headerRow);
+    }
     // Process each log entry
     logData.forEach(log => {
         const row = document.createElement('tr');
@@ -100,7 +108,9 @@ function processLogs(logData) {
 
 // Add event listener for refresh button
 document.getElementById('refreshLogsBtn')?.addEventListener('click', () => {
-    fetch(`/game/${gameId}/logs`)
+    let len = document.querySelectorAll('.log-table-content tr').length
+    if (len > 0) {len -= 1}
+    fetch(`/game/${gameId}/logs?count=${len}`)
         .then(response => response.json())
         .then(data => processLogs(data))
         .catch(error => console.error('Error fetching logs:', error));
