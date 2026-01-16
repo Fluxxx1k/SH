@@ -3,6 +3,7 @@ from __future__ import annotations
 import os, json
 from typing import Optional
 
+from WebsiteEasiest.data.database_py.players import add_game_to_player
 from WebsiteEasiest.memory_checker import memory_info
 from WebsiteEasiest.data.data_paths import path_games, path_existed_games
 from WebsiteEasiest.logger import logger
@@ -108,6 +109,18 @@ def end_game_db(game_name: str, game_data: dict = None) -> tuple[bool, Optional[
     try:
         if game_data is not None:
             save_data_of_game(game_name, game_data)
+        else:
+            game_found, game_data = get_data_of_game(game_name)
+            if not game_found:
+                return False, game_data
+        players = game_data.get('players')
+        if players is None:
+            logger.warning(f'Game {repr(game_name)} has no players')
+        else:
+            for player in players:
+                success, info = add_game_to_player(player, '')
+                if not success:
+                    logger.warning(f'Error removing game from player {repr(player)}: {info}')
         os.replace(os.path.join(path_games, game_name + '.json'), os.path.join(path_existed_games, game_name + '.json'))
         games_data_dict.pop(game_name, None)
         return True, None
