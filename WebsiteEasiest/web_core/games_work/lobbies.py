@@ -22,7 +22,9 @@ def game_leave():
     game_name = player_data['game']
     game_found, game_data = get_data_of_game(game_name)
     if not game_found:
-        add_game_to_player(session['username'], '')
+        success, info = add_game_to_player(session['username'], '')
+        if not success:
+            return {'success': False, 'message': info}
         logger.warning(f"Игрок {session['username']} пытался отключиться от игры {game_name}, но что-то пошло не так: {game_data}")
         return {'success': True, 'message': 'Disconnected from game room, but it\'s don\'t exist'}
     if game_data.get('status', '') == 'playing':
@@ -36,11 +38,15 @@ def game_leave():
         if game_data['current_players'] == 0:
             end_game_db(game_name)
         save_data_of_game(game_name, game_data)
-        add_game_to_player(session['username'], '')
+        success, info = add_game_to_player(session['username'], '')
+        if not success:
+            return {'success': False, 'message': info}
         return {'success': True, 'message': 'Disconnected from game room'}
     else:
         logger.warning(f"Игрок {session['username']} пытался отключиться от игры {game_name}, но он не был присоединен к этой игре")
-        add_game_to_player(session['username'], '')
+        success, info = add_game_to_player(session['username'], '')
+        if not success:
+            return {'success': False, 'message': info}
         return {'success': True, 'message': 'Player not in game'}
 
 
