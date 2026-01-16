@@ -133,6 +133,7 @@ def game_start(game_name):
     if game_data['status'] == 'playing':
         return {'success': False, 'message': 'Игра уже начата'}
     player_found, player_data = get_data_of_player(session['username'])
+    print(player_data)
     if not player_found:
         abort(401, description=f"Игрок {session['username']} не найден: {player_data}")
     if player_data.get('game') != game_name:
