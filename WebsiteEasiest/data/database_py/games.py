@@ -121,8 +121,10 @@ def end_game_db(game_name: str, game_data: dict = None, delete: bool = False) ->
                 if not success:
                     logger.warning(f'Error removing game from player {repr(player)}: {info}')
         if not delete:
+            logger.info(f"Ending game {game_name}: {game_data}")
             os.replace(os.path.join(path_games, game_name + '.json'), os.path.join(path_existed_games, game_name + '.json'))
         else:
+            logger.warning(f"Deleting game {game_name}: {game_data}")
             os.remove(os.path.join(path_games, game_name + '.json'))
         games_data_dict.pop(game_name, None)
         return True, None
