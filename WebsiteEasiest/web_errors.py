@@ -132,7 +132,7 @@ def too_many_requests_error(error):
     return render_error_page(
         error_code=429,
         error_message="Слишком много запросов",
-        error_description="Вы превысили допустимое количество запросов в заданный период времени.",
+        error_description=error.description or "Вы превысили допустимое количество запросов в заданный период времени.",
         error_comment="Пожалуйста, повторите попытку позже.",
         suggestion="Попробуйте повторить запрос позже или обратитесь к администратору для увеличения лимита запросов."
     ), 429

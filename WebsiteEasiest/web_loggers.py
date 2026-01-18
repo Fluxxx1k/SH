@@ -10,15 +10,17 @@ from cli.colors import (YELLOW_TEXT_BRIGHT,
 
 from bisect import bisect_right
 from time import time
+from WebsiteEasiest.data.data_paths import path_banned
+
 ips_frequency: dict[str, list[float]] = {}
 count_stops: dict[str, float] = {}
 ban_stops_count = 3
 forgot_about_responses_sec = 60
-max_response_times_ban = 60
-max_response_times_temp_stop = 40
+max_response_times_ban = 100
+max_response_times_temp_stop = 75
 temp_stop_sec = 30
-
-bans:set[str] = set()
+import json
+bans = set(json.load(open(path_banned, 'r', encoding='utf-8')).get("B", set()))
 stops: dict[str, float] = {}
 
 
@@ -55,7 +57,7 @@ def log_request():
             ips_frequency[real_ip] += [time_now]
             index = bisect_right(ips_frequency[real_ip], time_now - forgot_about_responses_sec)
             ips_frequency[real_ip] = ips_frequency[real_ip][index:]
-        if len(ips_frequency[real_ip]) > max_response_times_ban or count_stops[real_ip] >= ban_stops_count:
+        if len(ips_frequency[real_ip]) > max_response_times_ban or count_stops.get(real_ip, 0) >= ban_stops_count:
             bans.add(real_ip)
             logger.debug(f"[{real_ip} -> {request.path}] ({request.method}) Banned now")
             print(f"[{real_ip} -> {request.path}] ({RED_TEXT_BRIGHT}{request.method}{RESET_TEXT}) {RED_TEXT_BRIGHT}Banned now{RESET_TEXT}")
