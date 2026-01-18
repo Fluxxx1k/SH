@@ -2,7 +2,7 @@ import os
 import time
 
 from WebsiteEasiest.logger import logger
-from WebsiteEasiest.web_core.server_spec.shutdown import shutdown_server
+from WebsiteEasiest.web_core.server_spec.shutdown import shutdown, shutdown_force
 
 memory_info = 0
 
@@ -28,15 +28,7 @@ def mem_check():
         if memory_info > 536870912: # 1 << 29
             if memory_info > 1342177280: # (1 << 30) * 1.25
                 logger.critical(f"Memory usage exceeded 1.25 GB ({(memory_info >> 10) / 1024:.2f} MB)")
-                try:
-                    shutdown_server()
-                    time.sleep(30)
-                except BaseException as E:
-                    logger.critical(f"Shutdown server failed with {(memory_info >> 10) / 1024: .2f} MB: {repr(E)}")
-                else:
-                    logger.critical(f"Shutdown server failed with {(memory_info >> 10) / 1024: .2f} MB with no response, hard kill!")
-                finally:
-                    os._exit(1)
+                shutdown_force(30)
             elif memory_info > 1073741824: # 1 << 30
                 logger.error(f"Memory usage exceeded 1 GB ({(memory_info >> 10) / 1024:.2f} MB)")
             else:
@@ -44,12 +36,4 @@ def mem_check():
             from WebsiteEasiest.settings import web_config
             web_config.New_games_allowed = False
         time.sleep(600)
-    try:
-        shutdown_server()
-        time.sleep(30)
-    except BaseException as E:
-        logger.critical(f"Shutdown server failed with {(memory_info >> 10) / 1024: .2f} MB: {repr(E)}")
-    else:
-        logger.critical(f"Shutdown server failed with {(memory_info >> 10) / 1024: .2f} MB with no response, hard kill!")
-    finally:
-        os._exit(1)
+    shutdown_force(30)

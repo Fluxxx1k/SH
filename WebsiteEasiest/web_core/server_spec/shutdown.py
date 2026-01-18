@@ -1,25 +1,36 @@
-from flask import request
-
+from WebsiteEasiest.data.data_paths import path_banned
+from WebsiteEasiest.data.database_py.games import games_data_dict, save_data_of_game
+from WebsiteEasiest.data.database_py.players import players_data_dict, save_data_of_player
 from WebsiteEasiest.logger import logger
-from WebsiteEasiest.settings.web_config import SHUTDOWN_SERVER_TOKEN
+import json, atexit, os, time, threading
 
-
+@atexit.register
 def shutdown():
-    """
-    Shutdown the server by POST request
-    """
-    logger.warning("Shutdown server requested by POST")
-    real_ip = request.headers.get('X-Forwarded-For', request.remote_addr)
-    if real_ip not in ('127.0.0.1', '::1'):
-        return "Access denied", 403
-    if request.headers.get('X-Shutdown-Token') != SHUTDOWN_SERVER_TOKEN:
-        return "Invalid token", 403
-    shutdown_server()
-    return "Shutting down...", 200
+    logger.warning("Shutting down the server")
+    for i in games_data_dict:
+        save_data_of_game(i, games_data_dict[i])
+    for i in players_data_dict:
+        save_data_of_player(i, players_data_dict)
+    try:
+        from WebsiteEasiest.web_loggers import bans
+        with open(path_banned, "w+", encoding='utf-8') as f:
+            json.dump(f, bans)
+    except NameError as e:
+        logger.error(f"Could not save bans: {repr(e)}")
+    except Exception as e:
+        try:
+            logger.critical(f"Could not save bans: {repr(e)} | {bans}")
+        except Exception as e2:
+            logger.critical(f"Could not save bans: {repr(e)}, {repr(e2)}")
 
-def shutdown_server():
-    logger.info("Shutting down server...")
-    func = request.environ.get('werkzeug.server.shutdown')
-    if func is None:
-        raise RuntimeError('Not running with the Werkzeug Server')
-    func()
+
+def shutdown_force(timeout=30, memory_info:int =None):
+    try:
+        threading.Thread(target=shutdown, daemon=True).start()
+        time.sleep(timeout)
+    except BaseException as E:
+        logger.critical(f"Shutdown server failed with {f'{(memory_info >> 10) / 1024: .2f} MB' if memory_info else 'No memory info'}: {repr(E)}")
+    else:
+        logger.critical(f"Shutdown server failed with {f'{(memory_info >> 10) / 1024: .2f} MB' if memory_info else 'No memory info'} with no response, hard kill!")
+    finally:
+        os._exit(1)
