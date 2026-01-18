@@ -6,7 +6,7 @@ from cli.colors import (YELLOW_TEXT_BRIGHT,
                         GREEN_TEXT_BRIGHT,
                         RED_TEXT_BRIGHT,
                         GREEN_TEXT,
-                        YELLOW_TEXT)
+                        YELLOW_TEXT, RED_TEXT)
 
 from bisect import bisect_right
 from time import time
@@ -85,7 +85,12 @@ def log_response(response):
             else:
                 color = YELLOW_TEXT
         case 4 | 5:
-            color = RED_TEXT_BRIGHT
+            if response.status_code == 429:
+                color = YELLOW_TEXT_BRIGHT
+            elif response.status_code == 404:
+                color = RED_TEXT
+            else:
+                color = RED_TEXT_BRIGHT
         case _:
             color = YELLOW_TEXT_BRIGHT
     real_ip = request.headers.get('X-Forwarded-For', request.remote_addr)

@@ -144,7 +144,8 @@ def game_start(game_name):
 
     return {'success': True, 'message': 'Игра успешно начата'}
 
-def game_end(game_name):
+
+def game_end(game_name, delete:bool = False):
     if 'username' not in session:
         abort(401, description="Необходимо войти в систему")
     if game_name == '':
@@ -158,9 +159,11 @@ def game_end(game_name):
     if game_data['created_by'] != session['username']:
         abort(403, description=f"Игрок {session['username']} не является создателем игры {game_name}")
     game_data['status'] = 'ended'
-    end_game_db(game_name, game_data)
+    end_game_db(game_name, game_data, delete=delete)
     return {'success': True, 'message': 'Игра успешно завершена'}
 
+def game_delete(game_name, delete: bool = True):
+    return game_end(game_name, delete)
 
 def game_password(game_name):
     if 'username' not in session:

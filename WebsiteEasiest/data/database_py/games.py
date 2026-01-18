@@ -104,7 +104,7 @@ def create_game_db(game_name: str, creator: str, password: str=None, data: dict=
 
 
 
-def end_game_db(game_name: str, game_data: dict = None) -> tuple[bool, Optional[str]]:
+def end_game_db(game_name: str, game_data: dict = None, delete: bool = False) -> tuple[bool, Optional[str]]:
     logger.debug(f"Ending game {repr(game_name)} with data {game_data}")
     try:
         if game_data is None:
@@ -120,7 +120,10 @@ def end_game_db(game_name: str, game_data: dict = None) -> tuple[bool, Optional[
                 success, info = add_game_to_player(player, '')
                 if not success:
                     logger.warning(f'Error removing game from player {repr(player)}: {info}')
-        os.replace(os.path.join(path_games, game_name + '.json'), os.path.join(path_existed_games, game_name + '.json'))
+        if not delete:
+            os.replace(os.path.join(path_games, game_name + '.json'), os.path.join(path_existed_games, game_name + '.json'))
+        else:
+            os.remove(os.path.join(path_games, game_name + '.json'))
         games_data_dict.pop(game_name, None)
         return True, None
     except FileExistsError as e:

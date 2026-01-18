@@ -147,7 +147,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (deleteGameBtn) {
             deleteGameBtn.addEventListener('click', function () {
                 if (confirm('Вы уверены, что хотите удалить игру? Это действие нельзя отменить.')) {
-                    fetch(`/game/${gameId}/end`, {
+                    fetch(`/game/${gameId}/delete`, {
                         method: 'POST',
                         headers: {'Content-Type': 'application/json'}
                     })

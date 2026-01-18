@@ -54,6 +54,7 @@ app.route('/game/<game_name>/start', methods=['POST'])(abort_on_exception(game_b
 app.route('/game/<game_name>/password')(abort_on_exception(game_base.game_password))
 app.route('/game/<game_name>/verify_password', methods=['POST'])(abort_on_exception(game_base.game_verify_password))
 app.route('/game/<game_name>/end', methods=['POST'])(abort_on_exception(game_base.game_end))
+app.route('/game/<game_name>/delete', methods=['POST'])(abort_on_exception(game_base.game_end))
 app.route('/game/<game_name>/logs', methods=['GET'])(abort_on_exception(game_base.get_game_logs))
 
 from WebsiteEasiest.web_core.games_work import laws_work
