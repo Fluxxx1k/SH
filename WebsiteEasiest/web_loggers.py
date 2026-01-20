@@ -20,7 +20,11 @@ max_response_times_ban = 100
 max_response_times_temp_stop = 75
 temp_stop_sec = 30
 import json
-bans = set(json.load(open(path_banned, 'r', encoding='utf-8')).get("B", set()))
+try:
+    bans = set(json.load(open(path_banned, 'r', encoding='utf-8')).get("B", set()))
+except Exception as e:
+    bans = set()
+    logger.error(f"Could not load bans: {repr(e)}")
 stops: dict[str, float] = {}
 
 
