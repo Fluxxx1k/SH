@@ -21,7 +21,7 @@ max_response_times_temp_stop = 75
 temp_stop_sec = 30
 import json
 try:
-    bans = set(json.load(open(path_banned, 'r', encoding='utf-8')).get("B", set()))
+    bans = set(json.load(open(path_banned, 'r', encoding='utf-8')))
 except Exception as e:
     bans = set()
     logger.error(f"Could not load bans: {repr(e)}")
