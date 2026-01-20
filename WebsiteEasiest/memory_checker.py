@@ -2,7 +2,7 @@ import os
 import time
 
 from WebsiteEasiest.logger import logger
-from WebsiteEasiest.web_core.server_spec.shutdown import shutdown, shutdown_force
+from WebsiteEasiest.web_core.server_spec.shutdown import shutdown_force
 
 memory_info = 0
 
