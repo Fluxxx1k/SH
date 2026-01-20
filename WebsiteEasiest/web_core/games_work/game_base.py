@@ -132,7 +132,6 @@ def game_start(game_name):
     if game_data['status'] == 'playing':
         return {'success': False, 'message': 'Игра уже начата'}
     player_found, player_data = get_data_of_player(session['username'])
-    print(player_data)
     if not player_found:
         abort(401, description=f"Игрок {session['username']} не найден: {player_data}")
     if player_data.get('game') != game_name:
@@ -140,8 +139,9 @@ def game_start(game_name):
     if game_data['created_by'] != session['username']:
         abort(403, description=f"Игрок {session['username']} не является создателем игры {game_name}")
     game_data['status'] = 'playing'
+    from WebsiteEasiest.web_core.games_players_classes.webgame import games_dict, WebGame
     save_data_of_game(game_name, game_data)
-
+    games_dict[game_name] = WebGame(game_name, game_data)
     return {'success': True, 'message': 'Игра успешно начата'}
 
 
