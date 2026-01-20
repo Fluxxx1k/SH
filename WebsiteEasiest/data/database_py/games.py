@@ -4,7 +4,6 @@ import os, json
 from typing import Optional
 
 from WebsiteEasiest.data.database_py.players import add_game_to_player
-from WebsiteEasiest.memory_checker import memory_info
 from WebsiteEasiest.data.data_paths import path_games, path_existed_games
 from WebsiteEasiest.logger import logger
 
@@ -81,6 +80,7 @@ def create_game_db(game_name: str, creator: str, password: str=None, data: dict=
     logger.debug(f"Creating game {repr(game_name)} with creator {repr(creator)} and password {repr(password)}")
     from WebsiteEasiest.settings.web_config import New_games_allowed
     if not New_games_allowed:
+        from WebsiteEasiest.memory_checker import memory_info
         return False, repr(PermissionError(f'New games are not allowed: {memory_info}'))
     try:
         if len(game_name) < 3:
