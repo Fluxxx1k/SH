@@ -9,14 +9,14 @@ def shutdown_save():
     logger.warning("Shutting down the server")
     for i in games_data_dict:
         if not save_data_of_game(i, games_data_dict[i]):
-            logger.error(f"Cannot save data of game {i}: {games_data_dict[i]}")
+            logger.error(f"Could not save data of game {i}: {games_data_dict[i]}")
     for i in players_data_dict:
         if not save_data_of_player(i, players_data_dict):
-            logger.error(f"Cannot save data of player {i}: {games_data_dict[i]}")
+            logger.error(f"Could not save data of player {i}: {players_data_dict[i]}")
     try:
         from WebsiteEasiest.web_loggers import bans
         with open(path_banned, "w+", encoding='utf-8') as f:
-            json.dump(f, bans)
+            json.dump(list(bans), f)
     except NameError as e:
         logger.error(f"Could not save bans: {repr(e)}")
     except Exception as e:
