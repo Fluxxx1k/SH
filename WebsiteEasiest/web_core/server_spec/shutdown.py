@@ -10,9 +10,13 @@ def shutdown_save():
     for i in games_data_dict:
         if not save_data_of_game(i, games_data_dict[i]):
             logger.error(f"Could not save data of game {i}: {games_data_dict[i]}")
+        else:
+            logger.debug(f"Successfully saved data of game {i}: {games_data_dict[i]}")
     for i in players_data_dict:
         if not save_data_of_player(i, players_data_dict):
             logger.error(f"Could not save data of player {i}: {players_data_dict[i]}")
+        else:
+            logger.debug(f"Successfully saved data of player {i}: {players_data_dict[i]}")
     try:
         from WebsiteEasiest.web_loggers import bans
         with open(path_banned, "w+", encoding='utf-8') as f:
@@ -24,7 +28,8 @@ def shutdown_save():
             logger.critical(f"Could not save bans: {repr(e)} | {bans}")
         except Exception as e2:
             logger.critical(f"Could not save bans: {repr(e)}, {repr(e2)}")
-
+    else:
+        logger.debug(f"Successfully saved data of bans: {bans}")
 
 def shutdown_force(timeout=30, memory_info:int =None):
     try:
