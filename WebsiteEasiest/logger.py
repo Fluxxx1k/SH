@@ -56,11 +56,11 @@ class ColoredFormatter(logging.Formatter):
     format = "%(asctime)s - %(message)s"
 
     FORMATS = {
-        logging.DEBUG: f'{"\033[100m" if is_server else ""}DEBUG{"\033[49m" if is_server else ""}  | {"\033[90m" if is_server else ""}{log_text}{"\033[39m" if is_server else ""}',
-        logging.INFO: f'{"\033[30m\033[47m" if is_server else ""}INFO{"\033[39m\033[49m" if is_server else ""}   | {"\033[39m" if is_server else ""}{log_text}{"\033[39m" if is_server else ""}',
+        logging.DEBUG: f'{"\033[100m" if is_server else ""}DEBUG{"\033[49m" if is_server else ""}   | {"\033[90m" if is_server else ""}{log_text}{"\033[39m" if is_server else ""}',
+        logging.INFO: f'{"\033[30m\033[47m" if is_server else ""}INFO{"\033[39m\033[49m" if is_server else ""}    | {"\033[39m" if is_server else ""}{log_text}{"\033[39m" if is_server else ""}',
         logging.WARNING: f'{"\033[43m\033[31m" if is_server else ""}WARNING{"\033[39m\033[49m" if is_server else ""} | {"\033[93m" if is_server else ""}{log_text}{"\033[39m" if is_server else ""}',
-        logging.ERROR: f'\033[41m\033[30mERROR\033[49m\033[39m  | \033[31m{log_text}\033[39m {{%(filename)s - %(funcName)s - %(lineno)d}}',
-        logging.CRITICAL: f'{"\033[1m\033[4m\033[6m\033[101m\033[93m" if is_server else ""}FATAL{"\033[0m" if is_server else ""}  | {"\033[91m" if is_server else ""}{log_text}{"\033[39m" if is_server else ""} {{%(filename)s - %(funcName)s - %(lineno)d}}',
+        logging.ERROR: f'\033[41m\033[30mERROR\033[49m\033[39m   | \033[31m{log_text}\033[39m {{%(filename)s - %(funcName)s - %(lineno)d}}',
+        logging.CRITICAL: f'{"\033[1m\033[4m\033[6m\033[101m\033[93m" if is_server else ""}FATAL{"\033[0m" if is_server else ""}   | {"\033[91m" if is_server else ""}{log_text}{"\033[39m" if is_server else ""} {{%(filename)s - %(funcName)s - %(lineno)d}}',
     }
 
     def format(self, record):
