@@ -129,6 +129,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         .then(data => {
                             if (data.success) {
                                 alert('Игра начата!');
+                                startGameBtn.style.display = 'none';
                                 updateGameData();
                             } else {
                                 alert('Ошибка: ' + data.message);
