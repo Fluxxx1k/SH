@@ -45,7 +45,7 @@ class FatalFilter(logging.Filter):
 
 class ColoredFormatter(logging.Formatter):
     """
-    Logging Formatter to add colors and count warning / errors
+    Logging Formatter to add colors to log messages
     """
     grey = "\x1b[90m"
     standard = "\x1b[39m"
@@ -58,7 +58,7 @@ class ColoredFormatter(logging.Formatter):
     FORMATS = {
         logging.DEBUG: f'{"\033[100m" if is_server else ""}DEBUG{"\033[49m" if is_server else ""}   | {"\033[90m" if is_server else ""}{log_text}{"\033[39m" if is_server else ""}',
         logging.INFO: f'{"\033[30m\033[47m" if is_server else ""}INFO{"\033[39m\033[49m" if is_server else ""}    | {"\033[39m" if is_server else ""}{log_text}{"\033[39m" if is_server else ""}',
-        logging.WARNING: f'{"\033[43m\033[31m" if is_server else ""}WARNING{"\033[39m\033[49m" if is_server else ""} | {"\033[93m" if is_server else ""}{log_text}{"\033[39m" if is_server else ""}',
+        logging.WARNING: f'{"\033[43m\033[91m" if is_server else ""}WARNING{"\033[39m\033[49m" if is_server else ""} | {"\033[93m" if is_server else ""}{log_text}{"\033[39m" if is_server else ""}',
         logging.ERROR: f'\033[41m\033[30mERROR\033[49m\033[39m   | \033[31m{log_text}\033[39m {{%(filename)s - %(funcName)s - %(lineno)d}}',
         logging.CRITICAL: f'{"\033[1m\033[4m\033[6m\033[101m\033[93m" if is_server else ""}FATAL{"\033[0m" if is_server else ""}   | {"\033[91m" if is_server else ""}{log_text}{"\033[39m" if is_server else ""} {{%(filename)s - %(funcName)s - %(lineno)d}}',
     }
@@ -78,7 +78,7 @@ logger.addHandler(all_handler)
 
 
 debug_file_handler = RotatingFileHandler(
-maxBytes=5*1024*1024,  # 5MB
+maxBytes=5<<20,  # 5MB
     backupCount=3,
     mode='a',
     filename=debug_path,
@@ -90,7 +90,7 @@ debug_file_handler.setFormatter(logging.Formatter(
 ))
 
 info_file_handler = RotatingFileHandler(
-maxBytes=10*1024*1024,  # 20MB
+maxBytes=10<<20,  # 20MB
     backupCount=3,
     mode='a',
     filename=info_path,
@@ -101,7 +101,7 @@ info_file_handler.setFormatter(logging.Formatter(
     f'{"\033[30m\033[47m" if is_server else ""}INFO{"\033[39m\033[49m" if is_server else ""}  | {"\033[39m" if is_server else ""}{log_text}{"\033[39m" if is_server else ""}'
 ))
 warning_file_handler = RotatingFileHandler(
-maxBytes=5*1024*1024,  # 5MB
+maxBytes=5<<20,  # 5MB
     backupCount=3,
     mode='a',
     filename=warning_path,
@@ -112,7 +112,7 @@ warning_file_handler.setFormatter(logging.Formatter(
     f'{"\033[43m\033[31m" if is_server else ""}WARNING{"\033[39m\033[49m" if is_server else ""}| {"\033[93m" if is_server else ""}{log_text}{"\033[39m" if is_server else ""}'
 ))
 error_file_handler = RotatingFileHandler(
-maxBytes=5*1024*1024,  # 5MB
+maxBytes=5<<20,  # 5MB
     backupCount=3,
     mode='a',
     filename=error_path,
@@ -122,7 +122,7 @@ error_file_handler.addFilter(ErrorFilter())
 error_file_handler.setFormatter(logging.Formatter(
     f'\033[41m\033[30mERROR\033[49m\033[39m | \033[31m{log_text}\033[39m {{%(filename)s - %(funcName)s - %(lineno)d}}'))
 fatal_file_handler = RotatingFileHandler(
-maxBytes=5*1024*1024,  # 5MB
+maxBytes=5<<20,  # 5MB
     backupCount=3,
     mode='a',
     filename=fatal_path,
@@ -141,7 +141,7 @@ logger.addHandler(error_file_handler)
 logger.addHandler(fatal_file_handler)
 
 all_file_handler = RotatingFileHandler(
-    maxBytes=20*1024*1024,  # 20MB
+    maxBytes=20<<20,  # 20MB
     backupCount=3,
     mode='a',
     filename=all_path,
@@ -151,7 +151,7 @@ all_file_handler.setFormatter(ColoredFormatter())
 logger.addHandler(all_file_handler)
 
 warning_error_fatal_path_file_handler = RotatingFileHandler(
-    maxBytes=20*1024*1024,  # 20MB
+    maxBytes=20<<20,  # 20MB
     backupCount=3,
     mode='a',
     filename=warning_error_fatal_path,
@@ -166,6 +166,14 @@ logger.addHandler(warning_error_fatal_path_file_handler)
 
 
 logger.debug("Logger created and loaded")
+
+  # Testing logs
+
+logger.debug("Debug log")
+logger.info("Info log")
+logger.warning("Warning log")
+logger.error("Error log")
+logger.critical("Critical log")
 
 
 
