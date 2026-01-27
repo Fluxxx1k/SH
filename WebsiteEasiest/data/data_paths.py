@@ -22,5 +22,5 @@ logger.debug(f"Paths:"
              f"\n\t\t{path_games= },"
              f"\n\t\t{path_existed_games= },"
              f"\n\t\t{path_players= },"
-             f"\n\t\t{path_IP= },",
+             f"\n\t\t{path_IP= },"
              f"\n\t\t{path_banned= }")
