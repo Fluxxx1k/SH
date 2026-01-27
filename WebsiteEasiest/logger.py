@@ -167,13 +167,13 @@ logger.addHandler(warning_error_fatal_path_file_handler)
 
 logger.debug("Logger created and loaded")
 
-  # Testing logs
-
-logger.debug("Debug log")
-logger.info("Info log")
-logger.warning("Warning log")
-logger.error("Error log")
-logger.critical("Critical log")
-
+#   # Testing logs
+#
+# logger.debug("Debug log")
+# logger.info("Info log")
+# logger.warning("Warning log")
+# logger.error("Error log")
+# logger.critical("Critical log")
+#
 
 
