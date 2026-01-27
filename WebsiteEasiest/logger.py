@@ -43,41 +43,59 @@ class FatalFilter(logging.Filter):
         return logging.ERROR < record.levelno
 
 
+class ColoredFormatter(logging.Formatter):
+    """
+    Logging Formatter to add colors and count warning / errors
+    """
+    grey = "\x1b[90m"
+    standard = "\x1b[39m"
+    yellow = "\x1b[93m"
+    error = "\x1b[91m"
+    critical = "\x1b[91;1;4;7m"
+    reset = "\x1b[0m"
+    format = "%(asctime)s - %(message)s"
+
+    FORMATS = {
+        logging.DEBUG: f'{"\033[100m" if is_server else ""}DEBUG{"\033[49m" if is_server else ""} | {"\033[90m" if is_server else ""}{log_text}{"\033[39m" if is_server else ""}',
+        logging.INFO: f'{"\033[30m\033[47m" if is_server else ""}INFO{"\033[39m\033[49m" if is_server else ""}  | {"\033[39m" if is_server else ""}{log_text}{"\033[39m" if is_server else ""}',
+        logging.WARNING: f'{"\033[43m\033[31m" if is_server else ""}WARNING{"\033[39m\033[49m" if is_server else ""}| {"\033[93m" if is_server else ""}{log_text}{"\033[39m" if is_server else ""}',
+        logging.ERROR: f'\033[41m\033[30mERROR\033[49m\033[39m | \033[31m{log_text}\033[39m {{%(filename)s - %(funcName)s - %(lineno)d}}',
+        logging.CRITICAL: f'{"\033[1m\033[4m\033[6m\033[101m\033[93m" if is_server else ""}FATAL{"\033[0m" if is_server else ""} | {"\033[91m" if is_server else ""}{log_text}{"\033[39m" if is_server else ""} {{%(filename)s - %(funcName)s - %(lineno)d}}',
+    }
+
+    def format(self, record):
+        log_fmt = self.FORMATS.get(record.levelno)
+        if log_fmt is None:
+            logger.warning(f"Unknown log level: {record.levelno}")
+            log_fmt = self.FORMATS[logging.WARNING]
+        formatter = logging.Formatter(log_fmt)
+        return formatter.format(record)
+
 
 debug_handler = logging.StreamHandler(sys.stdout)
 debug_handler.setLevel(logging.DEBUG)
 debug_handler.addFilter(DebugFilter())
-debug_handler.setFormatter(logging.Formatter(
-    f'\033[90m{log_text}\033[39m'
-))
+debug_handler.setFormatter(ColoredFormatter())
 
 info_handler = logging.StreamHandler(sys.stdout)
 info_handler.setLevel(logging.INFO)
 info_handler.addFilter(InfoFilter())
-info_handler.setFormatter(logging.Formatter(
-    f'\033[39m{log_text}\033[39m'
-))
+info_handler.setFormatter(ColoredFormatter())
 
 warning_handler = logging.StreamHandler(sys.stderr)
 warning_handler.setLevel(logging.WARNING)
 warning_handler.addFilter(WarningFilter())
-warning_handler.setFormatter(logging.Formatter(
-    f'\033[93m{log_text}\033[39m'
-))
+warning_handler.setFormatter(ColoredFormatter())
 
 error_handler = logging.StreamHandler(sys.stderr)
 error_handler.setLevel(logging.ERROR)
 error_handler.addFilter(ErrorFilter())
-error_handler.setFormatter(logging.Formatter(
-    f'\033[31m{log_text}\033[39m'
-))
+error_handler.setFormatter(ColoredFormatter())
 
 fatal_handler = logging.StreamHandler(sys.stderr)
 fatal_handler.setLevel(logging.CRITICAL)
 fatal_handler.addFilter(FatalFilter())
-fatal_handler.setFormatter(logging.Formatter(
-    f'\033[101m{log_text}\033[49m'
-))
+fatal_handler.setFormatter(ColoredFormatter())
 
 logger.addHandler(debug_handler)
 logger.addHandler(info_handler)
@@ -149,7 +167,6 @@ logger.addHandler(warning_file_handler)
 logger.addHandler(error_file_handler)
 logger.addHandler(fatal_file_handler)
 
-
 all_file_handler = RotatingFileHandler(
     maxBytes=20*1024*1024,  # 20MB
     backupCount=3,
@@ -157,7 +174,7 @@ all_file_handler = RotatingFileHandler(
     filename=all_path,
     encoding='utf-8')
 all_file_handler.setLevel(logging.DEBUG)
-all_file_handler.setFormatter(logging.Formatter(f'%(levelname)s | {log_text}'))
+all_file_handler.setFormatter(ColoredFormatter())
 logger.addHandler(all_file_handler)
 
 warning_error_fatal_path_file_handler = RotatingFileHandler(
@@ -168,9 +185,7 @@ warning_error_fatal_path_file_handler = RotatingFileHandler(
     encoding='utf-8')
 warning_error_fatal_path_file_handler.setLevel(logging.WARNING)
 warning_error_fatal_path_file_handler.setFormatter(
-    logging.Formatter(
-        f'%(levelname)s | {log_text} {{%(filename)s - %(funcName)s - %(lineno)d}}'
-    )
+    ColoredFormatter()
 )
 logger.addHandler(warning_error_fatal_path_file_handler)
 
