@@ -1,6 +1,10 @@
 import logging
 import sys, os
 from logging.handlers import RotatingFileHandler
+try:
+    is_server = os.uname().nodename == "SERVERNYA"
+except AttributeError:
+    is_server = True
 # Создание логгера
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -91,7 +95,7 @@ maxBytes=5*1024*1024,  # 5MB
 debug_file_handler.setLevel(logging.DEBUG)
 debug_file_handler.addFilter(DebugFilter())
 debug_file_handler.setFormatter(logging.Formatter(
-    f'DEBUG | {log_text}'
+    f'{"\033[100m" if is_server else ""}DEBUG{"\033[49m" if is_server else ""} | {"\033[90m" if is_server else ""}{log_text}{"\033[39m" if is_server else ""}'
 ))
 
 info_file_handler = RotatingFileHandler(
@@ -103,7 +107,7 @@ maxBytes=10*1024*1024,  # 20MB
 info_file_handler.setLevel(logging.INFO)
 info_file_handler.addFilter(InfoFilter())
 info_file_handler.setFormatter(logging.Formatter(
-    f'INFO  | {log_text}'
+    f'{"\033[30m\033[47m" if is_server else ""}INFO{"\033[39m\033[49m" if is_server else ""}  | {"\033[39m" if is_server else ""}{log_text}{"\033[39m" if is_server else ""}'
 ))
 warning_file_handler = RotatingFileHandler(
 maxBytes=5*1024*1024,  # 5MB
@@ -114,7 +118,7 @@ maxBytes=5*1024*1024,  # 5MB
 warning_file_handler.setLevel(logging.WARNING)
 warning_file_handler.addFilter(WarningFilter())
 warning_file_handler.setFormatter(logging.Formatter(
-    f'WARNING| {log_text}'
+    f'{"\033[43m\033[31m" if is_server else ""}WARNING{"\033[39m\033[49m" if is_server else ""}| {"\033[93m" if is_server else ""}{log_text}{"\033[39m" if is_server else ""}'
 ))
 error_file_handler = RotatingFileHandler(
 maxBytes=5*1024*1024,  # 5MB
@@ -125,7 +129,7 @@ maxBytes=5*1024*1024,  # 5MB
 error_file_handler.setLevel(logging.ERROR)
 error_file_handler.addFilter(ErrorFilter())
 error_file_handler.setFormatter(logging.Formatter(
-    f'ERROR | {log_text} {{%(filename)s - %(funcName)s - %(lineno)d}}'))
+    f'\033[41m\033[30mERROR\033[49m\033[39m | \033[31m{log_text}\033[39m {{%(filename)s - %(funcName)s - %(lineno)d}}'))
 fatal_file_handler = RotatingFileHandler(
 maxBytes=5*1024*1024,  # 5MB
     backupCount=3,
@@ -135,7 +139,7 @@ maxBytes=5*1024*1024,  # 5MB
 fatal_file_handler.setLevel(logging.CRITICAL)
 fatal_file_handler.addFilter(FatalFilter())
 fatal_file_handler.setFormatter(logging.Formatter(
-    f'FATAL | {log_text} {{%(filename)s - %(funcName)s - %(lineno)d}}'
+    f'{"\033[1m\033[4m\033[6m\033[101m\033[93m" if is_server else ""}FATAL{"\033[0m" if is_server else ""} | {"\033[91m" if is_server else ""}{log_text}{"\033[39m" if is_server else ""} {{%(filename)s - %(funcName)s - %(lineno)d}}'
 ))
 
 

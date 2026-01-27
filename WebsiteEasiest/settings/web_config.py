@@ -1,4 +1,9 @@
+import os
 is_debug = True
+try:
+    is_server = os.uname().nodename == "SERVERNYA"
+except AttributeError:
+    is_server = True
 
 denied_literals = {'\\', '/',
                    ':', '*',
