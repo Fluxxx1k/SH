@@ -71,37 +71,10 @@ class ColoredFormatter(logging.Formatter):
         formatter = logging.Formatter(log_fmt)
         return formatter.format(record)
 
-
-debug_handler = logging.StreamHandler(sys.stdout)
-debug_handler.setLevel(logging.DEBUG)
-debug_handler.addFilter(DebugFilter())
-debug_handler.setFormatter(ColoredFormatter())
-
-info_handler = logging.StreamHandler(sys.stdout)
-info_handler.setLevel(logging.INFO)
-info_handler.addFilter(InfoFilter())
-info_handler.setFormatter(ColoredFormatter())
-
-warning_handler = logging.StreamHandler(sys.stderr)
-warning_handler.setLevel(logging.WARNING)
-warning_handler.addFilter(WarningFilter())
-warning_handler.setFormatter(ColoredFormatter())
-
-error_handler = logging.StreamHandler(sys.stderr)
-error_handler.setLevel(logging.ERROR)
-error_handler.addFilter(ErrorFilter())
-error_handler.setFormatter(ColoredFormatter())
-
-fatal_handler = logging.StreamHandler(sys.stderr)
-fatal_handler.setLevel(logging.CRITICAL)
-fatal_handler.addFilter(FatalFilter())
-fatal_handler.setFormatter(ColoredFormatter())
-
-logger.addHandler(debug_handler)
-logger.addHandler(info_handler)
-logger.addHandler(warning_handler)
-logger.addHandler(error_handler)
-logger.addHandler(fatal_handler)
+all_handler = logging.StreamHandler(sys.stdout)
+all_handler.setLevel(logging.DEBUG)
+all_handler.setFormatter(ColoredFormatter())
+logger.addHandler(all_handler)
 
 
 debug_file_handler = RotatingFileHandler(
