@@ -13,7 +13,7 @@ def shutdown_save():
         else:
             logger.debug(f"Successfully saved data of game {i}: {games_data_dict[i]}")
     for i in players_data_dict:
-        if not save_data_of_player(i, players_data_dict):
+        if not save_data_of_player(i, players_data_dict[i]):
             logger.error(f"Could not save data of player {i}: {players_data_dict[i]}")
         else:
             logger.debug(f"Successfully saved data of player {i}: {players_data_dict[i]}")
