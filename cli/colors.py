@@ -101,8 +101,8 @@ cf8 = custom_font_256
 
 if __name__ == '__main__':
     for i in range(256):
-        print(cf8(i), end=END+'\n')
-        print(ct8(i), end=END+'\n')
+        print(f"{ct8(i)}{i}", end=END+'\n')
+        print(f"{cf8(i)}{i}", end=END+'\n')
 
     x = globals()
     for i in list(x):
