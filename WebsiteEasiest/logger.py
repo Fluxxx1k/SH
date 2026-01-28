@@ -87,8 +87,8 @@ class ColoredFormatter(logging.Formatter):
         logging.DEBUG: f'{color.GREY_BACKGROUND if is_server else ""}DEBUG{color.END if is_server else ""}   | {color.GREY_TEXT if is_server else ""}{log_text}{color.END if is_server else ""}',
         logging.INFO: f'{color.WHITE_BACKGROUND+color.BLACK_TEXT if is_server else ""}INFO{color.END if is_server else ""}    | {log_text}{color.END if is_server else ""}',
         logging.WARNING: f'{color.YELLOW_BACKGROUND if is_server else ""}{color.RED_TEXT if is_server else ""}WARNING{color.END if is_server else ""} | {color.YELLOW_TEXT_BRIGHT if is_server else ""}{log_text}{color.END if is_server else ""}',
-        logging.ERROR: f'{color.RED_BACKGROUND if is_server else ""}{color.BLACK_TEXT if is_server else ""}ERROR{color.END}   | {color.RED_TEXT if is_server else ""}{log_text}{color.END} {{%(filename)s - %(funcName)s - %(lineno)d}}',
-        logging.CRITICAL: f'{color.BOLD}{color.UNDERLINE}{color.RED_BACKGROUND_BRIGHT if is_server else ""}{color.YELLOW_TEXT_BRIGHT if is_server else ""}FATAL{color.END if is_server else ""}   | {color.RED_TEXT_BRIGHT if is_server else ""}{log_text}{color.END} {{%(filename)s - %(funcName)s - %(lineno)d}}',
+        logging.ERROR: f'{color.RED_BACKGROUND if is_server else ""}{color.BLACK_TEXT if is_server else ""}ERROR{color.END}   | {color.RED_TEXT if is_server else ""}{log_text}{color.END if  is_server else ""} {{%(filename)s - %(funcName)s - %(lineno)d}}',
+        logging.CRITICAL: f'{color.BOLD}{color.UNDERLINE}{color.RED_BACKGROUND_BRIGHT if is_server else ""}{color.YELLOW_TEXT_BRIGHT if is_server else ""}FATAL{color.END if is_server else ""}   | {color.RED_TEXT_BRIGHT if is_server else ""}{log_text}{color.END if is_server else ""} {{%(filename)s - %(funcName)s - %(lineno)d}}',
     }
 
     def format(self, record):
