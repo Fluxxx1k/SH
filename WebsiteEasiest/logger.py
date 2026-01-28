@@ -4,10 +4,12 @@ from logging.handlers import RotatingFileHandler
 try:
     import cli.colors as color
 except Exception as e:
+    print(f"Could not import colors: {repr(e)}")
     class color:
         GREY_BACKGROUND = "\033[100m"
-        WHITE_BACKGROUND = "\033[107m"
+        WHITE_BACKGROUND_BRIGHT = "\033[107m"
         YELLOW_BACKGROUND = "\033[43m"
+        YELLOW_BACKGROUND_BRIGHT = "\033[103m"
         RED_BACKGROUND = "\033[41m"
         RED_BACKGROUND_BRIGHT = "\033[101m"
         END = '\033[0m'
@@ -63,7 +65,7 @@ class FatalFilter(logging.Filter):
         return logging.ERROR < record.levelno
 
 
-class ColoredFormatter(logging.Formatter):
+class ColoredFormatterFile(logging.Formatter):
     """
     Logging Formatter to add colors to log messages
     """
@@ -85,23 +87,32 @@ class ColoredFormatter(logging.Formatter):
 
     FORMATS = {
         logging.DEBUG: f'{color.GREY_BACKGROUND if is_server else ""}DEBUG{color.END if is_server else ""}   | {color.GREY_TEXT if is_server else ""}{log_text}{color.END if is_server else ""}',
-        logging.INFO: f'{color.WHITE_BACKGROUND+color.BLACK_TEXT if is_server else ""}INFO{color.END if is_server else ""}    | {log_text}{color.END if is_server else ""}',
-        logging.WARNING: f'{color.YELLOW_BACKGROUND if is_server else ""}{color.RED_TEXT if is_server else ""}WARNING{color.END if is_server else ""} | {color.YELLOW_TEXT_BRIGHT if is_server else ""}{log_text}{color.END if is_server else ""}',
+        logging.INFO: f'{color.WHITE_BACKGROUND_BRIGHT+color.BLACK_TEXT if is_server else ""}INFO{color.END if is_server else ""}    | {log_text}{color.END if is_server else ""}',
+        logging.WARNING: f'{color.YELLOW_BACKGROUND_BRIGHT if is_server else ""}{color.RED_TEXT if is_server else ""}WARNING{color.END if is_server else ""} | {color.YELLOW_TEXT_BRIGHT if is_server else ""}{log_text}{color.END if is_server else ""}',
         logging.ERROR: f'{color.RED_BACKGROUND if is_server else ""}{color.BLACK_TEXT if is_server else ""}ERROR{color.END}   | {color.RED_TEXT if is_server else ""}{log_text}{color.END if  is_server else ""} {{%(filename)s - %(funcName)s - %(lineno)d}}',
-        logging.CRITICAL: f'{color.BOLD}{color.UNDERLINE}{color.RED_BACKGROUND_BRIGHT if is_server else ""}{color.YELLOW_TEXT_BRIGHT if is_server else ""}FATAL{color.END if is_server else ""}   | {color.RED_TEXT_BRIGHT if is_server else ""}{log_text}{color.END if is_server else ""} {{%(filename)s - %(funcName)s - %(lineno)d}}',
+        logging.CRITICAL: f'{color.BOLD+color.UNDERLINE+color.RED_BACKGROUND_BRIGHT+color.YELLOW_TEXT_BRIGHT if is_server else ""}FATAL{color.END if is_server else ""}   | {color.RED_TEXT_BRIGHT if is_server else ""}{log_text}{color.END if is_server else ""} {{%(filename)s - %(funcName)s - %(lineno)d}}',
     }
 
     def format(self, record):
         log_fmt = self.FORMATS.get(record.levelno)
-        if log_fmt is None:
+        if log_fmt is None and record.levelno !=  logging.WARNING:
             logger.warning(f"Unknown log level: {record.levelno}")
             log_fmt = self.FORMATS[logging.WARNING]
         formatter = logging.Formatter(log_fmt)
         return formatter.format(record)
 
+class ColoredFormatterConsole(ColoredFormatterFile):
+    FORMATS = {
+        logging.DEBUG: f'{color.GREY_BACKGROUND}DEBUG{color.END}   | {color.GREY_TEXT}{log_text}{color.END}',
+        logging.INFO: f'{color.WHITE_BACKGROUND_BRIGHT + color.BLACK_TEXT}INFO{color.END}    | {log_text}{color.END}',
+        logging.WARNING: f'{color.YELLOW_BACKGROUND_BRIGHT + color.RED_TEXT}WARNING{color.END} | {color.YELLOW_TEXT_BRIGHT}{log_text}{color.END}',
+        logging.ERROR: f'{color.RED_BACKGROUND + color.BLACK_TEXT}ERROR{color.END}   | {color.RED_TEXT}{log_text}{color.END} {{%(filename)s - %(funcName)s - %(lineno)d}}',
+        logging.CRITICAL: f'{color.BOLD + color.UNDERLINE + color.RED_BACKGROUND_BRIGHT + color.YELLOW_TEXT_BRIGHT}FATAL{color.END}   | {color.RED_TEXT_BRIGHT}{log_text}{color.END} {{%(filename)s - %(funcName)s - %(lineno)d}}',
+    }
+
 all_handler = logging.StreamHandler(sys.stdout)
 all_handler.setLevel(logging.DEBUG)
-all_handler.setFormatter(ColoredFormatter())
+all_handler.setFormatter(ColoredFormatterConsole())
 logger.addHandler(all_handler)
 
 
@@ -114,7 +125,7 @@ maxBytes=5<<20,  # 5MB
 debug_file_handler.setLevel(logging.DEBUG)
 debug_file_handler.addFilter(DebugFilter())
 debug_file_handler.setFormatter(logging.Formatter(
-    f'{color.GREY_BACKGROUND if is_server else ""}DEBUG{color.END if is_server else ""} | {color.GREY_TEXT if is_server else ""}{log_text}{color.END if is_server else ""}'
+    ColoredFormatterFile.FORMATS[logging.DEBUG]
 ))
 
 info_file_handler = RotatingFileHandler(
@@ -126,7 +137,7 @@ maxBytes=10<<20,  # 20MB
 info_file_handler.setLevel(logging.INFO)
 info_file_handler.addFilter(InfoFilter())
 info_file_handler.setFormatter(logging.Formatter(
-    f'{color.WHITE_BACKGROUND if is_server else ""}INFO{color.END if is_server else ""}  | {log_text}{color.END if is_server else ""}'
+    ColoredFormatterFile.FORMATS[logging.INFO]
 ))
 warning_file_handler = RotatingFileHandler(
 maxBytes=5<<20,  # 5MB
@@ -137,7 +148,7 @@ maxBytes=5<<20,  # 5MB
 warning_file_handler.setLevel(logging.WARNING)
 warning_file_handler.addFilter(WarningFilter())
 warning_file_handler.setFormatter(logging.Formatter(
-    f'{color.YELLOW_BACKGROUND if is_server else ""}{color.RED_TEXT if is_server else ""}WARNING{color.END if is_server else ""} | {color.YELLOW_TEXT if is_server else ""}{log_text}{color.END if is_server else ""}'
+    ColoredFormatterFile.FORMATS[logging.WARNING]
 ))
 error_file_handler = RotatingFileHandler(
 maxBytes=5<<20,  # 5MB
@@ -148,7 +159,8 @@ maxBytes=5<<20,  # 5MB
 error_file_handler.setLevel(logging.ERROR)
 error_file_handler.addFilter(ErrorFilter())
 error_file_handler.setFormatter(logging.Formatter(
-    f'{color.RED_BACKGROUND if is_server else ""}{color.BLACK_TEXT if  is_server else ""}ERROR{color.END} | {color.RED_TEXT if is_server else ""}{log_text}{color.END if is_server else ""} {{%(filename)s - %(funcName)s - %(lineno)d}}'))
+    ColoredFormatterFile.FORMATS[logging.ERROR]
+))
 fatal_file_handler = RotatingFileHandler(
 maxBytes=5<<20,  # 5MB
     backupCount=3,
@@ -158,7 +170,7 @@ maxBytes=5<<20,  # 5MB
 fatal_file_handler.setLevel(logging.CRITICAL)
 fatal_file_handler.addFilter(FatalFilter())
 fatal_file_handler.setFormatter(logging.Formatter(
-    f'{f"{color.BOLD}{color.UNDERLINE}{color.RED_BACKGROUND_BRIGHT}{color.YELLOW_TEXT_BRIGHT}" if is_server else ""}FATAL{color.END if is_server else ""} | {color.RED_TEXT_BRIGHT if is_server else ""}{log_text}{color.END if is_server else ""} {{%(filename)s - %(funcName)s - %(lineno)d}}'
+    ColoredFormatterFile.FORMATS[logging.CRITICAL]
 ))
 
 
@@ -175,7 +187,7 @@ all_file_handler = RotatingFileHandler(
     filename=all_path,
     encoding='utf-8')
 all_file_handler.setLevel(logging.DEBUG)
-all_file_handler.setFormatter(ColoredFormatter())
+all_file_handler.setFormatter(ColoredFormatterFile())
 logger.addHandler(all_file_handler)
 
 warning_error_fatal_path_file_handler = RotatingFileHandler(
@@ -186,7 +198,7 @@ warning_error_fatal_path_file_handler = RotatingFileHandler(
     encoding='utf-8')
 warning_error_fatal_path_file_handler.setLevel(logging.WARNING)
 warning_error_fatal_path_file_handler.setFormatter(
-    ColoredFormatter()
+    ColoredFormatterFile()
 )
 logger.addHandler(warning_error_fatal_path_file_handler)
 
@@ -203,6 +215,5 @@ logger.warning("Warning log")
 logger.error("Error log")
 logger.critical("Critical log")
 
-
-if not isinstance(color, type):
+if isinstance(color, type):
     logger.warning("Compatibility colors not supported, using ANSI codes")

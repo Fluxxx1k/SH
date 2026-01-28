@@ -1,9 +1,10 @@
 try:
+    raise Exception("We won't use colorama, because it doesn't support all colors")
     from cli.colors2 import *
 except Exception as e:
-    from WebsiteEasiest.logger import logger
-    logger.warning(f"Could not import colors2: {repr(e)}"
-                   "\n\t\tMay be compatibility issues")
+    # from WebsiteEasiest.logger import logger
+    # logger.warning(f"Could not import colors2: {repr(e)}"
+    #                "\n\t\tMay be compatibility issues")
     GREY_TEXT = '\033[90m'
     BLACK_TEXT = '\033[30m'
     RED_TEXT = '\033[31m'

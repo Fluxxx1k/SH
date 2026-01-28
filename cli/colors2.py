@@ -54,4 +54,4 @@ if __name__ == '__main__':
     x = globals()
     for i in list(x):
         if i not in ['UP', 'DOWN', 'RIGHT', 'LEFT', 'CLEAR_SCREEN', 'CLEAR_LINE', 'HIDE_CURSOR', 'SHOW_CURSOR', 'SAVE_CURSOR', 'RESTORE_CURSOR']:
-            print(f'{x[i]}{i}{END}')
+            print(f'{x[i]}{repr(x[i])}{i}{END}')
