@@ -1,11 +1,14 @@
 try:
     raise Exception("We won't use colorama, because it doesn't support all colors")
-    from cli.colors2 import *
+    # from cli.colors2 import *
 except Exception as e:
+    from cli.colors_comp_test import get_best_color_code
     # from WebsiteEasiest.logger import logger
     # logger.warning(f"Could not import colors2: {repr(e)}"
     #                "\n\t\tMay be compatibility issues")
-    GREY_TEXT = '\033[90m'
+    GRAY_LIGHT_TEXT = get_best_color_code('\033[90m', '\033[38;5;252m')  # Светло-серый
+    GRAY_MEDIUM_TEXT = GRAY_TEXT = get_best_color_code('\033[90m', '\033[38;5;244m')  # Средне-серый
+    GRAY_DARK_TEXT = get_best_color_code('\033[90m', '\033[38;5;238m')  # Темно-серый
     BLACK_TEXT = '\033[30m'
     RED_TEXT = '\033[31m'
     GREEN_TEXT = '\033[32m'
@@ -24,7 +27,9 @@ except Exception as e:
     CYAN_TEXT_BRIGHT = '\033[96m'
     WHITE_TEXT_BRIGHT = '\033[97m'
 
-    GREY_BACKGROUND = '\033[100m'
+    GRAY_LIGHT_BACKGROUND = get_best_color_code('\033[100m', '\033[48;5;252m')
+    GRAY_MEDIUM_BACKGROUND = GREY_BACKGROUND = get_best_color_code('\033[100m', '\033[48;5;244m')
+    GRAY_DARK_BACKGROUND = get_best_color_code('\033[100m', '\033[48;5;238m')
     BLACK_BACKGROUND = '\033[40m'
     RED_BACKGROUND = '\033[41m'
     GREEN_BACKGROUND = '\033[42m'
@@ -48,6 +53,23 @@ except Exception as e:
 
     BOLD = '\033[1m'
     DIM = '\033[2m'
+    # Яркие цвета текста с улучшенной палитрой при поддержке 256 цветов
+    RED_TEXT_VERY_BRIGHT = get_best_color_code('\033[91m', '\033[38;5;196m')
+    GREEN_TEXT_VERY_BRIGHT = get_best_color_code('\033[92m', '\033[38;5;46m')
+    YELLOW_TEXT_VERY_BRIGHT = get_best_color_code('\033[93m', '\033[38;5;226m')
+    BLUE_TEXT_VERY_BRIGHT = get_best_color_code('\033[94m', '\033[38;5;21m')
+    PURPLE_TEXT_VERY_BRIGHT = get_best_color_code('\033[95m', '\033[38;5;201m')
+    CYAN_TEXT_VERY_BRIGHT = get_best_color_code('\033[96m', '\033[38;5;51m')
+    WHITE_TEXT_VERY_BRIGHT = get_best_color_code('\033[97m', '\033[38;5;15m')
+
+    # Яркие цвета фона с улучшенной палитрой при поддержке 256 цветов
+    RED_BACKGROUND_VERY_BRIGHT = get_best_color_code('\033[101m', '\033[48;5;196m')
+    GREEN_BACKGROUND_VERY_BRIGHT = get_best_color_code('\033[102m', '\033[48;5;46m')
+    YELLOW_BACKGROUND_VERY_BRIGHT = get_best_color_code('\033[103m', '\033[48;5;226m')
+    BLUE_BACKGROUND_VERY_BRIGHT = get_best_color_code('\033[104m', '\033[48;5;21m')
+    PURPLE_BACKGROUND_VERY_BRIGHT = get_best_color_code('\033[105m', '\033[48;5;201m')
+    CYAN_BACKGROUND_VERY_BRIGHT = get_best_color_code('\033[106m', '\033[48;5;51m')
+    WHITE_BACKGROUND_VERY_BRIGHT = get_best_color_code('\033[107m', '\033[48;5;15m')
 
 # Additional styles - using closest available colorama equivalents
 # Since colorama doesn't have direct equivalents for these, we'll define them as needed
@@ -108,4 +130,3 @@ if __name__ == '__main__':
     for i in list(x):
         if i not in {'UP', 'DOWN', 'RIGHT', 'LEFT', 'CLEAR_SCREEN', 'CLEAR_LINE', 'HIDE_CURSOR', 'SHOW_CURSOR', 'SAVE_CURSOR', 'RESTORE_CURSOR'}:
             print(f'{x[i]}{i}{END}')
-    input()
