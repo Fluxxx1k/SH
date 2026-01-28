@@ -1,5 +1,5 @@
 try:
-    from colors2 import *
+    from cli.colors2 import *
 except Exception as e:
     from WebsiteEasiest.logger import logger
     logger.warning(f"Could not import colors2: {repr(e)}"

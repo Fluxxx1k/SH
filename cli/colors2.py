@@ -55,7 +55,3 @@ if __name__ == '__main__':
     for i in list(x):
         if i not in ['UP', 'DOWN', 'RIGHT', 'LEFT', 'CLEAR_SCREEN', 'CLEAR_LINE', 'HIDE_CURSOR', 'SHOW_CURSOR', 'SAVE_CURSOR', 'RESTORE_CURSOR']:
             print(f'{x[i]}{i}{END}')
-    print("Additional features:")
-    print(f"{ITALIC}Italic style (using bright){END}")
-    print(f"{UNDERLINE}Underline style{END}")
-    print(f"{STRIKETHROUGH}Strikethrough style{END}")
