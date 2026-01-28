@@ -1,0 +1,62 @@
+from colorama import Fore, Back, Style
+
+# Text colors
+GREY_TEXT = "\033[90m"
+BLACK_TEXT = Fore.BLACK
+RED_TEXT = Fore.RED
+GREEN_TEXT = Fore.GREEN
+YELLOW_TEXT = Fore.YELLOW
+BLUE_TEXT = Fore.BLUE
+PURPLE_TEXT = Fore.MAGENTA
+CYAN_TEXT = Fore.CYAN
+WHITE_TEXT = Fore.WHITE
+RESET_TEXT = Fore.RESET
+
+# Bright text colors
+RED_TEXT_BRIGHT = Fore.LIGHTRED_EX
+GREEN_TEXT_BRIGHT = Fore.LIGHTGREEN_EX
+YELLOW_TEXT_BRIGHT = Fore.LIGHTYELLOW_EX
+BLUE_TEXT_BRIGHT = Fore.LIGHTBLUE_EX
+PURPLE_TEXT_BRIGHT = Fore.LIGHTMAGENTA_EX
+CYAN_TEXT_BRIGHT = Fore.LIGHTCYAN_EX
+WHITE_TEXT_BRIGHT = Fore.LIGHTWHITE_EX
+
+# Background colors
+GREY_BACKGROUND = "\033[100m"
+BLACK_BACKGROUND = Back.BLACK
+RED_BACKGROUND = Back.RED
+GREEN_BACKGROUND = Back.GREEN
+YELLOW_BACKGROUND = Back.YELLOW
+BLUE_BACKGROUND = Back.BLUE
+PURPLE_BACKGROUND = Back.MAGENTA
+CYAN_BACKGROUND = Back.CYAN
+WHITE_BACKGROUND = Back.WHITE
+RESET_BACKGROUND = Back.RESET
+
+# Bright background colors
+RED_BACKGROUND_BRIGHT = Back.LIGHTRED_EX
+GREEN_BACKGROUND_BRIGHT = Back.LIGHTGREEN_EX
+YELLOW_BACKGROUND_BRIGHT = Back.LIGHTYELLOW_EX
+BLUE_BACKGROUND_BRIGHT = Back.LIGHTBLUE_EX
+PURPLE_BACKGROUND_BRIGHT = Back.LIGHTMAGENTA_EX
+CYAN_BACKGROUND_BRIGHT = Back.LIGHTCYAN_EX
+WHITE_BACKGROUND_BRIGHT = Back.LIGHTWHITE_EX
+
+RESET = END = Style.RESET_ALL
+
+# Styles
+BOLD = Style.BRIGHT
+DIM = Style.DIM
+NORMAL = Style.NORMAL
+CURSIVE = Style.BRIGHT  # Using BRIGHT as equivalent since colorama doesn't have cursive
+UNDERLINE = Style.BRIGHT  # Using BRIGHT as equivalent since colorama doesn't have underline
+NEGATIVE = Style.BRIGHT  # Using BRIGHT as equivalent since colorama doesn't have negative
+
+# Cursor movement (not available in colorama, keeping for compatibility)
+UP = '\033[A'
+
+if __name__ == '__main__':
+    x = globals()
+    for i in list(x):
+        if i not in ['UP']:  # Skip cursor movement codes that aren't color related
+            print(f'{x[i]}{i}{END}')
