@@ -71,8 +71,41 @@ RESTORE_CURSOR = '\033[u'
 
 
 
+def custom_text_rgb(r:int ,g: int,b: int) -> str:
+    """
+        May cause incompatibility issues, use carefully
+    """
+    return '\033[38;2;'f'{r};{g};{b}m'
+def custom_font_rgb(r:int ,g:int ,b:int) -> str:
+    """
+        May cause incompatibility issues, use carefully
+    """
+    return '\033[48;2;'f'{r};{g};{b}m'
+
+def custom_text_256(color:int) -> str:
+    """
+    May cause incompatibility issues but rarely, use carefully
+    """
+    return '\033[38;5;{color}m'.format(color=color)
+
+def custom_font_256(color:int) -> str:
+    """
+    May cause incompatibility issues but rarely, use carefully
+    """
+    return '\033[48;5;{color}m'.format(color=color)
+
+ct24 = custom_text_rgb
+cf24 = custom_font_rgb
+ct8 = custom_text_256
+cf8 = custom_font_256
+
 if __name__ == '__main__':
+    for i in range(256):
+        print(cf8(i), end=END+'\n')
+        print(ct8(i), end=END+'\n')
+
     x = globals()
     for i in list(x):
         if i not in {'UP', 'DOWN', 'RIGHT', 'LEFT', 'CLEAR_SCREEN', 'CLEAR_LINE', 'HIDE_CURSOR', 'SHOW_CURSOR', 'SAVE_CURSOR', 'RESTORE_CURSOR'}:
             print(f'{x[i]}{i}{END}')
+    input()
