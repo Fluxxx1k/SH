@@ -43,14 +43,35 @@ except Exception as e:
     WHITE_BACKGROUND_BRIGHT = '\033[107m'
 
     RESET = END = '\033[0m'
+    NORMAL = '\033[22m'
 
     BOLD = '\033[1m'
-    CURSIVE = '\033[3m'
-    UNDERLINE = '\033[4m'
-    NEGATIVE = '\033[7m'
+    DIM = '\033[2m'
 
-    UP = '\033[A'
+# Additional styles - using closest available colorama equivalents
+# Since colorama doesn't have direct equivalents for these, we'll define them as needed
+CURSIVE = ITALIC = '\033[3m'  # Using ANSI code since colorama doesn't support italic
+UNDERLINE = '\033[4m'  # Using ANSI code since colorama doesn't support underline
+BLINK = '\033[5m'
+NEGATIVE = '\033[7m'  # Using ANSI code since colorama doesn't support negative
+CROSSED = STRIKETHROUGH = '\033[9m'  # Using ANSI code since colorama doesn't support strikethrough
+
+# Additional ANSI codes for cursor movement and other features
+UP = '\033[A'
+DOWN = '\033[B'
+RIGHT = '\033[C'
+LEFT = '\033[D'
+CLEAR_SCREEN = '\033[2J'
+CLEAR_LINE = '\033[K'
+HIDE_CURSOR = '\033[?25l'
+SHOW_CURSOR = '\033[?25h'
+SAVE_CURSOR = '\033[s'
+RESTORE_CURSOR = '\033[u'
+
+
+
 if __name__ == '__main__':
     x = globals()
     for i in list(x):
-        print(f'{x[i]}{i}{END}')
+        if i not in {'UP', 'DOWN', 'RIGHT', 'LEFT', 'CLEAR_SCREEN', 'CLEAR_LINE', 'HIDE_CURSOR', 'SHOW_CURSOR', 'SAVE_CURSOR', 'RESTORE_CURSOR'}:
+            print(f'{x[i]}{i}{END}')

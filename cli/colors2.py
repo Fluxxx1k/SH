@@ -1,7 +1,7 @@
 from colorama import Fore, Back, Style
 
 # Text colors
-GREY_TEXT = "\033[90m"
+GREY_TEXT = Fore.BLACK
 BLACK_TEXT = Fore.BLACK
 RED_TEXT = Fore.RED
 GREEN_TEXT = Fore.GREEN
@@ -22,7 +22,7 @@ CYAN_TEXT_BRIGHT = Fore.LIGHTCYAN_EX
 WHITE_TEXT_BRIGHT = Fore.LIGHTWHITE_EX
 
 # Background colors
-GREY_BACKGROUND = "\033[100m"
+GREY_BACKGROUND = Back.BLACK
 BLACK_BACKGROUND = Back.BLACK
 RED_BACKGROUND = Back.RED
 GREEN_BACKGROUND = Back.GREEN
@@ -48,15 +48,14 @@ RESET = END = Style.RESET_ALL
 BOLD = Style.BRIGHT
 DIM = Style.DIM
 NORMAL = Style.NORMAL
-CURSIVE = Style.BRIGHT  # Using BRIGHT as equivalent since colorama doesn't have cursive
-UNDERLINE = Style.BRIGHT  # Using BRIGHT as equivalent since colorama doesn't have underline
-NEGATIVE = Style.BRIGHT  # Using BRIGHT as equivalent since colorama doesn't have negative
 
-# Cursor movement (not available in colorama, keeping for compatibility)
-UP = '\033[A'
 
 if __name__ == '__main__':
     x = globals()
     for i in list(x):
-        if i not in ['UP']:  # Skip cursor movement codes that aren't color related
+        if i not in ['UP', 'DOWN', 'RIGHT', 'LEFT', 'CLEAR_SCREEN', 'CLEAR_LINE', 'HIDE_CURSOR', 'SHOW_CURSOR', 'SAVE_CURSOR', 'RESTORE_CURSOR']:
             print(f'{x[i]}{i}{END}')
+    print("Additional features:")
+    print(f"{ITALIC}Italic style (using bright){END}")
+    print(f"{UNDERLINE}Underline style{END}")
+    print(f"{STRIKETHROUGH}Strikethrough style{END}")
