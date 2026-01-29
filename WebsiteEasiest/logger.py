@@ -232,13 +232,15 @@ logger.addHandler(warning_error_fatal_path_file_handler)
 
 logger.debug("Logger created and loaded")
 
-  # Testing logs
-logger.low_debug("Low Debug log")
-logger.debug("Debug log")
-logger.info("Info log")
-logger.warning("Warning log")
-logger.error("Error log")
-logger.critical("Critical log")
-
 if isinstance(color, type):
     logger.warning("Compatibility colors not supported, using ANSI codes")
+
+if __name__ == "__main__":
+    # Testing logs
+    logger.low_debug("Low Debug log")
+    logger.debug("Debug log")
+    logger.info("Info log")
+    logger.warning("Warning log")
+    logger.error("Error log")
+    logger.critical("Critical log")
+
