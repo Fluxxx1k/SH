@@ -6,7 +6,7 @@ try:
 except Exception as e:
     print(f"Could not import colors: {repr(e)}")
     class color:
-        GREY_BACKGROUND = "\033[100m"
+        GRAY_BACKGROUND = "\033[100m"
         WHITE_BACKGROUND_BRIGHT = "\033[107m"
         YELLOW_BACKGROUND = "\033[43m"
         YELLOW_BACKGROUND_BRIGHT = "\033[103m"
@@ -86,7 +86,7 @@ class ColoredFormatterFile(logging.Formatter):
     format = "%(asctime)s - %(message)s"
 
     FORMATS = {
-        logging.DEBUG: f'{color.GREY_BACKGROUND if is_server else ""}DEBUG{color.END if is_server else ""}   | {color.GREY_TEXT if is_server else ""}{log_text}{color.END if is_server else ""}',
+        logging.DEBUG: f'{color.GRAY_BACKGROUND if is_server else ""}DEBUG{color.END if is_server else ""}   | {color.GREY_TEXT if is_server else ""}{log_text}{color.END if is_server else ""}',
         logging.INFO: f'{color.WHITE_BACKGROUND_BRIGHT+color.BLACK_TEXT if is_server else ""}INFO{color.END if is_server else ""}    | {log_text}{color.END if is_server else ""}',
         logging.WARNING: f'{color.YELLOW_BACKGROUND_BRIGHT if is_server else ""}{color.RED_TEXT if is_server else ""}WARNING{color.END if is_server else ""} | {color.YELLOW_TEXT_BRIGHT if is_server else ""}{log_text}{color.END if is_server else ""}',
         logging.ERROR: f'{color.RED_BACKGROUND if is_server else ""}{color.BLACK_TEXT if is_server else ""}ERROR{color.END}   | {color.RED_TEXT if is_server else ""}{log_text}{color.END if  is_server else ""} {{%(filename)s - %(funcName)s - %(lineno)d}}',
@@ -103,7 +103,7 @@ class ColoredFormatterFile(logging.Formatter):
 
 class ColoredFormatterConsole(ColoredFormatterFile):
     FORMATS = {
-        logging.DEBUG: f'{color.GREY_BACKGROUND}DEBUG{color.END}   | {color.GREY_TEXT}{log_text}{color.END}',
+        logging.DEBUG: f'{color.GRAY_BACKGROUND}DEBUG{color.END}   | {color.GREY_TEXT}{log_text}{color.END}',
         logging.INFO: f'{color.WHITE_BACKGROUND_BRIGHT + color.BLACK_TEXT}INFO{color.END}    | {log_text}{color.END}',
         logging.WARNING: f'{color.YELLOW_BACKGROUND_BRIGHT + color.RED_TEXT}WARNING{color.END} | {color.YELLOW_TEXT_BRIGHT}{log_text}{color.END}',
         logging.ERROR: f'{color.RED_BACKGROUND + color.BLACK_TEXT}ERROR{color.END}   | {color.RED_TEXT}{log_text}{color.END} {{%(filename)s - %(funcName)s - %(lineno)d}}',
