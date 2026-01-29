@@ -1,9 +1,26 @@
 import os
 from functools import cache
+import subprocess
 
+@cache
+def get_color_count():
+    """Получает количество поддерживаемых цветов"""
+    try:
+        result = subprocess.run(
+            ['tput', 'colors'],
+            capture_output=True,
+            text=True,
+            check=True
+        )
+        color_count = int(result.stdout.strip())
+        return color_count
+    except (subprocess.CalledProcessError, FileNotFoundError, ValueError):
+        return 0
 
 @cache
 def supports_256_colors():
+    if get_color_count() >= 256:
+        return True
     """Проверяет поддержку 256 цветов"""
     # Проверяем переменные окружения
     term = os.environ.get('TERM', '').lower()
