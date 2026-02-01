@@ -1,7 +1,6 @@
 import logging
 import sys, os
 from logging.handlers import RotatingFileHandler
-from typing import Callable
 
 try:
     import cli.colors as color
@@ -74,18 +73,19 @@ class FatalFilter(logging.Filter):
         return logging.ERROR < record.levelno
 
 
-# 2. Функция для добавления метода low_debug() к логгерам
-def low_debug(self, message, *args, **kwargs):
-    if self.isEnabledFor(LOW_DEBUG_NUM):
-        self._log(LOW_DEBUG_NUM, message, args, **kwargs)
 
 # 3. Добавляем метод в класс Logger
-logging.Logger.low_debug = low_debug
 
 # 4. Создаем логгер и настраиваем
 logger = logging.getLogger("my_logger")
 logger.setLevel(LOW_DEBUG_NUM)  # Ловим события от LOW_DEBUG и выше
-logger.low_debug: Callable
+# 2. Функция для добавления метода low_debug() к логгерам
+def low_debug(message, *args, **kwargs):
+    if logger.isEnabledFor(LOW_DEBUG_NUM):
+        logger._log(LOW_DEBUG_NUM, message, args, **kwargs)
+
+logger.low_debug = low_debug
+
 
 class ColoredFormatterFile(logging.Formatter):
     """
