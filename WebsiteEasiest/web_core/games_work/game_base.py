@@ -1,11 +1,32 @@
 from datetime import datetime
-
+from multiprocessing import Process
 from flask import redirect, session, abort, request
 
 from WebsiteEasiest.Website_featetures.error_handler.safe_functions import safe_url_for, render_template_abort_500
 from WebsiteEasiest.data.database_py.games import get_data_of_game, save_data_of_game, exists_game, end_game_db
 from WebsiteEasiest.data.database_py.players import get_data_of_player, save_data_of_player
 from WebsiteEasiest.logger import logger
+from WebsiteEasiest.web_core.games_work.game_work_bad import game_process
+
+games_processes: dict[str, Process] = {}
+
+def start_process_game(game_name):
+    try:
+        data = get_data_of_game(game_name)
+        if data[0]:
+            save_data_of_game(game_name, data[1])
+        else:
+            raise Exception("Game not found")
+        games_processes[game_name] = Process(target=game_process,
+                                             name=game_name,
+                                             args=(game_name, data[1]['count'],
+                                                   data[1].get('bots_count', 0),
+                                                   data[1].get('first_president', 0)),
+                                             daemon=True)
+        games_processes[game_name].start()
+    except Exception as e:
+        logger.error(f"Failed to start game process {game_name}: {repr(e)}")
+        abort(500, description=f"Failed to start game process {game_name}: {repr(e)}")
 
 def game(game_name):
     if 'username' not in session:
@@ -139,11 +160,9 @@ def game_start(game_name):
     if game_data['created_by'] != session['username']:
         abort(403, description=f"Игрок {session['username']} не является создателем игры {game_name}")
     game_data['status'] = 'playing'
-    from WebsiteEasiest.web_core.games_players_classes.webgame import games_dict, WebGame
     save_data_of_game(game_name, game_data)
-    games_dict[game_name] = WebGame(game_name, game_data)
+    start_process_game(game_name)
     return {'success': True, 'message': 'Игра успешно начата'}
-
 
 def game_end(game_name, delete:bool = False):
     if 'username' not in session:
