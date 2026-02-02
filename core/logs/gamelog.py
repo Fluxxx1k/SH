@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-from core.players.abstract_player import AbstractPlayer
-from core.standard_classes import Cards
-
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from core.players.abstract_player import AbstractPlayer
+    from core.standard_classes import Cards
 from core.standard_functions import color_clear
 
 
@@ -63,3 +64,21 @@ class GameLog:
         special = f'\t<td style="color: {special_c}"><b>{self.special}</b></td>\n'
         row = '\t<tr>' + president + chancellor + c_prs_said + c_cnc_said + c_cnc_placed + c_prs_said_after + special + '\t</tr>\n'
         return row
+
+    def to_json(self):
+        logs: dict[str, int|str]
+        logs = {
+            "cards_president_got": self.cpg,
+            "cards_president_said": self.cps,
+            "cards_chancellor_got": self.ccg,
+            "cards_chancellor_said": self.ccs,
+            "card_chancellor_placed": self.ccp,
+            "cards_president_said_after_chancellor": self.cpsa,
+            "special": self.special,
+        }
+        if self.is_president:
+            logs["prs"]= self.prs
+
+        if self.is_chancellor:
+            logs["cnc"] = self.cnc
+
