@@ -3,7 +3,8 @@ from multiprocessing import Process
 from flask import redirect, session, abort, request
 
 from WebsiteEasiest.Website_featetures.error_handler.safe_functions import safe_url_for, render_template_abort_500
-from WebsiteEasiest.data.database_py.games import get_data_of_game, save_data_of_game, exists_game, end_game_db
+from WebsiteEasiest.data.database_py.games import get_data_of_game, save_data_of_game, exists_game, end_game_db, \
+    get_logs_of_game
 from WebsiteEasiest.data.database_py.players import get_data_of_player, save_data_of_player
 from WebsiteEasiest.logger import logger
 from WebsiteEasiest.web_core.games_work.game_work_bad import game_process
@@ -235,36 +236,39 @@ def game_verify_password(game_name):
 
 def get_game_logs(game_name):
     count = request.args.get('count', default=0, type=int)
+    if not isinstance(count, int):
+        return {'success': False, 'message': f"Count must be an integer, not {type(count)}"}, 400
     if count < 0:
-        logger.warning(f"Count is below zero: {count}, replacing with 0")
+        logger.warning(f"Count ({game_name}) is below zero: {count}, replacing with 0")
         count = 0
     logger.debug(f'User {repr(session.get("username"))} requests logs of game {repr(game_name)} with count {repr(count)}')
     if 'username' not in session:
         abort(401, description="Необходимо войти в систему")
     if game_name == '':
         abort(404, description="Имя игры не может быть пустым")
-    game_found, game_data = get_data_of_game(game_name)
+    game_found, game_logs = get_logs_of_game(game_name)
     if not game_found:
+        abort(404, description=f"Игра {game_name} не найдена: {game_logs}")
+    game_found_2, game_data = get_data_of_game(game_name)
+    if not game_found_2:
         abort(404, description=f"Игра {game_name} не найдена: {game_data}")
     player_found, player_data = get_data_of_player(session['username'])
     if not player_found:
         abort(401, description=f"Игрок {session['username']} не найден: {player_data}")
-    if not isinstance(count, int):
-        return {'success': False, 'message': f"Count must be an integer, not {type(count)}"}, 400
     predata = [ #{'cps': 'CPS',
-                # 'ccs': 'CCS',
-                # 'ccp': 'CCP',
-                # 'cpsa': "CPSA",
-                # 'prs': 'PRS',
-                # 'cnc': "CNC",
-                # 'special': 'No logs'}
-                # for _ in range(10)
-                ]
+        # 'ccs': 'CCS',
+        # 'ccp': 'CCP',
+        # 'cpsa': "CPSA",
+        # 'prs': 'PRS',
+        # 'cnc': "CNC",
+        # 'special': 'No logs'}
+        # for _ in range(10)
+    ]
     x = {
         'success': True,
-        'logs': game_data.get('logs', predata)[count:],
-        'action': game_data.get('action', "Unknown action"),
-        }
+        'logs': game_logs[count:],
+        'action': game_data.get('action', 'No action')
+    }
     if x['logs'] == []:
         return {'success': False, 'message': "No new logs", "action":x['action']}
     return x

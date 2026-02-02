@@ -4,7 +4,7 @@ import os, json
 from typing import Optional
 
 from WebsiteEasiest.data.database_py.players import add_game_to_player
-from WebsiteEasiest.data.data_paths import path_games, path_existed_games
+from WebsiteEasiest.data.data_paths import path_games, path_existed_games, path_logs_games
 from WebsiteEasiest.logger import logger
 
 
@@ -57,10 +57,23 @@ def get_data_of_game(game_name: str) -> tuple[bool, dict | str]:
             games_data_dict[game_name] = json.load(open(os.path.join(path_games, game_name + '.json'), encoding='utf-8'))
             return True, games_data_dict[game_name]
         else:
-            return False, repr(FileNotFoundError(f'Game "{game_name}" not found'))
+            return False, f'Game "{game_name}" not found'
     except Exception as e:
         logger.error(repr(e))
         return False, e.__class__.__name__
+
+def get_logs_of_game(game_name: str) -> tuple[bool, list[dict[str, str|int]] | str]:
+    try:
+        logger.debug(f"Getting logs of game {repr(game_name)} from file")
+        if exists_game(game_name):
+            game_logs = json.load(open(os.path.join(path_logs_games, game_name + '.json'), encoding='utf-8'))
+            return True, game_logs
+        else:
+            return False, f'Game "{game_name}" not found'
+    except Exception as e:
+        logger.error(repr(e))
+        return False, e.__class__.__name__
+
 
 
 def save_data_of_game(game_name: str, game_data: dict) -> bool:
