@@ -19,9 +19,12 @@ def start_process_game(game_name):
             raise Exception("Game not found")
         games_processes[game_name] = Process(target=game_process,
                                              name=game_name,
-                                             args=(game_name, data[1]['count'],
+                                             args=(game_name,
+                                                   data[1]['current_players'],
                                                    data[1].get('bots_count', 0),
-                                                   data[1].get('first_president', 0)),
+                                                   data[1]['players'],
+                                                   data[1].get('first_president', 0),
+                                                   ),
                                              daemon=True)
         games_processes[game_name].start()
     except Exception as e:

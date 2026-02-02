@@ -1,17 +1,23 @@
 from __future__ import annotations
 
-import os
+import os, json
 import random as rnd
 import time as t
 
 from WebsiteEasiest.logger import logger
+from WebsiteEasiest.web_core.games_players_classes.webplayer import WebPlayer
 from core.logs.HTML_logs import color_of_HTML_roles, GameLog, pr_c, purple_c, InfoLog
 from legacy.globs import PLAYERS, ROLES, INFO_LOGS
 from legacy import globs
 from core.standard_names_SH import X
 from user_settings import *
+from WebsiteEasiest.data.data_paths import path_logs_games
 
 def game_work_bad(game_name: str, count: int, bots_count: int, first_president: int = 0):
+    def save_json_of_logs():
+        with open(f"{path_logs_games}\\{game_name}.json", 'w+', encoding='utf-8') as file:
+            json.dump([log.to_json() for log in normal_logs], file, indent=4)
+
     code_start_time = t.time()
     INFO_LOGS.append(InfoLog(info_type=X.INFO, info_name="Code start time", info1=t.strftime(f"{DATE_FORMAT} {TIME_FORMAT}"), info2=code_start_time))
     saved = []
@@ -65,7 +71,7 @@ def game_work_bad(game_name: str, count: int, bots_count: int, first_president: 
     try:
         STALIN = ROLES.index(X.STALIN)
     except ValueError:
-        logger.warning(f"{game_name}: WTH? No {X.STALIN} in ROLES...")
+        logger.debug(f"{game_name}: No {X.STALIN} in ROLES")
     except Exception as error:
         logger.warning(f"{game_name}: Can't find {X.STALIN= }: {repr(error)}")
     try:
@@ -81,13 +87,11 @@ def game_work_bad(game_name: str, count: int, bots_count: int, first_president: 
     start_time = t.time()
     start_time_f = t.strftime(f"{DATE_FORMAT} {TIME_FORMAT}")
     logger.debug(f"{game_name}: Game start time: {start_time_f}")
-    INFO_LOGS.append(InfoLog(info_type=X.INFO, info_name="AbstractGame start time", info1=start_time_f, info2=start_time))
+    INFO_LOGS.append(InfoLog(info_type=X.INFO, info_name="Game start time", info1=start_time_f, info2=start_time))
     red = black = 0
     checks = 1
     Git_caput = False
     Git_cn = False
-    f_l = {"OUT", "DEBUG_MODE", "EXIT"}
-
 
 
     def degov() -> None:
@@ -96,17 +100,18 @@ def game_work_bad(game_name: str, count: int, bots_count: int, first_president: 
 
 
     def take_random(c:int) ->  list[str]:
-        global saved
+        nonlocal saved
         if saved:
             x = saved.copy()
             saved = []
             return x
-        global deck
+        nonlocal deck
         try:
             chosen = rnd.sample(deck, k=c)
         except ValueError:
             normal_logs.append(
                 GameLog(special=f"Deck resetting<br>RED: {red_start - red}<br>BLACK: {black_start - black}", is_cards=False))
+            save_json_of_logs()
             deck = ["R"] * (red_start - red) + ["B"] * (black_start - black)
             chosen = rnd.sample(deck, k=c)
         for card in chosen:
@@ -146,6 +151,7 @@ def game_work_bad(game_name: str, count: int, bots_count: int, first_president: 
                 normal_logs.append(GameLog(prs="ANARCHY", cnc="ANARCHY",
                                            c_cnc_placed=ccp, special=f"({skips} skips)",
                                            is_chancellor=False, is_president=False))
+                save_json_of_logs()
                 if ccp == 'B':
                     black += 1
                     checks += 1
@@ -162,6 +168,7 @@ def game_work_bad(game_name: str, count: int, bots_count: int, first_president: 
                 saved = 0
                 if gulag is not None:
                     normal_logs.append(GameLog(prs="ANARCHY", cnc="ANARCHY", special=f"Anarchy, {PLAYERS[gulag]} freed", is_chancellor=False, is_president=False))
+                    save_json_of_logs()
                     PLAYERS[gulag].free()
                     gulag = None
         PLAYERS[pn].chosen_gov(X.PRESIDENT)
@@ -194,6 +201,7 @@ def game_work_bad(game_name: str, count: int, bots_count: int, first_president: 
             if cn == HITLER:
                 degov()
                 normal_logs.append(GameLog(prs=PLAYERS[pn], cnc=PLAYERS[cn], special="Hitler is chancellor!"))
+                save_json_of_logs()
                 Git_cn = True
                 break
             else:
@@ -220,6 +228,7 @@ def game_work_bad(game_name: str, count: int, bots_count: int, first_president: 
                                        c_prs_got=c_prs_got, c_prs_said=cps, c_prs_said_after=cpsa,
                                        c_cnc_got=c_cnc_got, c_cnc_said=ccs, c_cnc_placed="",
                                        special="VETO"))
+        save_json_of_logs()
         degov()
         previous_president = pn
         if black == 1 >= checks:
@@ -229,6 +238,7 @@ def game_work_bad(game_name: str, count: int, bots_count: int, first_president: 
                                        c_prs_got=''.join(saved),
                                        c_prs_said=cpsc,
                                        special="Card check"))
+            save_json_of_logs()
             checks = 2
         elif black == 2 >= checks:
             pc, cpc = PLAYERS[pn].check_player()
@@ -238,10 +248,12 @@ def game_work_bad(game_name: str, count: int, bots_count: int, first_president: 
                 GameLog(prs=PLAYERS[pn], cnc=PLAYERS[pc],
                         special=f"[<font color='{pr_c}'>{PLAYERS[pn]}</font>] said, that color of [<font color='{purple_c}'>{PLAYERS[pc]}</font>] is <font color='{color_of_HTML_roles(cpc)}'>{cpc}</font>",
                         is_chancellor=False))
+            save_json_of_logs()
             checks = 3
         elif black == 3 >= checks:
             gulag = PLAYERS[pn].purge_another(X.GULAG)
             normal_logs.append(GameLog(PLAYERS[pn], PLAYERS[gulag], special="In gulag", is_cards=False, is_chancellor=False))
+            save_json_of_logs()
             PLAYERS[gulag].purge(X.GULAG)
             if gulag == HITLER:
                 degov()
@@ -263,6 +275,8 @@ def game_work_bad(game_name: str, count: int, bots_count: int, first_president: 
                 gulag = None
             PLAYERS[killed].purge(X.KILLED)
             normal_logs.append(GameLog(PLAYERS[pn], PLAYERS[killed], special=f"Killed", is_chancellor=False))
+            save_json_of_logs()
+            save_json_of_logs()
             if killed not in Git_not:
                 if killed == HITLER:
                     degov()
@@ -280,10 +294,13 @@ def game_work_bad(game_name: str, count: int, bots_count: int, first_president: 
     logger.info(f"{game_name}: Game over time: " + end_time_f)
 
 
-def game_process(game_name, count: int, bots_count: int, first_president: int|None = None):
+def game_process(game_name, count: int, bots_count: int, players: list[str], first_president: int|None = None):
+    globs.ROLES = get_roles(count)
+    globs.PLAYERS = [WebPlayer(i, players[i], globs.ROLES[i]) for i in range(count)]
+
     try:
         game_work_bad(game_name, count, bots_count, first_president or 0)
         return True
     except Exception as e:
-        logger.error(f"{game_name}: Error in game_process: {e}")
+        logger.error(f"{game_name}: Error in game_process: {repr(e)}")
         return False
