@@ -7,13 +7,17 @@ import time as t
 from WebsiteEasiest.logger import logger
 from WebsiteEasiest.web_core.games_players_classes.webplayer import WebPlayer
 from core.logs.HTML_logs import color_of_HTML_roles, GameLog, pr_c, purple_c, InfoLog
-from legacy.globs import PLAYERS, ROLES, INFO_LOGS
 from legacy import globs
 from core.standard_names_SH import X
 from user_settings import *
 from WebsiteEasiest.data.data_paths import path_logs_games
 
 def game_work_bad(game_name: str, count: int, bots_count: int, first_president: int = 0):
+    INFO_LOGS = globs.INFO_LOGS
+    ROLES = globs.ROLES
+    PLAYERS = globs.PLAYERS
+    logger.low_debug(f"{'\n'.join([f'{i}) {j}' for i, j in globs.__dict__.items()])}")
+    logger.low_debug(globs.PLAYERS)
     def save_json_of_logs():
         with open(f"{path_logs_games}\\{game_name}.json", 'w+', encoding='utf-8') as file:
             json.dump([log.to_json() for log in normal_logs], file, indent=4)
@@ -65,9 +69,6 @@ def game_work_bad(game_name: str, count: int, bots_count: int, first_president: 
     killed = None
     HITLER = None
     STALIN = None
-    temp, molotov_ribbentrop = get_roles(count)
-    ROLES.extend(temp)
-
     try:
         STALIN = ROLES.index(X.STALIN)
     except ValueError:
@@ -295,7 +296,7 @@ def game_work_bad(game_name: str, count: int, bots_count: int, first_president: 
 
 
 def game_process(game_name, count: int, bots_count: int, players: list[str], first_president: int|None = None):
-    globs.ROLES = get_roles(count)
+    globs.ROLES = get_roles(count)[0]
     globs.PLAYERS = [WebPlayer(i, players[i], globs.ROLES[i]) for i in range(count)]
 
     try:
