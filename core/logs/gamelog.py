@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from core.players.abstract_player import AbstractPlayer
     from core.standard_classes import Cards
+from core.players.abstract_player import AbstractPlayer
 from core.standard_functions import color_clear
 
 

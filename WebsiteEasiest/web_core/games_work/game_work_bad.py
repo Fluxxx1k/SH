@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import os, json
+import os, json, traceback
 import random as rnd
 import time as t
 
@@ -302,5 +302,7 @@ def game_process(game_name, count: int, bots_count: int, players: list[str], fir
         game_work_bad(game_name, count, bots_count, first_president or 0)
         return True
     except Exception as e:
-        logger.error(f"{game_name}: Error in game_process: {repr(e)}")
+        logger.critical(f"{game_name}: Error in game_process: {repr(e)}"
+                        "\n"f"{traceback.format_exc()}""\n")
+
         return False
