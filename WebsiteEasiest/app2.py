@@ -8,7 +8,7 @@ from WebsiteEasiest.Website_featetures.error_handler.render_error import abort_o
 
 @app.route('/favicon.ico')
 def favicon():
-    return url_for('static', filename='favicon.ico')
+    return "https://img.icons8.com/fluency/48/soldier-man.png"
 
 @app.route('/')
 @app.route('/index')
