@@ -13,12 +13,20 @@ os.makedirs(path_logs_games, exist_ok=True)
 os.makedirs(path_actions_games, exist_ok=True)
 
 path_players = os.path.join(dirname, 'players')
-path_IP = os.path.join(dirname, 'IP')
 os.makedirs(path_players, exist_ok=True)
-os.makedirs(path_IP, exist_ok=True)
+try:
+    path_IP = os.path.join(dirname, 'IP')
+    os.makedirs(path_IP, exist_ok=True)
+except Exception as e:
+    path_IP = None
+    logger.error(f"Failed to create or open IP directory: {repr(e)}")
+try:
+    path_banned = os.path.join(dirname, 'banned_IP.json')
+    open(path_banned, 'a+', encoding='utf-8').close()
+except Exception as e:
+    path_banned = None
+    logger.error(f"Failed to create or open banned_IP.json: {repr(e)}")
 
-path_banned = os.path.join(dirname, 'banned_IP.json')
-open(path_banned, 'a+', encoding='utf-8').close()
 
 logger.low_debug(f"Paths:"
              f"\n\t\t{__file__= }"
