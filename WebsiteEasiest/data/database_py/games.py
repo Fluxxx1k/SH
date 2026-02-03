@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 import os, json
-from typing import Optional
+from typing import Optional, Literal
 
 from WebsiteEasiest.data.database_py.players import add_game_to_player
-from WebsiteEasiest.data.data_paths import path_games, path_existed_games, path_logs_games
+from WebsiteEasiest.data.data_paths import path_games, path_existed_games, path_logs_games, path_actions_games
 from WebsiteEasiest.logger import logger
 
 
@@ -147,3 +147,47 @@ def end_game_db(game_name: str, game_data: dict = None, delete: bool = False) ->
         logger.error(repr(e))
         return False, e.__class__.__name__ + f' Game "{game_name}" will be lost'
 
+def get_vote_of_player_in_game(player_name: str, game_name: str) -> tuple[bool, dict | str]:
+    game_found, game_data = get_data_of_game(game_name)
+    if not game_found:
+        return False, game_data
+    if player_name not in game_data.get('votes', {}):
+        return False, f'Player {player_name} has not voted in game {game_name}'
+    return True, game_data['votes'][player_name]
+
+def get_vote_of_player_in_game_type_2(player_name: str, game_name: str, get_type: Literal['yesNo', 0, 'target', 1]) -> tuple[bool, str, float]:
+    try:
+        if get_type == 'yesNo' or get_type == 0:
+            with open(os.path.join(path_actions_games, "YesNo", game_name + '.txt'), encoding='utf-8') as f:
+                vote = f.readline()
+                timestamp = float(f.readline())
+                return True, vote.strip(), timestamp
+        elif get_type == 'target' or get_type == 1:
+            with open(os.path.join(path_actions_games, "Target", game_name + '.txt'), encoding='utf-8') as f:
+                vote = f.readline()
+                timestamp = float(f.readline().strip())
+                return True, vote.strip(), timestamp
+        else:
+            raise ValueError(f"Invalid get_type: {get_type}")
+
+    except Exception as e:
+        logger.error(f"Failed to get vote of player {player_name} in game {game_name}: {repr(e)}")
+        return False, repr(e), 0
+
+def set_vote_of_player_in_game_type_2(player_name: str, game_name: str, vote: str, timestamp: float, get_type: Literal['yesNo', 0, 'target', 1]) -> tuple[bool, str|None]:
+    try:
+        if get_type == 'yesNo' or get_type == 0:
+            with open(os.path.join(path_actions_games, "YesNo", game_name + '.txt'), 'w+', encoding='utf-8') as f:
+                f.write(vote + '\n')
+                f.write(str(timestamp) + '\n')
+            return True, None
+        elif get_type == 'target' or get_type == 1:
+            with open(os.path.join(path_actions_games, "Target", game_name + '.txt'), 'w+', encoding='utf-8') as f:
+                f.write(vote + '\n')
+            return True, None
+        else:
+            raise ValueError(f"Invalid get_type: {get_type}")
+
+    except Exception as e:
+        logger.error(f"Failed to set vote of player {player_name} in game {game_name}: {repr(e)}")
+        return False, repr(e)
