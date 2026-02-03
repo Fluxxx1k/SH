@@ -290,7 +290,7 @@ def game_work_bad(game_name: str, count: int, bots_count: int, first_president: 
 
     end_time_f = t.strftime(f"{DATE_FORMAT} {TIME_FORMAT}")
     end_time = t.time()
-    INFO_LOGS.append(InfoLog(info_type=X.INFO, info_name="AbstractGame end time", info1=end_time_f, info2=end_time))
+    INFO_LOGS.append(InfoLog(info_type=X.INFO, info_name="Game end time", info1=end_time_f, info2=end_time))
     logger.info(f"{game_name}: Game start time: " + start_time_f)
     logger.info(f"{game_name}: Game over time: " + end_time_f)
 
