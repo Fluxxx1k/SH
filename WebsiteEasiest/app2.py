@@ -1,5 +1,4 @@
-from WebsiteEasiest.data.database_py.games import count_games
-from WebsiteEasiest.data.database_py.players import count_players
+from WebsiteEasiest.data.database.adapter import count_games, count_players
 from WebsiteEasiest.app_globs import app
 from WebsiteEasiest.Website_featetures.error_handler.safe_functions import safe_url_for as url_for, \
     render_template_abort_500 as render_template

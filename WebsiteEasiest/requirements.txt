@@ -2,3 +2,7 @@ Flask
 Werkzeug
 Jinja2>=3.1.2,<4.0.0
 psutil
+SQLAlchemy>=2.0.0
+psycopg2-binary>=2.9.0
+alembic>=1.12.0
+python-dotenv>=1.0.0
