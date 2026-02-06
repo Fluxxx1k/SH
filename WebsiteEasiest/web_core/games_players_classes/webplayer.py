@@ -13,10 +13,6 @@ class WebPlayer(AbstractPlayer):
     def __init__(self, index, name, role):
         super().__init__(index, name, role)
         self.game_name = get_data_of_player(self.name)[1]['game']
-        game_found, game_data = get_data_of_game(self.game_name)
-        if not game_found:
-            raise ValueError(f"Game {self.game_name} not found: {game_data}")
-        self.players = game_data['players']
         self._vote_yesno = None
         self._vote_player = None
         self._cards_action = None
