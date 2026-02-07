@@ -4,6 +4,7 @@ import os
 from WebsiteEasiest.settings.web_config import is_debug
 from WebsiteEasiest.web_errors import *
 from WebsiteEasiest.web_loggers import log_response, log_request
+from WebsiteEasiest.logger import logger
 
 app = Flask(__name__)
 app.debug = is_debug
@@ -13,10 +14,9 @@ app.secret_key = 'your_secret_key_here'
 # Initialize database
 try:
     from WebsiteEasiest.data.database import init_db
-    from WebsiteEasiest.logger import logger as db_logger
     db_url = os.getenv('DATABASE_URL')
     init_db(db_url, echo=is_debug)
-    db_logger.info("Database initialized successfully")
+    logger.info("Database initialized successfully")
 except Exception as e:
     print(f"WARNING: Failed to initialize database: {e}")
     print("Some features may not work correctly")
