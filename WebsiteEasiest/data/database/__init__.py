@@ -13,7 +13,7 @@ Base = declarative_base()
 # Database URL configuration
 DATABASE_URL: Optional[str] = None
 engine = None
-SessionLocal = None
+SessionLocal: None | sessionmaker = None
 
 def init_db(database_url: str = None, echo: bool = False):
     """
@@ -47,5 +47,4 @@ def get_session():
     if SessionLocal is None:
         raise RuntimeError("Database not initialized. Call init_db() first.")
     return SessionLocal()
-
 
