@@ -39,7 +39,8 @@ try:
     for item in not_done:
         print(f"\033[33m{item}\033[0m")
     if not_done:
-        print("\033[31mWARNING: Some files are not installed or renamed, may be problems!\033[0m")
+        print("\033[31mWARNING: Some files are not installed or renamed or moved, may be problems!\033[0m")
+        print("\033[31mYou can try to launch anyway, but some features or all game may not work (or i just  forgot to fix it)!\033[0m")
         if not input("Press Enter if you want to exit or anything to try to launch: "):
             print("\033[31mClosing...\033[0m")
             exit(0)
@@ -58,4 +59,4 @@ if temp == '1':
 elif temp == '2':
     print("\033[31mNot available now...\033[0m")
 elif temp == '3':
-    pass
+    print("\033[31mNot available now...\033[0m")

@@ -1,12 +1,17 @@
+# I HATE THIS SHIT
+# THIS WILL BE UNUSED
+# I'll make new database before
 from __future__ import annotations
 
 import time
 from typing import Literal, Iterable
 
-from WebsiteEasiest.data.database_py.games import get_data_of_game
+from WebsiteEasiest.data.database_py.games import get_data_of_game, get_vote_of_player_in_game_type_2
 from WebsiteEasiest.data.database_py.players import get_data_of_player
 from WebsiteEasiest.logger import logger
 from core.players.abstract_player import AbstractPlayer
+WAIT_TIME = 60
+CHECK_TIME = 5
 
 
 class WebPlayer(AbstractPlayer):
@@ -106,6 +111,26 @@ class WebPlayer(AbstractPlayer):
     def set_cards_action(self, cards: str):
         """Set player's action from web interface"""
         self._cards = cards
+    def load_cards_action(self, timeout: float = float('inf')):
+        """Load player's action from web interface"""
+        success, vote, timestamp = get_vote_of_player_in_game_type_2(self.name, self.game_name, 'cards')
+        if success:
+            if timestamp + timeout < time.time():
+                logger.warning(f"Player {self.name} in game {self.game_name} has not voted for cards for {WAIT_TIME} seconds, clearing vote")
+                return
+            self.set_cards_action(vote)
+        return self._cards
+
+    def wait_for_cards_action(self, timeout: float = float('inf')) -> str:
+        """Wait for user action with timeout"""
+        start_time = time.time()
+        while time.time() - start_time < timeout:
+            if self.has_cards_action():
+                return self.get_cards_action()
+            time.sleep(CHECK_TIME)
+        if self.has_cards_action():
+            return self.get_cards_action()
+        raise TimeoutError("Action timeout")
 
     def get_cards_action(self) -> str | None:
         """Get and clear player's action"""

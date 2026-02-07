@@ -174,7 +174,10 @@ def get_vote_of_player_in_game_type_2(player_name: str, game_name: str, get_type
         logger.error(f"Failed to get vote of player {player_name} in game {game_name}: {repr(e)}")
         return False, repr(e), 0
 
-def set_vote_of_player_in_game_type_2(player_name: str, game_name: str, vote: str, timestamp: float, get_type: Literal['yesNo', 0, 'target', 1]) -> tuple[bool, str|None]:
+def set_vote_of_player_in_game_type_2(player_name: str, game_name: str, vote: str, get_type: Literal['yesNo', 0, 'target', 1], timestamp: float = None) -> tuple[bool, str|None]:
+    if timestamp is None:
+        import time
+        timestamp = time.time()
     try:
         if get_type == 'yesNo' or get_type == 0:
             with open(os.path.join(path_actions_games, "YesNo", game_name + '.txt'), 'w+', encoding='utf-8') as f:
@@ -184,6 +187,7 @@ def set_vote_of_player_in_game_type_2(player_name: str, game_name: str, vote: st
         elif get_type == 'target' or get_type == 1:
             with open(os.path.join(path_actions_games, "Target", game_name + '.txt'), 'w+', encoding='utf-8') as f:
                 f.write(vote + '\n')
+                f.write(str(timestamp) + '\n')
             return True, None
         else:
             raise ValueError(f"Invalid get_type: {get_type}")
