@@ -26,27 +26,25 @@ def index():
 
 from WebsiteEasiest.web_core.profile import logins
 app.route('/login')(abort_on_exception(logins.login))
-app.route('/login', methods=['POST'])(abort_on_exception(logins.login_post))
+app.route('/login',                             methods=['POST'])(abort_on_exception(logins.login_post))
 
 from WebsiteEasiest.web_core.profile import registers
 app.route('/register')(abort_on_exception(registers.register))
-app.route('/register', methods=['POST'])(abort_on_exception(registers.register_post))
+app.route('/register',                          methods=['POST'])(abort_on_exception(registers.register_post))
 
 from WebsiteEasiest.web_core.profile import logouts
-app.route('/logout')(abort_on_exception(logouts.logout))
+app.route('/logout',                            methods=['GET'] )(abort_on_exception(logouts.logout))
 
 from WebsiteEasiest.web_core.games_work import lobbies
 app.route('/lobby')(abort_on_exception(lobbies.lobby))
-app.route('/lobby/leave', methods=['POST'])(abort_on_exception(lobbies.game_leave))
-
-
+app.route('/lobby/leave',                       methods=['POST'])(abort_on_exception(lobbies.game_leave))
 
 from WebsiteEasiest.web_core.games_work import game_creation
-app.route('/create_game', methods=['GET'] )(abort_on_exception(game_creation.create_game))
-app.route('/create_game', methods=['POST'])(abort_on_exception(game_creation.create_game_post))
+app.route('/create_game',                       methods=['GET'] )(abort_on_exception(game_creation.create_game))
+app.route('/create_game',                       methods=['POST'])(abort_on_exception(game_creation.create_game_post))
 
 from WebsiteEasiest.web_core.games_work import game_base
-app.route('/game/<game_name>',                  methods=['GET'])(abort_on_exception(game_base.game))
+app.route('/game/<game_name>',                  methods=['GET'] )(abort_on_exception(game_base.game))
 app.route('/game/<game_name>',                  methods=['POST'])(abort_on_exception(game_base.game_post))
 app.route('/game/<game_name>/vote',             methods=['POST'])(abort_on_exception(game_base.game_vote))
 app.route('/game/<game_name>/join',             methods=['POST'])(abort_on_exception(game_base.game_join))
@@ -58,11 +56,10 @@ app.route('/game/<game_name>/delete',           methods=['POST'])(abort_on_excep
 app.route('/game/<game_name>/logs',             methods=['GET'] )(abort_on_exception(game_base.get_game_logs))
 
 from WebsiteEasiest.web_core.games_work import laws_work
-app.route('/game/<game_name>/laws_vote', methods=['POST'])(abort_on_exception(laws_work.laws_vote))
+app.route('/game/<game_name>/laws_vote',        methods=['POST'])(abort_on_exception(laws_work.laws_vote))
 
 
 from WebsiteEasiest.memory_checker import mem_check
-
 
 if __name__ == '__main__':
     import threading
