@@ -12,7 +12,7 @@ RED_WIN_NUM: int = 5
 BLACK_WIN_NUM: int = 6
 
 ANARCHY_SKIP_NUM: int = 3
-DEBUG_MODE: bool = True
+DEBUG_MODE: bool = False
 IS_PROMT_ENTERING_COMMAND: bool = False
 LOG_CONSOLE: bool = DEBUG_MODE
 IS_PRINT_FULL_INFO: bool = DEBUG_MODE
@@ -72,9 +72,9 @@ BOT_BASE_NAME = "Bot"
 BOT_NUM: int = 7
 
 
-VOTE_BY_ONE: bool = True
+VOTE_BY_ONE: bool = False
 VOTE_ANONYMOUS: bool = False
 
 
-WEBSITE_USING: bool = True
+WEBSITE_USING: bool = False
 VETO_NUM_BLACK: int = 5
