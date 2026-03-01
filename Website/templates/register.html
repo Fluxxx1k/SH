@@ -1,0 +1,265 @@
+{% extends "base.html" %}
+
+{% block title %}Регистрация - {{ config.SITE_NAME or 'Игра' }}{% endblock %}
+{% block header_title %}Регистрация{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+{% endblock %}
+
+{% block content %}
+    <!-- Конфигурация для JavaScript -->
+    <script>
+        const AUTH_CONFIG = {
+            redirectUrl: '{{ request.args.get("next") or url_for("lobby") }}',
+            csrfToken: '{{ csrf_token() if csrf_token else "" }}',
+            isLogin: false
+        };
+    </script>
+
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <h1 class="auth-title">
+                    <span class="gradient-text">Регистрация</span>
+                </h1>
+                <p class="auth-subtitle">Создайте свой аккаунт и начните играть!</p>
+            </div>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="auth-messages">
+                        {% for category, message in messages %}
+                            <div class="auth-message auth-message-{{ category }}">
+                                <span class="message-icon">
+                                    {% if category == 'error' %}❌{% elif category == 'success' %}✅{% else %}ℹ️{% endif %}
+                                </span>
+                                <span class="message-text">{{ message }}</span>
+                                <button class="message-close" onclick="this.parentElement.remove()">×</button>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+
+            <form class="auth-form" id="registerForm" method="POST" action="{{ url_for('register') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() if csrf_token else '' }}">
+                
+                <div class="form-group">
+                    <label for="username" class="form-label">Имя пользователя</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">👤</span>
+                        <input 
+                            type="text" 
+                            id="username" 
+                            name="username" 
+                            class="form-input" 
+                            placeholder="Придумайте имя пользователя"
+                            required
+                            autofocus
+                            autocomplete="username"
+                            minlength="3"
+                            maxlength="20"
+                        >
+                    </div>
+                    <div class="form-help">От 3 до 20 символов, только буквы и цифры</div>
+                    <div class="form-error" id="username-error"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="email" class="form-label">Email (опционально)</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">📧</span>
+                        <input 
+                            type="email" 
+                            id="email" 
+                            name="email" 
+                            class="form-input" 
+                            placeholder="Ваш email адрес"
+                            autocomplete="email"
+                        >
+                    </div>
+                    <div class="form-help">Используется для восстановления пароля</div>
+                    <div class="form-error" id="email-error"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="password" class="form-label">Пароль</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">🔒</span>
+                        <input 
+                            type="password" 
+                            id="password" 
+                            name="password" 
+                            class="form-input" 
+                            placeholder="Придумайте надежный пароль"
+                            required
+                            autocomplete="new-password"
+                            minlength="6"
+                        >
+                        <button type="button" class="password-toggle" onclick="togglePassword('password')">
+                            <span class="toggle-icon">👁️</span>
+                        </button>
+                    </div>
+                    <div class="form-help">Минимум 6 символов</div>
+                    <div class="password-strength" id="password-strength">
+                        <div class="strength-bar">
+                            <div class="strength-fill" id="strength-fill"></div>
+                        </div>
+                        <span class="strength-text" id="strength-text">Слабый</span>
+                    </div>
+                    <div class="form-error" id="password-error"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirm_password" class="form-label">Подтверждение пароля</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">🔒</span>
+                        <input 
+                            type="password" 
+                            id="confirm_password" 
+                            name="confirm_password" 
+                            class="form-input" 
+                            placeholder="Повторите пароль"
+                            required
+                            autocomplete="new-password"
+                        >
+                        <button type="button" class="password-toggle" onclick="togglePassword('confirm_password')">
+                            <span class="toggle-icon">👁️</span>
+                        </button>
+                    </div>
+                    <div class="form-error" id="confirm_password-error"></div>
+                </div>
+
+                <div class="form-group">
+                    <label class="checkbox-wrapper">
+                        <input type="checkbox" name="terms" class="form-checkbox" required>
+                        <span class="checkmark"></span>
+                        <span class="checkbox-label">
+                            Я соглашаюсь с <a href="#" class="auth-link" onclick="showTerms()">условиями использования</a>
+                        </span>
+                    </label>
+                    <div class="form-error" id="terms-error"></div>
+                </div>
+
+                <button type="submit" class="auth-submit" id="submitBtn">
+                    <span class="submit-text">Создать аккаунт</span>
+                    <span class="submit-spinner" style="display: none;">
+                        <div class="spinner"></div>
+                    </span>
+                </button>
+
+                <div class="auth-loading" id="loadingIndicator" style="display: none;">
+                    <div class="loading-spinner"></div>
+                    <span>Создание аккаунта...</span>
+                </div>
+            </form>
+
+            <div class="auth-footer">
+                <p class="auth-text">
+                    Уже есть аккаунт? 
+                    <a href="{{ url_for('login') }}?next={{ request.args.get('next') or '' }}" class="auth-link">
+                        Войдите
+                    </a>
+                </p>
+                
+                <div class="auth-divider">
+                    <span class="divider-text">или</span>
+                </div>
+
+                <div class="auth-alternatives">
+                    <button type="button" class="auth-alternative" onclick="showDemoLogin()">
+                        <span class="alternative-icon">🎮</span>
+                        <span class="alternative-text">Демо-режим</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="auth-info">
+            <div class="info-card">
+                <h3>🔒 Безопасность</h3>
+                <ul class="info-list">
+                    <li>Все данные шифруются при передаче</li>
+                    <li>Пароли хранятся в зашифрованном виде</li>
+                    <li>Email используется только для восстановления доступа</li>
+                </ul>
+            </div>
+
+            <div class="info-card">
+                <h3>🎯 Преимущества</h3>
+                <ul class="info-list">
+                    <li>Доступ ко всем играм и функциям</li>
+                    <li>Сохранение истории игр и статистики</li>
+                    <li>Возможность создавать свои игры</li>
+                    <li>Участие в рейтингах и турнирах</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно для демо-режима -->
+    <div class="modal" id="demoModal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>🎮 Демо-режим</h3>
+                <button class="modal-close" onclick="closeDemoModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <p>Вы можете войти в демо-режиме, чтобы быстро протестировать игру:</p>
+                
+                <div class="demo-options">
+                    <button class="demo-option" onclick="loginAsDemo('player')">
+                        <div class="demo-icon">👤</div>
+                        <div class="demo-title">Обычный игрок</div>
+                        <div class="demo-desc">Простой игровой аккаунт</div>
+                    </button>
+                    
+                    <button class="demo-option" onclick="loginAsDemo('observer')">
+                        <div class="demo-icon">👁️</div>
+                        <div class="demo-title">Наблюдатель</div>
+                        <div class="demo-desc">Только просмотр игр</div>
+                    </button>
+                </div>
+                
+                <div class="demo-warning">
+                    <strong>⚠️ Внимание:</strong> Демо-аккаунты имеют ограниченные возможности и могут быть удалены автоматически.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно для условий использования -->
+    <div class="modal" id="termsModal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>📋 Условия использования</h3>
+                <button class="modal-close" onclick="closeTermsModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="terms-content">
+                    <h4>1. Общие положения</h4>
+                    <p>Используя данный сервис, вы соглашаетесь соблюдать правила и условия, изложенные ниже.</p>
+                    
+                    <h4>2. Пользовательский контент</h4>
+                    <p>Вы несете ответственность за любой контент, который публикуете или передаете через сервис.</p>
+                    
+                    <h4>3. Конфиденциальность</h4>
+                    <p>Мы уважаем вашу конфиденциальность и обязуемся защищать ваши персональные данные.</p>
+                    
+                    <h4>4. Правила поведения</h4>
+                    <p>Запрещено использование сервиса для распространения вредоносного контента или спама.</p>
+                </div>
+                
+                <div class="terms-actions">
+                    <button class="action-btn action-btn-primary" onclick="acceptTerms()">Принять условия</button>
+                    <button class="action-btn action-btn-secondary" onclick="closeTermsModal()">Отмена</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+    <script src="{{ url_for('static', filename='js/auth.js') }}"></script>
+{% endblock %}

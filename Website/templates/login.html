@@ -1,0 +1,184 @@
+{% extends "base.html" %}
+
+{% block title %}Вход - {{ config.SITE_NAME or 'Игра' }}{% endblock %}
+{% block header_title %}Вход{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+{% endblock %}
+
+{% block content %}
+    <!-- Конфигурация для JavaScript -->
+    <script>
+        const AUTH_CONFIG = {
+            redirectUrl: '{{ request.args.get("next") or url_for("lobby") }}',
+            csrfToken: '{{ csrf_token() if csrf_token else "" }}',
+            isLogin: true
+        };
+    </script>
+
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <h1 class="auth-title">
+                    <span class="gradient-text">Вход</span>
+                </h1>
+                <p class="auth-subtitle">Добро пожаловать обратно!</p>
+            </div>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="auth-messages">
+                        {% for category, message in messages %}
+                            <div class="auth-message auth-message-{{ category }}">
+                                <span class="message-icon">
+                                    {% if category == 'error' %}❌{% elif category == 'success' %}✅{% else %}ℹ️{% endif %}
+                                </span>
+                                <span class="message-text">{{ message }}</span>
+                                <button class="message-close" onclick="this.parentElement.remove()">×</button>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+
+            <form class="auth-form" id="loginForm" method="POST" action="{{ url_for('login') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() if csrf_token else '' }}">
+                
+                <div class="form-group">
+                    <label for="username" class="form-label">Имя пользователя</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">👤</span>
+                        <input 
+                            type="text" 
+                            id="username" 
+                            name="username" 
+                            class="form-input" 
+                            placeholder="Введите ваше имя пользователя"
+                            required
+                            autofocus
+                            autocomplete="username"
+                        >
+                    </div>
+                    <div class="form-error" id="username-error"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="password" class="form-label">Пароль</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">🔒</span>
+                        <input 
+                            type="password" 
+                            id="password" 
+                            name="password" 
+                            class="form-input" 
+                            placeholder="Введите ваш пароль"
+                            required
+                            autocomplete="current-password"
+                        >
+                        <button type="button" class="password-toggle" onclick="togglePassword('password')">
+                            <span class="toggle-icon">👁️</span>
+                        </button>
+                    </div>
+                    <div class="form-error" id="password-error"></div>
+                </div>
+
+                <div class="form-group">
+                    <label class="checkbox-wrapper">
+                        <input type="checkbox" name="remember_me" class="form-checkbox">
+                        <span class="checkmark"></span>
+                        <span class="checkbox-label">Запомнить меня</span>
+                    </label>
+                </div>
+
+                <button type="submit" class="auth-submit" id="submitBtn">
+                    <span class="submit-text">Войти</span>
+                    <span class="submit-spinner" style="display: none;">
+                        <div class="spinner"></div>
+                    </span>
+                </button>
+
+                <div class="auth-loading" id="loadingIndicator" style="display: none;">
+                    <div class="loading-spinner"></div>
+                    <span>Проверка данных...</span>
+                </div>
+            </form>
+
+            <div class="auth-footer">
+                <p class="auth-text">
+                    Нет аккаунта? 
+                    <a href="{{ url_for('register') }}?next={{ request.args.get('next') or '' }}" class="auth-link">
+                        Зарегистрируйтесь
+                    </a>
+                </p>
+                
+                <div class="auth-divider">
+                    <span class="divider-text">или</span>
+                </div>
+
+                <div class="auth-alternatives">
+                    <button type="button" class="auth-alternative" onclick="showDemoLogin()">
+                        <span class="alternative-icon">🎮</span>
+                        <span class="alternative-text">Демо-режим</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="auth-info">
+            <div class="info-card">
+                <h3>💡 Советы по безопасности</h3>
+                <ul class="info-list">
+                    <li>Используйте уникальный пароль для каждого сайта</li>
+                    <li>Не делитесь своими учетными данными с другими</li>
+                    <li>Используйте функцию "Запомнить меня" только на личных устройствах</li>
+                </ul>
+            </div>
+
+            <div class="info-card">
+                <h3>🎯 Преимущества регистрации</h3>
+                <ul class="info-list">
+                    <li>Доступ ко всем играм и функциям</li>
+                    <li>Сохранение истории игр и статистики</li>
+                    <li>Возможность создавать свои игры</li>
+                    <li>Участие в рейтингах и турнирах</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно для демо-режима -->
+    <div class="modal" id="demoModal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>🎮 Демо-режим</h3>
+                <button class="modal-close" onclick="closeDemoModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <p>Вы можете войти в демо-режиме, чтобы быстро протестировать игру:</p>
+                
+                <div class="demo-options">
+                    <button class="demo-option" onclick="loginAsDemo('player')">
+                        <div class="demo-icon">👤</div>
+                        <div class="demo-title">Обычный игрок</div>
+                        <div class="demo-desc">Простой игровой аккаунт</div>
+                    </button>
+                    
+                    <button class="demo-option" onclick="loginAsDemo('observer')">
+                        <div class="demo-icon">👁️</div>
+                        <div class="demo-title">Наблюдатель</div>
+                        <div class="demo-desc">Только просмотр игр</div>
+                    </button>
+                </div>
+                
+                <div class="demo-warning">
+                    <strong>⚠️ Внимание:</strong> Демо-аккаунты имеют ограниченные возможности и могут быть удалены автоматически.
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+    <script src="{{ url_for('static', filename='js/auth.js') }}"></script>
+{% endblock %}

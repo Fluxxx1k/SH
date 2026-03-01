@@ -1,0 +1,301 @@
+{% extends "base.html" %}
+
+{% block title %}Игра #{{ game_id }} - {{ config.SITE_NAME or 'Игра' }}{% endblock %}
+{% block header_title %}Игра #{{ game_id }}{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/game.css') }}">
+{% endblock %}
+
+{% block content %}
+    <!-- Конфигурация для JavaScript -->
+    <script>
+        const GAME_CONFIG = {
+            gameId: '{{ game_id }}',
+            username: '{{ username }}',
+            isCreator: {{ 'true' if game.creator == username else 'false' }},
+            updateInterval: 1000,
+            maxChatMessages: 100,
+            maxLogMessages: 200
+        };
+    </script>
+
+    <div class="game-container">
+        <!-- Шапка игры -->
+        <div class="game-header">
+            <div class="game-info">
+                <h1 class="game-title">Игра #{{ game_id }}</h1>
+                <div class="game-status">
+                    <span class="status-indicator" id="gameStatusIndicator"></span>
+                    <span class="status-text" id="gameStatusText">{{ game.status }}</span>
+                </div>
+            </div>
+            
+            <div class="game-actions">
+                <button class="action-btn action-btn-secondary" onclick="toggleFullscreen()">
+                    <span class="btn-icon">⛶</span>
+                    <span class="btn-text">На весь экран</span>
+                </button>
+                
+                <button class="action-btn action-btn-danger" onclick="leaveGame()">
+                    <span class="btn-icon">🚪</span>
+                    <span class="btn-text">Покинуть игру</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Основная область игры -->
+        <div class="game-main">
+            <!-- Игровое поле -->
+            <div class="game-board">
+                <div class="board-header">
+                    <h2>Игровое поле</h2>
+                    <div class="board-controls">
+                        <button class="control-btn" onclick="resetGame()" title="Сбросить игру">
+                            <span class="btn-icon">🔄</span>
+                        </button>
+                        <button class="control-btn" onclick="toggleBoardFullscreen()" title="На весь экран">
+                            <span class="btn-icon">⛶</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="board-content" id="gameBoard">
+                    <div class="game-waiting" id="waitingScreen">
+                        <div class="waiting-icon">⏳</div>
+                        <h3>Ожидание игроков</h3>
+                        <p>Игра начнется, когда соберется достаточно игроков</p>
+                        
+                        <div class="waiting-players">
+                            <div class="players-grid" id="playersGrid">
+                                {% for player in game.players %}
+                                    <div class="player-card" data-player="{{ player }}">
+                                        <div class="player-avatar">👤</div>
+                                        <div class="player-name">{{ player }}</div>
+                                        <div class="player-status">
+                                            {% if player == game.creator %}
+                                                <span class="creator-badge">Создатель</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        
+                        {% if game.creator == username %}
+                            <div class="waiting-actions">
+                                <button class="action-btn action-btn-primary" onclick="startGame()" id="startGameBtn">
+                                    <span class="btn-icon">▶️</span>
+                                    <span class="btn-text">Начать игру</span>
+                                </button>
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="game-playing" id="playingScreen" style="display: none;">
+                        <div class="game-interface">
+                            <div class="game-area">
+                                <div class="game-content" id="gameContent">
+                                    <!-- Сюда будет загружаться игровой контент -->
+                                </div>
+                            </div>
+                            
+                            <div class="game-controls">
+                                <div class="control-panel">
+                                    <h3>Управление</h3>
+                                    <div class="control-buttons" id="gameControls">
+                                        <!-- Динамические кнопки управления -->
+                                    </div>
+                                </div>
+                                
+                                <div class="vote-panel">
+                                    <h3>Голосование</h3>
+                                    <div class="vote-buttons" id="voteButtons">
+                                        <!-- Динамические кнопки голосования -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Боковая панель -->
+            <div class="game-sidebar">
+                <!-- Информация об игроках -->
+                <div class="players-panel">
+                    <div class="panel-header">
+                        <h3>Игроки ({{ game.current_players }}/{{ game.max_players }})</h3>
+                        <div class="panel-controls">
+                            <button class="control-btn" onclick="refreshPlayers()" title="Обновить">
+                                <span class="btn-icon">🔄</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="panel-content">
+                        <div class="players-list" id="playersList">
+                            {% for player in game.players %}
+                                <div class="player-item" data-player="{{ player }}" data-status="online">
+                                    <div class="player-info">
+                                        <div class="player-avatar">👤</div>
+                                        <div class="player-details">
+                                            <div class="player-name">{{ player }}</div>
+                                            <div class="player-role" id="playerRole-{{ player }}">Ожидание...</div>
+                                        </div>
+                                    </div>
+                                    <div class="player-status">
+                                        <span class="status-dot online" title="Онлайн"></span>
+                                        {% if player == game.creator %}
+                                            <span class="creator-badge">Создатель</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Чат игры -->
+                <div class="chat-panel">
+                    <div class="panel-header">
+                        <h3>💬 Чат</h3>
+                        <div class="panel-controls">
+                            <button class="control-btn" onclick="clearChat()" title="Очистить чат">
+                                <span class="btn-icon">🗑️</span>
+                            </button>
+                            <button class="control-btn" onclick="toggleChatSound()" title="Звук">
+                                <span class="btn-icon" id="chatSoundIcon">🔊</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="panel-content">
+                        <div class="chat-messages" id="chatMessages">
+                            <div class="chat-welcome">
+                                <p>Добро пожаловать в чат игры!</p>
+                                <p>Будьте вежливы и соблюдайте правила.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="chat-input-area">
+                            <div class="chat-input-wrapper">
+                                <input 
+                                    type="text" 
+                                    id="chatInput" 
+                                    class="chat-input" 
+                                    placeholder="Введите сообщение..."
+                                    maxlength="500"
+                                    autocomplete="off"
+                                >
+                                <button class="chat-send" onclick="sendChatMessage()" title="Отправить">
+                                    <span class="btn-icon">📤</span>
+                                </button>
+                            </div>
+                            <div class="chat-input-info">
+                                <span class="char-counter" id="charCounter">0/500</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Нижняя панель -->
+        <div class="game-footer">
+            <!-- Лог игры -->
+            <div class="log-panel">
+                <div class="panel-header">
+                    <h3>📋 Лог игры</h3>
+                    <div class="panel-controls">
+                        <button class="control-btn" onclick="clearLog()" title="Очистить лог">
+                            <span class="btn-icon">🗑️</span>
+                        </button>
+                        <button class="control-btn" onclick="toggleLogAutoScroll()" title="Автопрокрутка">
+                            <span class="btn-icon" id="autoScrollIcon">🔽</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="panel-content">
+                    <div class="log-messages" id="logMessages">
+                        <div class="log-entry log-info">
+                            <span class="log-time">{{ game.created_at[:19] }}</span>
+                            <span class="log-type">[ИНФО]</span>
+                            <span class="log-message">Игра создана пользователем {{ game.creator }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Статус подключения -->
+            <div class="connection-panel">
+                <div class="panel-header">
+                    <h3>Статус</h3>
+                </div>
+                
+                <div class="panel-content">
+                    <div class="connection-status">
+                        <div class="status-item">
+                            <span class="status-label">WebSocket:</span>
+                            <span class="status-value" id="wsStatus">Подключение...</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="status-label">Задержка:</span>
+                            <span class="status-value" id="pingStatus">—</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="status-label">Игра:</span>
+                            <span class="status-value" id="gameStatus">{{ game.status }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальные окна -->
+    <div class="modal" id="gameEndModal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>🏆 Игра завершена!</h3>
+                <button class="modal-close" onclick="closeGameEndModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="game-result" id="gameResult">
+                    <!-- Результат игры будет загружен динамически -->
+                </div>
+                <div class="modal-actions">
+                    <button class="action-btn action-btn-primary" onclick="playAgain()">
+                        <span class="btn-icon">🔄</span>
+                        <span class="btn-text">Играть снова</span>
+                    </button>
+                    <button class="action-btn action-btn-secondary" onclick="returnToLobby()">
+                        <span class="btn-icon">🏠</span>
+                        <span class="btn-text">В лобби</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Контекстное меню -->
+    <div class="context-menu" id="playerContextMenu" style="display: none;">
+        <div class="context-menu-item" onclick="viewPlayerProfile()">
+            <span class="menu-icon">👤</span>
+            <span class="menu-text">Профиль</span>
+        </div>
+        <div class="context-menu-item" onclick="sendPrivateMessage()">
+            <span class="menu-icon">💬</span>
+            <span class="menu-text">Личное сообщение</span>
+        </div>
+        <div class="context-menu-item" onclick="voteForPlayer()">
+            <span class="menu-icon">🗳️</span>
+            <span class="menu-text">Голосовать</span>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+    <script src="{{ url_for('static', filename='js/game.js') }}"></script>
+{% endblock %}

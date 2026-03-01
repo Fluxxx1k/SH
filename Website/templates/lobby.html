@@ -1,0 +1,319 @@
+{% extends "base.html" %}
+
+{% block title %}Лобби{% endblock %}
+{% block header_title %}Лобби{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/lobby.css') }}">
+{% endblock %}
+
+{% block content %}
+    <!-- Конфигурация для JavaScript -->
+    <script>
+        const LOBBY_CONFIG = {
+            username: '{{ session.username }}',
+            updateInterval: 2000,
+            maxGames: 50,
+            cacheTimeout: 300000
+        };
+    </script>
+
+    <div class="lobby-container">
+        <!-- Верхняя панель -->
+        <div class="lobby-header">
+            <h1>🎮 Лобби</h1>
+            <div class="lobby-stats">
+                <div class="stat-item">
+                    <span class="stat-label">Активных игр:</span>
+                    <span class="stat-value" id="activeGamesCount">{{ stats.active_games }}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Онлайн игроков:</span>
+                    <span class="stat-value" id="onlinePlayersCount">{{ stats.total_players }}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Завершенных игр:</span>
+                    <span class="stat-value" id="completedGamesCount">{{ stats.complete_games }}</span>
+                </div>
+            </div>
+            <div class="lobby-actions">
+                <button class="action-btn action-btn-primary" id="createGameBtn">➕ Создать игру</button>
+                <button class="action-btn action-btn-secondary" id="refreshGamesBtn">🔄 Обновить</button>
+            </div>
+        </div>
+
+        <!-- Основной контент лобби -->
+        <div class="lobby-content">
+            <!-- Список активных игр с real-time обновлениями -->
+            <div class="games-section">
+                <div class="section-header">
+                    <h2>🎯 Активные игры</h2>
+                    <div class="section-controls">
+                        <select class="filter-select" id="gameFilter">
+                            <option value="all">Все игры</option>
+                            <option value="waiting">Ожидают игроков</option>
+                            <option value="playing">В процессе</option>
+                            <option value="full">Полные</option>
+                        </select>
+                        <select class="sort-select" id="gameSort">
+                            <option value="newest">Новые первые</option>
+                            <option value="oldest">Старые первые</option>
+                            <option value="players">По количеству игроков</option>
+                            <option value="name">По названию</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="games-list" id="gamesList">
+                    {% for game in games %}
+                    <div class="game-card" data-game-id="{{ game.id }}" data-game-status="{{ game.status }}">
+                        <div class="game-card-header">
+                            <h3 class="game-title">Игра #{{ game.id }}</h3>
+                            <div class="game-status">
+                                {% if game.status == 'waiting' %}
+                                    <span class="status-badge status-waiting">⏳ Ожидание</span>
+                                {% elif game.status == 'playing' %}
+                                    <span class="status-badge status-playing">▶️ В процессе</span>
+                                {% else %}
+                                    <span class="status-badge status-full">🔒 Полная</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="game-card-body">
+                            <div class="game-info">
+                                <div class="info-row">
+                                    <span class="info-label">Создатель:</span>
+                                    <span class="info-value">{{ game.creator }}</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Игроков:</span>
+                                    <span class="info-value">{{ game.current_players }}/{{ game.max_players }}</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Создана:</span>
+                                    <span class="info-value">{{ game.created_at }}</span>
+                                </div>
+                                {% if game.status == 'waiting' %}
+                                <div class="info-row">
+                                    <span class="info-label">Доступно мест:</span>
+                                    <span class="info-value">{{ game.max_players - game.current_players }}</span>
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="game-players">
+                                <span class="players-label">Игроки:</span>
+                                <div class="players-list">
+                                    {% for player in game.players %}
+                                    <span class="player-tag {{ 'online' if player.online else 'offline' }}">
+                                        {{ player.name }}
+                                    </span>
+                                    {% endfor %}
+                                    {% for i in range(game.current_players, game.max_players) %}
+                                    <span class="player-slot empty">+</span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="game-card-actions">
+                            {% if game.status == 'waiting' and game.current_players < game.max_players %}
+                                <a href="{{ url_for('game', game_name=game.id) }}" class="action-btn action-btn-primary">
+                                    🎮 Присоединиться
+                                </a>
+                            {% elif game.status == 'playing' %}
+                                <a href="{{ url_for('game', game_name=game.id) }}" class="action-btn action-btn-secondary">
+                                    👁️ Наблюдать
+                                </a>
+                            {% else %}
+                                <button class="action-btn" disabled>
+                                    🔒 Недоступно
+                                </button>
+                            {% endif %}
+                            
+                            <button class="action-btn action-btn-info" onclick="showGameDetails('{{ game.id }}')">
+                                ℹ️ Подробности
+                            </button>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    
+                    {% if not games %}
+                    <div class="no-games">
+                        <div class="no-games-icon">🎮</div>
+                        <h3>Нет активных игр</h3>
+                        <p>Создайте новую игру или подождите, пока кто-то создаст</p>
+                        <button class="action-btn action-btn-primary" onclick="document.getElementById('createGameBtn').click()">
+                            Создать игру
+                        </button>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div class="loading-indicator" id="gamesLoading" style="display: none;">
+                    <div class="loading-spinner"></div>
+                    <span>Обновление списка игр...</span>
+                </div>
+            </div>
+
+            <!-- Правая панель -->
+            <div class="sidebar">
+                <!-- Профиль пользователя -->
+                <div class="user-profile card">
+                    <div class="profile-header">
+                        <div class="avatar-container">
+                            <div class="avatar" id="userAvatar">
+                                {{ session.username[0].upper() }}
+                            </div>
+                            <div class="online-indicator" id="userOnlineIndicator"></div>
+                        </div>
+                        <div class="user-info">
+                            <h3 class="username">{{ session.username }}</h3>
+                            <p class="user-status" id="userStatus">В сети</p>
+                        </div>
+                    </div>
+                    
+                    <div class="profile-stats">
+                        <div class="stat-item">
+                            <span class="stat-number" id="userGamesPlayed">0</span>
+                            <span class="stat-label">Игр сыграно</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number" id="userGamesWon">0</span>
+                            <span class="stat-label">Побед</span>
+                        </div>
+                    </div>
+                    
+                    <div class="profile-actions">
+                        <button class="action-btn action-btn-secondary" id="editProfileBtn">⚙️ Настройки</button>
+                        <a href="{{ url_for('logout') }}" class="action-btn action-btn-danger">
+                            🚪 Выйти
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Онлайн игроки -->
+                <div class="online-players card">
+                    <div class="card-header">
+                        <h3>👥 Онлайн игроки</h3>
+                        <span class="online-count" id="onlineCount">{{ online_players|length }}</span>
+                    </div>
+                    
+                    <div class="players-list" id="onlinePlayersList">
+                        {% for player in online_players %}
+                        <div class="player-item" data-username="{{ player }}">
+                            <div class="player-avatar">
+                                {{ player[0].upper() }}
+                            </div>
+                            <span class="player-name">{{ player }}</span>
+                            <div class="player-status-indicator online"></div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    {% if not online_players %}
+                    <div class="no-players">
+                        <div class="no-players-icon">👤</div>
+                        <p>Нет других игроков онлайн</p>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Последние события -->
+                <div class="recent-events card">
+                    <div class="card-header">
+                        <h3>📢 Последние события</h3>
+                        <button class="action-btn action-btn-small" id="clearEventsBtn">Очистить</button>
+                    </div>
+                    
+                    <div class="events-list" id="eventsList">
+                        <div class="event-item">
+                            <div class="event-time">{{ current_time }}</div>
+                            <div class="event-text">Добро пожаловать в лобби!</div>
+                        </div>
+                    </div>
+                    
+                    <div class="events-loading" id="eventsLoading" style="display: none;">
+                        <div class="loading-spinner"></div>
+                        <span>Загрузка событий...</span>
+                    </div>
+                </div>
+
+                <!-- Быстрые действия -->
+                <div class="quick-actions card">
+                    <h3>⚡ Быстрые действия</h3>
+                    <div class="action-buttons">
+                        <button class="action-btn action-btn-full" id="quickJoinBtn">
+                            🚀 Быстрое подключение
+                        </button>
+                        <button class="action-btn action-btn-secondary" id="randomGameBtn">
+                            🎲 Случайная игра
+                        </button>
+                        <button class="action-btn action-btn-info" id="showRulesBtn">
+                            📖 Правила игры
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно создания игры -->
+    <div class="modal" id="createGameModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Создание новой игры</h2>
+                <button class="modal-close" id="closeModalBtn">&times;</button>
+            </div>
+            
+            <form class="create-game-form" id="createGameForm">
+                <div class="form-group">
+                    <label for="gameName">Название игры:</label>
+                    <input type="text" id="gameName" name="game_name" required maxlength="50">
+                </div>
+                
+                <div class="form-group">
+                    <label for="maxPlayers">Максимальное количество игроков:</label>
+                    <select id="maxPlayers" name="max_players" required>
+                        <option value="3">3 игрока</option>
+                        <option value="4" selected>4 игрока</option>
+                        <option value="5">5 игроков</option>
+                        <option value="6">6 игроков</option>
+                        <option value="7">7 игроков</option>
+                        <option value="8">8 игроков</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="gamePassword">Пароль (необязательно):</label>
+                    <input type="password" id="gamePassword" name="password" maxlength="20">
+                </div>
+                
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="privateGame" name="private">
+                        Приватная игра
+                    </label>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="action-btn action-btn-primary">
+                        🎮 Создать игру
+                    </button>
+                    <button type="button" class="action-btn action-btn-secondary" id="cancelCreateBtn">
+                        Отмена
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Подложка для модального окна -->
+    <div class="modal-overlay" id="modalOverlay"></div>
+{% endblock %}
+
+{% block extra_js %}
+    <script src="{{ url_for('static', filename='js/socket.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/lobby.js') }}"></script>
+{% endblock %}
