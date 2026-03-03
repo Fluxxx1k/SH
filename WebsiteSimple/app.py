@@ -22,8 +22,39 @@ class Config:
 app = Flask(__name__)
 app.config.from_object(Config)
 
+# Добавляем middleware для обработки JSON
+def json_error_handler(f):
+    def decorated_function(*args, **kwargs):
+        try:
+            return f(*args, **kwargs)
+        except Exception as e:
+            app.logger.error(f'Error in {f.__name__}: {str(e)}')
+            return jsonify({'error': 'Internal server error'}), 500
+    return decorated_function
+
+# Глобальный обработчик ошибок
+@app.errorhandler(404)
+def not_found(error):
+    if request.path.startswith('/api/'):
+        return jsonify({'error': 'Not found'}), 404
+    return render_template('error.html'), 404
+
+@app.errorhandler(500)
+def internal_error(error):
+    if request.path.startswith('/api/'):
+        return jsonify({'error': 'Internal server error'}), 500
+    return render_template('error.html'), 500
+
 # Инициализация SocketIO
-socketio = SocketIO(app, cors_allowed_origins="*", logger=False, engineio_logger=False)
+socketio = SocketIO(
+    app, 
+    cors_allowed_origins="*", 
+    logger=False, 
+    engineio_logger=False,
+    async_mode='threading',
+    ping_timeout=20,
+    ping_interval=25
+)
 
 # Простое хранилище данных в памяти
 class SimpleDataStore:
@@ -104,41 +135,57 @@ def require_auth(f):
 
 # API endpoints
 @app.route('/api/auth/register', methods=['POST'])
+@json_error_handler
 def api_register():
-    data = request.get_json()
-    username = data.get('username')
-    email = data.get('email')
-    password = data.get('password')
-    
-    if not all([username, email, password]):
-        return jsonify({'error': 'Missing required fields'}), 400
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({'error': 'No JSON data provided'}), 400
+            
+        username = data.get('username')
+        email = data.get('email')
+        password = data.get('password')
         
-    if data_store.get_user(username):
-        return jsonify({'error': 'Username already exists'}), 400
+        if not all([username, email, password]):
+            return jsonify({'error': 'Missing required fields'}), 400
+            
+        if data_store.get_user(username):
+            return jsonify({'error': 'Username already exists'}), 400
+            
+        password_hash = generate_password_hash(password)
+        if data_store.add_user(username, email, password_hash):
+            session['username'] = username
+            return jsonify({'success': True, 'username': username})
         
-    password_hash = generate_password_hash(password)
-    if data_store.add_user(username, email, password_hash):
-        session['username'] = username
-        return jsonify({'success': True, 'username': username})
-    
-    return jsonify({'error': 'Registration failed'}), 500
+        return jsonify({'error': 'Registration failed'}), 500
+    except Exception as e:
+        app.logger.error(f'Registration error: {str(e)}')
+        return jsonify({'error': 'Registration failed'}), 500
 
 @app.route('/api/auth/login', methods=['POST'])
+@json_error_handler
 def api_login():
-    data = request.get_json()
-    username = data.get('username')
-    password = data.get('password')
-    
-    if not all([username, password]):
-        return jsonify({'error': 'Missing required fields'}), 400
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({'error': 'No JSON data provided'}), 400
+            
+        username = data.get('username')
+        password = data.get('password')
         
-    user = data_store.get_user(username)
-    if user and check_password_hash(user['password_hash'], password):
-        session['username'] = username
-        data_store.online_users.add(username)
-        return jsonify({'success': True, 'username': username})
-    
-    return jsonify({'error': 'Invalid credentials'}), 401
+        if not all([username, password]):
+            return jsonify({'error': 'Missing required fields'}), 400
+            
+        user = data_store.get_user(username)
+        if user and check_password_hash(user['password_hash'], password):
+            session['username'] = username
+            data_store.online_users.add(username)
+            return jsonify({'success': True, 'username': username})
+        
+        return jsonify({'error': 'Invalid credentials'}), 401
+    except Exception as e:
+        app.logger.error(f'Login error: {str(e)}')
+        return jsonify({'error': 'Login failed'}), 500
 
 @app.route('/api/auth/logout', methods=['POST'])
 @require_auth

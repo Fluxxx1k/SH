@@ -25,6 +25,9 @@ class SimpleApp {
     async setupAuthCheck() {
         try {
             const response = await fetch('/api/auth/status');
+            if (!response.ok) {
+                throw new Error('Auth check failed');
+            }
             const data = await response.json();
             
             this.isAuthenticated = data.authenticated;
@@ -33,6 +36,9 @@ class SimpleApp {
             this.updateAuthUI();
         } catch (error) {
             console.error('Ошибка проверки аутентификации:', error);
+            this.isAuthenticated = false;
+            this.username = null;
+            this.updateAuthUI();
         }
     }
 
@@ -277,7 +283,14 @@ class SimpleApp {
                     body: JSON.stringify(data)
                 });
                 
-                const result = await response.json();
+                let result;
+                try {
+                    result = await response.json();
+                } catch (jsonError) {
+                    console.error('Ошибка парсинга JSON:', jsonError);
+                    this.showError('Ошибка ответа сервера');
+                    return;
+                }
                 
                 if (response.ok) {
                     this.isAuthenticated = true;
@@ -327,7 +340,14 @@ class SimpleApp {
                     })
                 });
                 
-                const result = await response.json();
+                let result;
+                try {
+                    result = await response.json();
+                } catch (jsonError) {
+                    console.error('Ошибка парсинга JSON:', jsonError);
+                    this.showError('Ошибка ответа сервера');
+                    return;
+                }
                 
                 if (response.ok) {
                     this.isAuthenticated = true;
@@ -466,11 +486,30 @@ class SimpleApp {
 
     // Настройка WebSocket
     setupWebSocket(gameId) {
-        this.socket = io();
+        this.socket = io({
+            transports: ['polling', 'websocket'], // Пробуем polling сначала
+            reconnection: true,
+            reconnectionDelay: 1000,
+            reconnectionAttempts: 5,
+            timeout: 20000
+        });
         
         this.socket.on('connect', () => {
-            console.log('WebSocket подключен');
+            console.log('WebSocket подключен, транспорт:', this.socket.io.engine.transport.name);
             this.socket.emit('join_game', { game_id: gameId });
+        });
+        
+        this.socket.on('connect_error', (error) => {
+            console.error('Ошибка подключения WebSocket:', error);
+            // Пробуем переподключиться с другим транспортом
+            if (this.socket.io.engine.transport.name === 'websocket') {
+                this.socket.io.opts.transports = ['polling'];
+                this.socket.connect();
+            }
+        });
+        
+        this.socket.on('disconnect', (reason) => {
+            console.log('WebSocket отключен:', reason);
         });
         
         this.socket.on('chat_message', (data) => {
