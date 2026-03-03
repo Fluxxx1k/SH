@@ -53,9 +53,10 @@ socketio = SocketIO(
     cors_allowed_origins="*", 
     logger=False, 
     engineio_logger=False,
-    async_mode='threading',
+    async_mode='eventlet',  # Changed from threading to eventlet
     ping_timeout=20,
-    ping_interval=25
+    ping_interval=25,
+    manage_session=False  # Disable session management to avoid conflicts
 )
 
 # Простое хранилище данных в памяти
