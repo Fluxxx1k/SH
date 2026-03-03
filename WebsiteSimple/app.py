@@ -24,13 +24,14 @@ app.config.from_object(Config)
 
 # Добавляем middleware для обработки JSON
 def json_error_handler(f):
-    def decorated_function(*args, **kwargs):
+    def wrapper(*args, **kwargs):
         try:
             return f(*args, **kwargs)
         except Exception as e:
             app.logger.error(f'Error in {f.__name__}: {str(e)}')
             return jsonify({'error': 'Internal server error'}), 500
-    return decorated_function
+    wrapper.__name__ = f.__name__  # Сохраняем оригинальное имя функции
+    return wrapper
 
 # Глобальный обработчик ошибок
 @app.errorhandler(404)
