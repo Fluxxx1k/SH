@@ -1,0 +1,583 @@
+/* Стили для игровой страницы */
+
+/* Основной макет игры */
+.game-layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+@media (min-width: 1024px) {
+    .game-layout {
+        grid-template-columns: 2fr 1fr;
+    }
+}
+
+/* Секция голосования */
+.voting-section {
+    background: linear-gradient(135deg, #2a2a2a 0%, #1f1f1f 100%);
+}
+
+.vote-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.vote-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.vote-btn {
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s;
+    min-width: 100px;
+}
+
+.vote-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.vote-yes {
+    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    color: white;
+}
+
+.vote-no {
+    background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+    color: white;
+}
+
+.vote-pass {
+    background: linear-gradient(135deg, #757f9a 0%, #d7dde8 100%);
+    color: #333;
+}
+
+.vote-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+.vote-btn.voted {
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+}
+
+/* Секции голосования */
+.player-vote-section,
+.color-vote-section {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 1rem;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.player-select {
+    width: 100%;
+    padding: 0.75rem;
+    margin: 0.5rem 0;
+    background: #333;
+    color: #fff;
+    border: 1px solid #555;
+    border-radius: 4px;
+}
+
+.color-buttons {
+    display: flex;
+    gap: 0.5rem;
+    margin: 0.5rem 0;
+    flex-wrap: wrap;
+}
+
+.color-btn {
+    padding: 0.5rem 1rem;
+    border: 2px solid transparent;
+    border-radius: 4px;
+    background: #333;
+    color: #fff;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.color-btn:hover {
+    border-color: #667eea;
+    background: #444;
+}
+
+.color-btn.selected {
+    border-color: #38ef7d;
+    background: #2a4a2a;
+}
+
+.color-input {
+    width: 100%;
+    padding: 0.75rem;
+    margin: 0.5rem 0;
+    background: #333;
+    color: #fff;
+    border: 1px solid #555;
+    border-radius: 4px;
+    text-align: center;
+    font-size: 1.1rem;
+}
+
+.color-controls {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.color-controls button {
+    flex: 1;
+}
+
+/* Статус голосования */
+.vote-status {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.vote-summary {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.vote-count {
+    font-weight: bold;
+    color: #38ef7d;
+}
+
+.vote-timer {
+    font-family: monospace;
+    font-size: 1.2rem;
+    color: #f2994a;
+}
+
+.vote-results {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 0.5rem;
+}
+
+.vote-result-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+}
+
+/* Секция чата */
+.chat-section {
+    background: linear-gradient(135deg, #2a2a2a 0%, #1f1f1f 100%);
+}
+
+.chat-container {
+    display: flex;
+    flex-direction: column;
+    height: 300px;
+}
+
+.chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1rem;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.chat-message {
+    margin-bottom: 0.5rem;
+    padding: 0.5rem;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.05);
+    animation: slideIn 0.3s ease-out;
+}
+
+.chat-message.own {
+    background: rgba(102, 126, 234, 0.2);
+    margin-left: 2rem;
+}
+
+.chat-message.system {
+    background: rgba(255, 193, 7, 0.2);
+    color: #ffd700;
+    font-style: italic;
+}
+
+.chat-message-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.25rem;
+    font-size: 0.9rem;
+}
+
+.chat-message-author {
+    font-weight: bold;
+    color: #667eea;
+}
+
+.chat-message-time {
+    color: #888;
+    font-size: 0.8rem;
+}
+
+.chat-message-content {
+    word-wrap: break-word;
+}
+
+.chat-input-area {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.chat-input {
+    flex: 1;
+    padding: 0.75rem;
+    background: #333;
+    color: #fff;
+    border: 1px solid #555;
+    border-radius: 4px;
+}
+
+.chat-send-btn {
+    padding: 0.75rem 1.5rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.chat-send-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+.chat-send-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+/* Секция игроков */
+.players-section {
+    background: linear-gradient(135deg, #2a2a2a 0%, #1f1f1f 100%);
+}
+
+.players-list {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.player-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+    transition: all 0.3s;
+    border: 1px solid transparent;
+}
+
+.player-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.player-item.online {
+    border-left: 3px solid #38ef7d;
+}
+
+.player-item.offline {
+    opacity: 0.6;
+    border-left: 3px solid #888;
+}
+
+.player-name {
+    font-weight: bold;
+}
+
+.player-role {
+    color: #888;
+    font-size: 0.9rem;
+}
+
+.player-status {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #888;
+}
+
+.player-status.online {
+    background: #38ef7d;
+    animation: pulse 2s infinite;
+}
+
+/* Секция логов */
+.log-section {
+    background: linear-gradient(135deg, #2a2a2a 0%, #1f1f1f 100%);
+}
+
+.log-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.log-controls {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.log-controls button {
+    padding: 0.5rem;
+    background: #333;
+    color: #fff;
+    border: 1px solid #555;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.log-controls button:hover {
+    background: #444;
+    border-color: #667eea;
+}
+
+.log-container {
+    position: relative;
+}
+
+.log-entries {
+    max-height: 400px;
+    overflow-y: auto;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 8px;
+    padding: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.log-entry {
+    padding: 0.5rem;
+    margin-bottom: 0.25rem;
+    border-radius: 4px;
+    transition: all 0.3s;
+    animation: slideIn 0.3s ease-out;
+}
+
+.log-entry:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.log-entry.new {
+    background: rgba(102, 126, 234, 0.2);
+    animation: highlight 1s ease-out;
+}
+
+.log-time {
+    color: #888;
+    font-size: 0.8rem;
+    margin-right: 0.5rem;
+}
+
+.log-content {
+    color: #fff;
+}
+
+.log-loading {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.8);
+    padding: 1rem;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Игровые кнопки управления */
+.game-controls {
+    position: fixed;
+    bottom: 1rem;
+    left: 1rem;
+    right: 1rem;
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.host-controls,
+.join-controls {
+    display: flex;
+    gap: 1rem;
+    background: rgba(0, 0, 0, 0.8);
+    padding: 1rem;
+    border-radius: 8px;
+    backdrop-filter: blur(10px);
+}
+
+.btn-start {
+    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    color: white;
+}
+
+.btn-delete {
+    background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+    color: white;
+}
+
+.btn-join {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+/* Анимации */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes highlight {
+    0% {
+        background: rgba(102, 126, 234, 0.4);
+    }
+    100% {
+        background: rgba(102, 126, 234, 0.2);
+    }
+}
+
+/* Счетчик игроков */
+.player-count {
+    color: #38ef7d;
+    font-size: 0.9rem;
+}
+
+/* Обновление логов */
+.log-entries.updating {
+    opacity: 0.7;
+}
+
+/* Скроллбары */
+.chat-messages::-webkit-scrollbar,
+.players-list::-webkit-scrollbar,
+.log-entries::-webkit-scrollbar {
+    width: 6px;
+}
+
+.chat-messages::-webkit-scrollbar-track,
+.players-list::-webkit-scrollbar-track,
+.log-entries::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+}
+
+.chat-messages::-webkit-scrollbar-thumb,
+.players-list::-webkit-scrollbar-thumb,
+.log-entries::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 3px;
+}
+
+.chat-messages::-webkit-scrollbar-thumb:hover,
+.players-list::-webkit-scrollbar-thumb:hover,
+.log-entries::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.5);
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .game-layout {
+        grid-template-columns: 1fr;
+    }
+    
+    .vote-buttons {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .vote-btn {
+        width: 100%;
+        max-width: 200px;
+    }
+    
+    .color-buttons {
+        flex-direction: column;
+    }
+    
+    .color-btn {
+        width: 100%;
+    }
+    
+    .chat-container {
+        height: 250px;
+    }
+    
+    .log-entries {
+        max-height: 250px;
+    }
+    
+    .game-controls {
+        position: relative;
+        bottom: auto;
+        left: auto;
+        right: auto;
+        margin-top: 1rem;
+    }
+    
+    .host-controls,
+    .join-controls {
+        flex-direction: column;
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .vote-summary {
+        flex-direction: column;
+        gap: 0.5rem;
+        text-align: center;
+    }
+    
+    .vote-results {
+        grid-template-columns: 1fr;
+    }
+    
+    .chat-input-area {
+        flex-direction: column;
+    }
+    
+    .chat-send-btn {
+        width: 100%;
+    }
+}
