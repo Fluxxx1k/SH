@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="pageTitle">Игра</title>
+    <link rel="stylesheet" href="/static/css/main.css">
+    <link rel="stylesheet" href="/static/css/index.css" id="extraCss">
+</head>
+<body>
+    <header class="game-header">
+        <h1 id="headerTitle">Игра</h1>
+        <nav>
+            <a href="/">Главная</a>
+            <a href="/lobby">Лобби</a>
+            <span id="userSection">
+                <span class="username" id="usernameDisplay" style="display:none;"></span>
+                <a href="/login" id="loginLink">Войти</a>
+                <a href="/register" id="registerLink">Регистрация</a>
+                <a href="#" id="logoutLink" style="display:none;">Выйти</a>
+            </span>
+        </nav>
+    </header>
+
+    <main class="game-container">
+        <div id="flashMessages" class="flash-messages" style="display:none;">
+            <div id="flashContent"></div>
+        </div>
+        <div id="mainContent">
+            <!-- Контент страницы будет загружен сюда -->
+        </div>
+    </main>
+
+    <!-- Socket.IO клиент -->
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <script src="/static/js/app.js"></script>
+    
+    <!-- Скрипт текущей страницы будет загружен динамически -->
+    <script id="pageScript"></script>
+</body>
+</html>

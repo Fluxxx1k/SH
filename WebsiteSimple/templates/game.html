@@ -1,0 +1,51 @@
+<!-- Страница игры -->
+<div class="game-container" id="gameContainer">
+    <div class="game-header">
+        <h1>Игра #<span id="gameId">{{ game_id }}</span></h1>
+        <div class="game-info">
+            <span class="game-status" id="gameStatus">Ожидание игроков</span>
+            <span class="game-players" id="gamePlayers">1/6</span>
+        </div>
+    </div>
+    
+    <div class="game-content">
+        <div class="game-main">
+            <div class="players-section">
+                <h3>Игроки</h3>
+                <div class="players-list" id="playersList">
+                    <!-- Список игроков будет загружен через JavaScript -->
+                </div>
+            </div>
+            
+            <div class="voting-section" id="votingSection" style="display:none;">
+                <h3>Голосование</h3>
+                <div class="vote-buttons">
+                    <button class="vote-btn vote-yes" data-vote="yes">ЗА</button>
+                    <button class="vote-btn vote-no" data-vote="no">ПРОТИВ</button>
+                    <button class="vote-btn vote-pass" data-vote="pass">ПАС</button>
+                </div>
+                <div class="vote-results" id="voteResults">
+                    <!-- Результаты голосования -->
+                </div>
+            </div>
+        </div>
+        
+        <div class="game-sidebar">
+            <div class="chat-section">
+                <h3>Чат</h3>
+                <div class="chat-messages" id="chatMessages">
+                    <!-- Сообщения чата будут загружаться здесь -->
+                </div>
+                <div class="chat-input">
+                    <input type="text" id="chatInput" placeholder="Введите сообщение..." maxlength="200">
+                    <button id="sendMessageBtn" class="send-btn">➤</button>
+                </div>
+            </div>
+            
+            <div class="game-actions">
+                <button id="startGameBtn" class="action-btn action-btn-primary" style="display:none;">Начать игру</button>
+                <button id="leaveGameBtn" class="action-btn action-btn-secondary">Покинуть игру</button>
+            </div>
+        </div>
+    </div>
+</div>

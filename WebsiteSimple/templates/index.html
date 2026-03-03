@@ -1,0 +1,231 @@
+<!-- Главная страница - контент загружается через JavaScript -->
+<div id="indexContent">
+    <section class="hero">
+        <div class="hero-content">
+            <div class="hero-text">
+                <h1 class="hero-title">
+                    🎮 <span class="gradient-text" id="siteName">Игра</span>
+                </h1>
+                <p class="hero-description">
+                    Присоединяйтесь к захватывающей многопользовательской игре с real-time обновлениями, 
+                    голосованием и стратегическим геймплеем!
+                </p>
+                
+                <div class="hero-stats">
+                    <div class="stat-item">
+                        <div class="stat-number" id="activeGamesCount">0</div>
+                        <div class="stat-label">Активных игр</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" id="onlinePlayersCount">0</div>
+                        <div class="stat-label">Игроков онлайн</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" id="completedGamesCount">0</div>
+                        <div class="stat-label">Завершенных игр</div>
+                    </div>
+                </div>
+                
+                <div class="hero-actions" id="heroActions">
+                    <!-- Кнопки будут добавлены через JavaScript -->
+                </div>
+            </div>
+            
+            <div class="hero-visual">
+                <div class="game-preview">
+                    <div class="preview-header">
+                        <h3>🎮 Предпросмотр игры</h3>
+                        <div class="connection-status" id="connectionStatus">
+                            <span class="status-indicator" id="statusIndicator"></span>
+                            <span id="statusText">Подключение...</span>
+                        </div>
+                    </div>
+                    
+                    <div class="preview-game">
+                        <div class="preview-players">
+                            <div class="player-slot">
+                                <div class="player-avatar">A</div>
+                                <span class="player-name">Игрок 1</span>
+                                <div class="player-vote vote-yes">✓</div>
+                            </div>
+                            <div class="player-slot">
+                                <div class="player-avatar">B</div>
+                                <span class="player-name">Игрок 2</span>
+                                <div class="player-vote vote-no">✗</div>
+                            </div>
+                            <div class="player-slot">
+                                <div class="player-avatar">C</div>
+                                <span class="player-name">Игрок 3</span>
+                                <div class="player-vote vote-pass">—</div>
+                            </div>
+                        </div>
+                        
+                        <div class="preview-voting">
+                            <div class="vote-buttons">
+                                <button class="vote-btn vote-yes">ЗА</button>
+                                <button class="vote-btn vote-no">ПРОТИВ</button>
+                                <button class="vote-btn vote-pass">ПАС</button>
+                            </div>
+                        </div>
+                        
+                        <div class="preview-chat">
+                            <div class="chat-message">
+                                <span class="message-author">Игрок 1:</span>
+                                <span class="message-text">Готов начинать!</span>
+                            </div>
+                            <div class="chat-message">
+                                <span class="message-author">Игрок 2:</span>
+                                <span class="message-text">Я тоже готов</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Особенности игры -->
+    <section class="features">
+        <div class="container">
+            <h2 class="section-title">✨ Особенности</h2>
+            
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h3>Real-time обновления</h3>
+                    <p>Все изменения в игре мгновенно отображаются у всех игроков без необходимости обновления страницы</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">🗣️</div>
+                    <h3>Чат в реальном времени</h3>
+                    <p>Общайтесь с другими игроками через встроенный чат с индикаторами набора текста</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3>Система голосования</h3>
+                    <p>Принимайте решения коллективно с прозрачной системой голосования</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">📱</div>
+                    <h3>Адаптивный дизайн</h3>
+                    <p>Играйте на любом устройстве - компьютере, планшете или смартфоне</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">🔒</div>
+                    <h3>Безопасность</h3>
+                    <p>Защита от дублирования событий и оптимизированная нагрузка на сервер</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">🎯</div>
+                    <h3>Простота использования</h3>
+                    <p>Интуитивно понятный интерфейс и быстрое подключение к играм</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Как играть -->
+    <section class="how-to-play">
+        <div class="container">
+            <h2 class="section-title">📖 Как играть</h2>
+            
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h3>Зарегистрируйтесь</h3>
+                        <p>Создайте аккаунт, чтобы получить доступ ко всем функциям игры</p>
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h3>Войдите в лобби</h3>
+                        <p>Выберите существующую игру или создайте свою</p>
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h3>Играйте и общайтесь</h3>
+                        <p>Голосуйте за действия и общайтесь с другими игроками в чате</p>
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <h3>Побеждайте!</h3>
+                        <p>Используйте стратегию и дипломатию для достижения целей игры</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Активные игры -->
+    <section class="active-games">
+        <div class="container">
+            <h2 class="section-title">🎮 Активные игры</h2>
+            
+            <div class="games-preview" id="gamesPreview">
+                <!-- Игры будут загружены через JavaScript -->
+            </div>
+            
+            <div class="show-all-games" id="showAllGames" style="display:none;">
+                <a href="/lobby" class="action-btn action-btn-secondary">
+                    Показать все игры
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Подвал -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3 id="footerSiteName">Игра</h3>
+                    <p>Увлекательная многопользовательская игра с real-time обновлениями</p>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Быстрые ссылки</h4>
+                    <ul id="footerLinks">
+                        <li><a href="/">Главная</a></li>
+                        <li><a href="/lobby">Лобби</a></li>
+                        <li><a href="/login">Войти</a></li>
+                        <li><a href="/register">Регистрация</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Статус сервера</h4>
+                    <div class="server-status">
+                        <span class="status-indicator" id="serverStatusIndicator"></span>
+                        <span id="serverStatusText">Проверка...</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2024 <span id="footerCopyrightName">Игра</span>. Все права защищены.</p>
+                <p>Сделано с ❤️ для любителей стратегических игр</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Плавающая кнопка действия -->
+    <div class="floating-action" id="floatingAction" style="display:none;">
+        <a href="/lobby" class="floating-btn" title="Перейти в лобби">
+            🚀
+        </a>
+    </div>
+</div>

@@ -1,0 +1,48 @@
+<!-- Страница лобби -->
+<div class="lobby-container">
+    <div class="lobby-header">
+        <h1>Игровое лобби</h1>
+        <p>Выберите игру или создайте новую</p>
+    </div>
+    
+    <div class="lobby-actions">
+        <button id="createGameBtn" class="action-btn action-btn-primary">➕ Создать игру</button>
+        <button id="refreshGamesBtn" class="action-btn action-btn-secondary">🔄 Обновить</button>
+    </div>
+    
+    <div class="games-list" id="gamesList">
+        <!-- Список игр будет загружен через JavaScript -->
+        <div class="loading-message">
+            <div class="loading-spinner"></div>
+            <p>Загрузка игр...</p>
+        </div>
+    </div>
+    
+    <!-- Модальное окно создания игры -->
+    <div id="createGameModal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Создать новую игру</h2>
+                <span class="close" id="closeModal">&times;</span>
+            </div>
+            
+            <form id="createGameForm" class="modal-form">
+                <div class="form-group">
+                    <label for="maxPlayers">Максимальное количество игроков</label>
+                    <select id="maxPlayers" name="max_players">
+                        <option value="4">4 игрока</option>
+                        <option value="6" selected>6 игроков</option>
+                        <option value="8">8 игроков</option>
+                    </select>
+                </div>
+                
+                <div id="createGameError" class="error-message" style="display:none;"></div>
+                
+                <div class="modal-actions">
+                    <button type="button" class="action-btn action-btn-secondary" id="cancelCreateGame">Отмена</button>
+                    <button type="submit" class="action-btn action-btn-primary">Создать</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
