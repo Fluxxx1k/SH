@@ -9,7 +9,7 @@ import os
 import json
 import secrets
 from datetime import datetime, timedelta
-from flask import Flask, render_template, request, jsonify, session, redirect, url_for
+from flask import Flask, render_template, request, jsonify, session, redirect, url_for, send_from_directory
 from flask_socketio import SocketIO, emit, join_room, leave_room
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
@@ -296,8 +296,15 @@ def lobby():
 @app.route('/game/<game_id>')
 def game(game_id):
     return render_template('game.html', game_id=game_id)
+@app.route('/static/<path:path>')
+def serve_static(path):
+    if '..' in path or path.startswith('/'):
+        return jsonify({'error': 'Invalid path'}), 400
+    return send_from_directory('static', path)
 
 if __name__ == '__main__':
+    import os
+    print(os.getcwd())
     socketio.run(app,
                  debug=True,
                  host='0.0.0.0',
