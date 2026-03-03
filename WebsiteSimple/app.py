@@ -12,6 +12,7 @@ from datetime import datetime, timedelta
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for
 from flask_socketio import SocketIO, emit, join_room, leave_room
 from werkzeug.security import generate_password_hash, check_password_hash
+from functools import wraps
 
 # Конфигурация
 class Config:
@@ -24,13 +25,13 @@ app.config.from_object(Config)
 
 # Добавляем middleware для обработки JSON
 def json_error_handler(f):
+    @wraps(f)
     def wrapper(*args, **kwargs):
         try:
             return f(*args, **kwargs)
         except Exception as e:
             app.logger.error(f'Error in {f.__name__}: {str(e)}')
             return jsonify({'error': 'Internal server error'}), 500
-    wrapper.__name__ = f.__name__  # Сохраняем оригинальное имя функции
     return wrapper
 
 # Глобальный обработчик ошибок
@@ -128,6 +129,7 @@ data_store = SimpleDataStore()
 
 # Вспомогательные функции
 def require_auth(f):
+    @wraps(f)
     def decorated_function(*args, **kwargs):
         if 'username' not in session:
             return jsonify({'error': 'Authentication required'}), 401
