@@ -202,22 +202,138 @@ class DataStore:
 # Инициализация хранилища
 data_store = DataStore()
 
+# Улучшенная система авторизации
+class AuthManager:
+    """Менеджер аутентификации с использованием Redis"""
+    
+    def __init__(self, redis_client):
+        self.redis = redis_client
+        self.session_prefix = "session:"
+        self.user_prefix = "user:"
+        self.token_prefix = "token:"
+        
+    def create_session(self, username: str, remember_me: bool = False) -> str:
+        """Создать новую сессию"""
+        session_token = secrets.token_urlsafe(32)
+        session_data = {
+            'username': username,
+            'created_at': datetime.now().isoformat(),
+            'last_activity': datetime.now().isoformat(),
+            'ip_address': request.remote_addr,
+            'user_agent': request.headers.get('User-Agent', '')[:200]
+        }
+        
+        # Сохраняем сессию в Redis
+        if self.redis:
+            session_key = f"{self.session_prefix}{session_token}"
+            expires_in = timedelta(days=30) if remember_me else timedelta(hours=24)
+            
+            self.redis.hset(session_key, mapping={
+                k: json.dumps(v) if isinstance(v, (dict, list)) else str(v)
+                for k, v in session_data.items()
+            })
+            self.redis.expire(session_key, int(expires_in.total_seconds()))
+            
+            # Обновляем активность пользователя
+            user_key = f"{self.user_prefix}{username}"
+            self.redis.hset(user_key, 'last_activity', datetime.now().isoformat())
+            self.redis.expire(user_key, int(expires_in.total_seconds()))
+        
+        return session_token
+    
+    def get_session(self, session_token: str) -> Optional[Dict]:
+        """Получить данные сессии"""
+        if not self.redis or not session_token:
+            return None
+            
+        session_key = f"{self.session_prefix}{session_token}"
+        session_data = self.redis.hgetall(session_key)
+        
+        if not session_data:
+            return None
+            
+        # Обновляем последнюю активность
+        self.redis.hset(session_key, 'last_activity', datetime.now().isoformat())
+        
+        # Декодируем данные
+        decoded_data = {}
+        for key, value in session_data.items():
+            key = key.decode('utf-8') if isinstance(key, bytes) else key
+            value = value.decode('utf-8') if isinstance(value, bytes) else value
+            
+            # Пытаемся декодировать JSON
+            try:
+                decoded_data[key] = json.loads(value)
+            except (json.JSONDecodeError, ValueError):
+                decoded_data[key] = value
+                
+        return decoded_data
+    
+    def delete_session(self, session_token: str) -> bool:
+        """Удалить сессию"""
+        if not self.redis or not session_token:
+            return False
+            
+        session_key = f"{self.session_prefix}{session_token}"
+        return bool(self.redis.delete(session_key))
+    
+    def is_user_online(self, username: str) -> bool:
+        """Проверить онлайн ли пользователь"""
+        if not self.redis:
+            return False
+            
+        user_key = f"{self.user_prefix}{username}"
+        last_activity = self.redis.hget(user_key, 'last_activity')
+        
+        if not last_activity:
+            return False
+            
+        last_activity = datetime.fromisoformat(last_activity.decode('utf-8'))
+        return datetime.now() - last_activity < timedelta(minutes=5)
+
+# Инициализация менеджера авторизации
+auth_manager = AuthManager(redis_client)
+
 # Декораторы
 def login_required(f):
-    """Декоратор для защиты маршрутов"""
+    """Улучшенный декоратор для защиты маршрутов"""
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if 'username' not in session:
+        session_token = session.get('session_token')
+        
+        if not session_token:
             return redirect(url_for('login', next=request.url))
+            
+        session_data = auth_manager.get_session(session_token)
+        if not session_data:
+            session.clear()
+            return redirect(url_for('login', next=request.url))
+            
+        # Добавляем данные сессии в request
+        request.current_user = session_data['username']
+        request.session_data = session_data
+        
         return f(*args, **kwargs)
     return decorated_function
 
 def api_login_required(f):
-    """Декоратор для защиты API маршрутов"""
+    """Улучшенный декоратор для защиты API маршрутов"""
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if 'username' not in session:
+        session_token = session.get('session_token')
+        
+        if not session_token:
             return jsonify({'error': 'Требуется авторизация'}), 401
+            
+        session_data = auth_manager.get_session(session_token)
+        if not session_data:
+            session.clear()
+            return jsonify({'error': 'Сессия истекла'}), 401
+            
+        # Добавляем данные сессии в request
+        request.current_user = session_data['username']
+        request.session_data = session_data
+        
         return f(*args, **kwargs)
     return decorated_function
 
@@ -240,7 +356,7 @@ def index():
 @login_required
 def lobby():
     """Страница лобби"""
-    username = session.get('username')
+    username = request.current_user
     return render_template('lobby.html', username=username)
 
 @app.route('/game/<game_id>')
@@ -252,7 +368,7 @@ def game(game_id: str):
         flash('Игра не найдена', 'error')
         return redirect(url_for('lobby'))
         
-    username = session.get('username')
+    username = request.current_user
     if username not in game['players'] and game['status'] != 'waiting':
         flash('Вы не участвуете в этой игре', 'error')
         return redirect(url_for('lobby'))
@@ -262,7 +378,7 @@ def game(game_id: str):
 # Маршруты авторизации
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    """Страница входа"""
+    """Страница входа с улучшенной системой авторизации"""
     if request.method == 'POST':
         username = request.form.get('username', '').strip()
         password = request.form.get('password', '')
@@ -277,10 +393,14 @@ def login():
             flash('Неверное имя пользователя или пароль', 'error')
             return render_template('login.html')
             
-        # Успешный вход
-        session['username'] = username
+        # Успешный вход - создаем новую сессию
+        session_token = auth_manager.create_session(username, remember_me)
+        session['session_token'] = session_token
         session.permanent = remember_me
+        
+        # Обновляем данные пользователя
         data_store.update_user_login(username)
+        data_store.add_online_user(username)
         
         flash(f'Добро пожаловать, {username}!', 'success')
         next_url = request.args.get('next')
@@ -336,10 +456,19 @@ def register():
 
 @app.route('/logout')
 def logout():
-    """Выход из системы"""
-    username = session.get('username')
-    if username:
-        data_store.remove_online_user(username)
+    """Выход из системы с улучшенной системой авторизации"""
+    session_token = session.get('session_token')
+    
+    if session_token:
+        # Получаем данные сессии перед удалением
+        session_data = auth_manager.get_session(session_token)
+        if session_data:
+            username = session_data.get('username')
+            if username:
+                data_store.remove_online_user(username)
+        
+        # Удаляем сессию из Redis
+        auth_manager.delete_session(session_token)
         
     session.clear()
     flash('Вы вышли из системы', 'info')
@@ -374,7 +503,7 @@ def api_health():
 
 @app.route('/api/auth/demo', methods=['POST'])
 def api_demo_login():
-    """API: Вход в демо-режим"""
+    """API: Вход в демо-режим с улучшенной системой авторизации"""
     try:
         data = request.get_json() or {}
         demo_type = data.get('type', 'player')
@@ -391,10 +520,12 @@ def api_demo_login():
         if data_store.add_user(username, '', password_hash):
             data_store.users[username]['is_demo'] = True
             
-            # Авторизация
-            session['username'] = username
+            # Авторизация с созданием сессии
+            session_token = auth_manager.create_session(username, remember_me=False)
+            session['session_token'] = session_token
             session.permanent = False  # Демо-сессия временная
             data_store.update_user_login(username)
+            data_store.add_online_user(username)
             
             return jsonify({
                 'success': True,
