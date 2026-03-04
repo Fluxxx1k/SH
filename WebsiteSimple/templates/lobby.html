@@ -1,48 +1,283 @@
-<!-- Страница лобби -->
-<div class="lobby-container">
-    <div class="lobby-header">
-        <h1>Игровое лобби</h1>
-        <p>Выберите игру или создайте новую</p>
+{% extends "base.html" %}
+
+{% block title %}Лобби - {{ site_name or 'Игра' }}{% endblock %}
+
+{% block content %}
+<div class="lobby-container" id="lobbyContainer">
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loading-spinner"></div>
+        <p>Загрузка лобби...</p>
     </div>
     
-    <div class="lobby-actions">
-        <button id="createGameBtn" class="action-btn action-btn-primary">➕ Создать игру</button>
-        <button id="refreshGamesBtn" class="action-btn action-btn-secondary">🔄 Обновить</button>
-    </div>
-    
-    <div class="games-list" id="gamesList">
-        <!-- Список игр будет загружен через JavaScript -->
-        <div class="loading-message">
-            <div class="loading-spinner"></div>
-            <p>Загрузка игр...</p>
-        </div>
-    </div>
-    
-    <!-- Модальное окно создания игры -->
-    <div id="createGameModal" class="modal" style="display:none;">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Создать новую игру</h2>
-                <span class="close" id="closeModal">&times;</span>
-            </div>
-            
-            <form id="createGameForm" class="modal-form">
-                <div class="form-group">
-                    <label for="maxPlayers">Максимальное количество игроков</label>
-                    <select id="maxPlayers" name="max_players">
-                        <option value="4">4 игрока</option>
-                        <option value="6" selected>6 игроков</option>
-                        <option value="8">8 игроков</option>
-                    </select>
-                </div>
-                
-                <div id="createGameError" class="error-message" style="display:none;"></div>
-                
-                <div class="modal-actions">
-                    <button type="button" class="action-btn action-btn-secondary" id="cancelCreateGame">Отмена</button>
-                    <button type="submit" class="action-btn action-btn-primary">Создать</button>
-                </div>
-            </form>
-        </div>
+    <div class="lobby-content" id="lobbyContent" style="display:none;">
+        <!-- Контент будет отрендерен JavaScript -->
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Лобби страница - полностью на JavaScript
+class LobbyPage {
+    constructor() {
+        this.container = document.getElementById('lobbyContainer');
+        this.loadingScreen = document.getElementById('loadingScreen');
+        this.content = document.getElementById('lobbyContent');
+        this.refreshInterval = null;
+        
+        this.init();
+    }
+    
+    async init() {
+        try {
+            await this.checkAuth();
+            await this.loadLobbyData();
+            this.setupEventListeners();
+            this.startAutoRefresh();
+            this.showContent();
+        } catch (error) {
+            console.error('Ошибка инициализации лобби:', error);
+            this.showError('Не удалось загрузить лобби');
+        }
+    }
+    
+    async checkAuth() {
+        try {
+            const response = await fetch('/api/auth/status');
+            const data = await response.json();
+            
+            if (!data.authenticated) {
+                window.location.href = '/login';
+                return;
+            }
+        } catch (error) {
+            window.location.href = '/login';
+        }
+    }
+    
+    async loadLobbyData() {
+        const response = await fetch('/api/games');
+        const data = await response.json();
+        
+        this.renderLobby(data.games || []);
+    }
+    
+    renderLobby(games) {
+        this.content.innerHTML = `
+            <div class="lobby-header">
+                <h1>Игровое лобби</h1>
+                <p>Выберите игру или создайте новую</p>
+            </div>
+            
+            <div class="lobby-actions">
+                <button id="createGameBtn" class="action-btn action-btn-primary">
+                    ➕ Создать игру
+                </button>
+                <button id="refreshGamesBtn" class="action-btn action-btn-secondary">
+                    🔄 Обновить
+                </button>
+            </div>
+            
+            <div class="games-list" id="gamesList">
+                ${this.renderGamesList(games)}
+            </div>
+            
+            ${this.renderCreateGameModal()}
+        `;
+        
+        this.attachModalListeners();
+    }
+    
+    renderGamesList(games) {
+        if (games.length === 0) {
+            return `
+                <div class="no-games-message">
+                    <div class="no-games-icon">🎮</div>
+                    <h3>Нет доступных игр</h3>
+                    <p>Создайте новую игру или подождите других игроков</p>
+                </div>
+            `;
+        }
+        
+        return games.map(game => `
+            <div class="game-card" data-game-id="${game.id}">
+                <div class="game-info">
+                    <h3>Игра #${game.id}</h3>
+                    <div class="game-details">
+                        <span>Создатель: ${game.creator}</span>
+                        <span>Игроков: ${game.current_players}/${game.max_players}</span>
+                        <span class="status-${game.status}">
+                            ${game.status === 'waiting' ? 'Ожидание' : 'В процессе'}
+                        </span>
+                    </div>
+                </div>
+                <div class="game-actions">
+                    <a href="/game/${game.id}" class="action-btn action-btn-small">
+                        ${game.status === 'waiting' && game.current_players < game.max_players ? 
+                            'Присоединиться' : 'Наблюдать'}
+                    </a>
+                </div>
+            </div>
+        `).join('');
+    }
+    
+    renderCreateGameModal() {
+        return `
+            <div id="createGameModal" class="modal" style="display:none;">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2>Создать новую игру</h2>
+                        <span class="close" id="closeModal">&times;</span>
+                    </div>
+                    
+                    <form id="createGameForm" class="modal-form">
+                        <div class="form-group">
+                            <label for="maxPlayers">Максимальное количество игроков</label>
+                            <select id="maxPlayers" name="max_players">
+                                <option value="4">4 игрока</option>
+                                <option value="6" selected>6 игроков</option>
+                                <option value="8">8 игроков</option>
+                            </select>
+                        </div>
+                        
+                        <div id="createGameError" class="error-message" style="display:none;"></div>
+                        
+                        <div class="modal-actions">
+                            <button type="button" class="action-btn action-btn-secondary" id="cancelCreateGame">
+                                Отмена
+                            </button>
+                            <button type="submit" class="action-btn action-btn-primary">
+                                Создать
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        `;
+    }
+    
+    attachModalListeners() {
+        const modal = document.getElementById('createGameModal');
+        const form = document.getElementById('createGameForm');
+        
+        document.getElementById('createGameBtn').onclick = () => {
+            modal.style.display = 'block';
+        };
+        
+        document.getElementById('closeModal').onclick = () => {
+            modal.style.display = 'none';
+        };
+        
+        document.getElementById('cancelCreateGame').onclick = () => {
+            modal.style.display = 'none';
+        };
+        
+        form.onsubmit = async (e) => {
+            e.preventDefault();
+            await this.createGame();
+        };
+        
+        document.getElementById('refreshGamesBtn').onclick = () => {
+            this.refreshGames();
+        };
+    }
+    
+    async createGame() {
+        const form = document.getElementById('createGameForm');
+        const formData = new FormData(form);
+        const maxPlayers = parseInt(formData.get('max_players'));
+        
+        try {
+            const response = await fetch('/api/games', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ max_players: maxPlayers })
+            });
+            
+            const result = await response.json();
+            
+            if (response.ok) {
+                window.location.href = `/game/${result.game_id}`;
+            } else {
+                this.showFormError(result.error || 'Ошибка создания игры');
+            }
+        } catch (error) {
+            console.error('Ошибка создания игры:', error);
+            this.showFormError('Ошибка соединения с сервером');
+        }
+    }
+    
+    async refreshGames() {
+        const button = document.getElementById('refreshGamesBtn');
+        const originalText = button.innerHTML;
+        
+        button.innerHTML = '🔄 Обновление...';
+        button.disabled = true;
+        
+        try {
+            await this.loadLobbyData();
+        } catch (error) {
+            console.error('Ошибка обновления игр:', error);
+        } finally {
+            button.innerHTML = originalText;
+            button.disabled = false;
+        }
+    }
+    
+    setupEventListeners() {
+        // Закрытие модального окна по клику вне его
+        window.onclick = (event) => {
+            const modal = document.getElementById('createGameModal');
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        };
+    }
+    
+    startAutoRefresh() {
+        this.refreshInterval = setInterval(() => {
+            this.loadLobbyData();
+        }, 5000);
+    }
+    
+    showContent() {
+        this.loadingScreen.style.display = 'none';
+        this.content.style.display = 'block';
+    }
+    
+    showError(message) {
+        this.content.innerHTML = `
+            <div class="error-container">
+                <div class="error-message">
+                    <h3>Ошибка</h3>
+                    <p>${message}</p>
+                    <button onclick="window.location.reload()" class="action-btn action-btn-primary">
+                        Перезагрузить
+                    </button>
+                </div>
+            </div>
+        `;
+        this.showContent();
+    }
+    
+    showFormError(message) {
+        const errorDiv = document.getElementById('createGameError');
+        errorDiv.textContent = message;
+        errorDiv.style.display = 'block';
+    }
+    
+    destroy() {
+        if (this.refreshInterval) {
+            clearInterval(this.refreshInterval);
+        }
+    }
+}
+
+// Инициализация при загрузке страницы
+document.addEventListener('DOMContentLoaded', () => {
+    new LobbyPage();
+});
+</script>
+{% endblock %}

@@ -1,231 +1,514 @@
-<!-- Главная страница - контент загружается через JavaScript -->
+{% extends "base.html" %}
+
+{% block title %}Главная - {{ site_name or 'Игра' }}{% endblock %}
+
+{% block content %}
 <div id="indexContent">
-    <section class="hero">
-        <div class="hero-content">
-            <div class="hero-text">
-                <h1 class="hero-title">
-                    🎮 <span class="gradient-text" id="siteName">Игра</span>
-                </h1>
-                <p class="hero-description">
-                    Присоединяйтесь к захватывающей многопользовательской игре с real-time обновлениями, 
-                    голосованием и стратегическим геймплеем!
-                </p>
-                
-                <div class="hero-stats">
-                    <div class="stat-item">
-                        <div class="stat-number" id="activeGamesCount">0</div>
-                        <div class="stat-label">Активных игр</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-number" id="onlinePlayersCount">0</div>
-                        <div class="stat-label">Игроков онлайн</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-number" id="completedGamesCount">0</div>
-                        <div class="stat-label">Завершенных игр</div>
-                    </div>
-                </div>
-                
-                <div class="hero-actions" id="heroActions">
-                    <!-- Кнопки будут добавлены через JavaScript -->
-                </div>
-            </div>
-            
-            <div class="hero-visual">
-                <div class="game-preview">
-                    <div class="preview-header">
-                        <h3>🎮 Предпросмотр игры</h3>
-                        <div class="connection-status" id="connectionStatus">
-                            <span class="status-indicator" id="statusIndicator"></span>
-                            <span id="statusText">Подключение...</span>
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loading-spinner"></div>
+        <p>Загрузка...</p>
+    </div>
+    
+    <div class="main-content" id="mainContentArea" style="display:none;">
+        <!-- Контент будет отрендерен JavaScript -->
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Главная страница - полностью на JavaScript
+class IndexPage {
+    constructor() {
+        this.data = {
+            stats: null,
+            games: [],
+            isAuthenticated: false,
+            username: null
+        };
+        
+        this.init();
+    }
+    
+    async init() {
+        try {
+            await this.loadInitialData();
+            this.renderPage();
+            this.startAutoUpdate();
+            this.showContent();
+        } catch (error) {
+            console.error('Ошибка инициализации главной страницы:', error);
+            this.showError('Не удалось загрузить данные');
+        }
+    }
+    
+    async loadInitialData() {
+        // Проверка аутентификации
+        try {
+            const authResponse = await fetch('/api/auth/status');
+            const authData = await authResponse.json();
+            this.data.isAuthenticated = authData.authenticated;
+            this.data.username = authData.username;
+        } catch (error) {
+            console.log('Пользователь не авторизован');
+        }
+        
+        // Загрузка статистики и игр
+        await Promise.all([
+            this.loadGameStats(),
+            this.loadActiveGames()
+        ]);
+    }
+    
+    async loadGameStats() {
+        try {
+            // Имитация загрузки статистики
+            this.data.stats = {
+                active_games: Math.floor(Math.random() * 10) + 5,
+                total_players: Math.floor(Math.random() * 50) + 20,
+                completed_games: Math.floor(Math.random() * 100) + 50
+            };
+        } catch (error) {
+            console.error('Ошибка загрузки статистики:', error);
+            this.data.stats = { active_games: 0, total_players: 0, completed_games: 0 };
+        }
+    }
+    
+    async loadActiveGames() {
+        try {
+            const response = await fetch('/api/games');
+            const data = await response.json();
+            this.data.games = data.games || [];
+        } catch (error) {
+            console.error('Ошибка загрузки игр:', error);
+            this.data.games = [];
+        }
+    }
+    
+    renderPage() {
+        const contentArea = document.getElementById('mainContentArea');
+        
+        contentArea.innerHTML = `
+            ${this.renderHeroSection()}
+            ${this.renderFeaturesSection()}
+            ${this.renderHowToPlaySection()}
+            ${this.renderActiveGamesSection()}
+            ${this.renderFooter()}
+            ${this.renderFloatingAction()}
+        `;
+        
+        this.attachEventListeners();
+    }
+    
+    renderHeroSection() {
+        return `
+            <section class="hero">
+                <div class="hero-content">
+                    <div class="hero-text">
+                        <h1 class="hero-title">
+                            🎮 <span class="gradient-text">${window.siteName || 'Игра'}</span>
+                        </h1>
+                        <p class="hero-description">
+                            Присоединяйтесь к захватывающей многопользовательской игре с real-time обновлениями, 
+                            голосованием и стратегическим геймплеем!
+                        </p>
+                        
+                        <div class="hero-stats">
+                            <div class="stat-item">
+                                <div class="stat-number">${this.data.stats.active_games}</div>
+                                <div class="stat-label">Активных игр</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number">${this.data.stats.total_players}</div>
+                                <div class="stat-label">Игроков онлайн</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number">${this.data.stats.completed_games}</div>
+                                <div class="stat-label">Завершенных игр</div>
+                            </div>
+                        </div>
+                        
+                        <div class="hero-actions" id="heroActions">
+                            ${this.renderHeroActions()}
                         </div>
                     </div>
                     
-                    <div class="preview-game">
-                        <div class="preview-players">
-                            <div class="player-slot">
-                                <div class="player-avatar">A</div>
-                                <span class="player-name">Игрок 1</span>
-                                <div class="player-vote vote-yes">✓</div>
+                    <div class="hero-visual">
+                        <div class="game-preview">
+                            <div class="preview-header">
+                                <h3>🎮 Предпросмотр игры</h3>
+                                <div class="connection-status">
+                                    <span class="status-indicator" id="statusIndicator"></span>
+                                    <span id="statusText">Подключение...</span>
+                                </div>
                             </div>
-                            <div class="player-slot">
-                                <div class="player-avatar">B</div>
-                                <span class="player-name">Игрок 2</span>
-                                <div class="player-vote vote-no">✗</div>
+                            
+                            <div class="preview-game">
+                                <div class="preview-players">
+                                    <div class="player-slot">
+                                        <div class="player-avatar">A</div>
+                                        <span class="player-name">Игрок 1</span>
+                                        <div class="player-vote vote-yes">✓</div>
+                                    </div>
+                                    <div class="player-slot">
+                                        <div class="player-avatar">B</div>
+                                        <span class="player-name">Игрок 2</span>
+                                        <div class="player-vote vote-no">✗</div>
+                                    </div>
+                                    <div class="player-slot">
+                                        <div class="player-avatar">C</div>
+                                        <span class="player-name">Игрок 3</span>
+                                        <div class="player-vote vote-pass">—</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="preview-voting">
+                                    <div class="vote-buttons">
+                                        <button class="vote-btn vote-yes">ЗА</button>
+                                        <button class="vote-btn vote-no">ПРОТИВ</button>
+                                        <button class="vote-btn vote-pass">ПАС</button>
+                                    </div>
+                                </div>
+                                
+                                <div class="preview-chat">
+                                    <div class="chat-message">
+                                        <span class="message-author">Игрок 1:</span>
+                                        <span class="message-text">Готов начинать!</span>
+                                    </div>
+                                    <div class="chat-message">
+                                        <span class="message-author">Игрок 2:</span>
+                                        <span class="message-text">Я тоже готов</span>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="player-slot">
-                                <div class="player-avatar">C</div>
-                                <span class="player-name">Игрок 3</span>
-                                <div class="player-vote vote-pass">—</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        `;
+    }
+    
+    renderHeroActions() {
+        if (this.data.isAuthenticated) {
+            return `
+                <a href="/lobby" class="action-btn action-btn-primary">🚀 Начать играть</a>
+                <div class="user-welcome">
+                    Добро пожаловать, <strong>${this.data.username}</strong>!
+                </div>
+            `;
+        } else {
+            return `
+                <a href="/register" class="action-btn action-btn-primary">🎯 Зарегистрироваться</a>
+                <a href="/login" class="action-btn action-btn-secondary">Войти</a>
+            `;
+        }
+    }
+    
+    renderFeaturesSection() {
+        return `
+            <section class="features">
+                <div class="container">
+                    <h2 class="section-title">✨ Особенности</h2>
+                    
+                    <div class="features-grid">
+                        <div class="feature-card">
+                            <div class="feature-icon">⚡</div>
+                            <h3>Real-time обновления</h3>
+                            <p>Все изменения в игре мгновенно отображаются у всех игроков без необходимости обновления страницы</p>
+                        </div>
+                        
+                        <div class="feature-card">
+                            <div class="feature-icon">🗣️</div>
+                            <h3>Чат в реальном времени</h3>
+                            <p>Общайтесь с другими игроками через встроенный чат с индикаторами набора текста</p>
+                        </div>
+                        
+                        <div class="feature-card">
+                            <div class="feature-icon">📊</div>
+                            <h3>Система голосования</h3>
+                            <p>Принимайте решения коллективно с прозрачной системой голосования</p>
+                        </div>
+                        
+                        <div class="feature-card">
+                            <div class="feature-icon">📱</div>
+                            <h3>Адаптивный дизайн</h3>
+                            <p>Играйте на любом устройстве - компьютере, планшете или смартфоне</p>
+                        </div>
+                        
+                        <div class="feature-card">
+                            <div class="feature-icon">🔒</div>
+                            <h3>Безопасность</h3>
+                            <p>Защита от дублирования событий и оптимизированная нагрузка на сервер</p>
+                        </div>
+                        
+                        <div class="feature-card">
+                            <div class="feature-icon">🎯</div>
+                            <h3>Простота использования</h3>
+                            <p>Интуитивно понятный интерфейс и быстрое подключение к играм</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        `;
+    }
+    
+    renderHowToPlaySection() {
+        return `
+            <section class="how-to-play">
+                <div class="container">
+                    <h2 class="section-title">📖 Как играть</h2>
+                    
+                    <div class="steps">
+                        <div class="step">
+                            <div class="step-number">1</div>
+                            <div class="step-content">
+                                <h3>Зарегистрируйтесь</h3>
+                                <p>Создайте аккаунт, чтобы получить доступ ко всем функциям игры</p>
                             </div>
                         </div>
                         
-                        <div class="preview-voting">
-                            <div class="vote-buttons">
-                                <button class="vote-btn vote-yes">ЗА</button>
-                                <button class="vote-btn vote-no">ПРОТИВ</button>
-                                <button class="vote-btn vote-pass">ПАС</button>
+                        <div class="step">
+                            <div class="step-number">2</div>
+                            <div class="step-content">
+                                <h3>Войдите в лобби</h3>
+                                <p>Выберите существующую игру или создайте свою</p>
                             </div>
                         </div>
                         
-                        <div class="preview-chat">
-                            <div class="chat-message">
-                                <span class="message-author">Игрок 1:</span>
-                                <span class="message-text">Готов начинать!</span>
+                        <div class="step">
+                            <div class="step-number">3</div>
+                            <div class="step-content">
+                                <h3>Играйте и общайтесь</h3>
+                                <p>Голосуйте за действия и общайтесь с другими игроками в чате</p>
                             </div>
-                            <div class="chat-message">
-                                <span class="message-author">Игрок 2:</span>
-                                <span class="message-text">Я тоже готов</span>
+                        </div>
+                        
+                        <div class="step">
+                            <div class="step-number">4</div>
+                            <div class="step-content">
+                                <h3>Побеждайте!</h3>
+                                <p>Используйте стратегию и дипломатию для достижения целей игры</p>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Особенности игры -->
-    <section class="features">
-        <div class="container">
-            <h2 class="section-title">✨ Особенности</h2>
-            
-            <div class="features-grid">
-                <div class="feature-card">
-                    <div class="feature-icon">⚡</div>
-                    <h3>Real-time обновления</h3>
-                    <p>Все изменения в игре мгновенно отображаются у всех игроков без необходимости обновления страницы</p>
+            </section>
+        `;
+    }
+    
+    renderActiveGamesSection() {
+        const hasGames = this.data.games.length > 0;
+        const displayGames = this.data.games.slice(0, 6);
+        
+        return `
+            <section class="active-games">
+                <div class="container">
+                    <h2 class="section-title">🎮 Активные игры</h2>
+                    
+                    <div class="games-preview" id="gamesPreview">
+                        ${hasGames ? this.renderGamesList(displayGames) : this.renderNoGamesMessage()}
+                    </div>
+                    
+                    ${this.data.games.length > 6 ? `
+                        <div class="show-all-games">
+                            <a href="/lobby" class="action-btn action-btn-secondary">Показать все игры</a>
+                        </div>
+                    ` : ''}
+                </div>
+            </section>
+        `;
+    }
+    
+    renderGamesList(games) {
+        return games.map(game => `
+            <div class="game-preview-card" data-game-id="${game.id}">
+                <div class="game-preview-header">
+                    <h3>Игра #${game.id}</h3>
+                    <span class="game-status-badge status-${game.status}">
+                        ${game.status === 'waiting' ? '⏳ Ожидание' : '▶️ В процессе'}
+                    </span>
                 </div>
                 
-                <div class="feature-card">
-                    <div class="feature-icon">🗣️</div>
-                    <h3>Чат в реальном времени</h3>
-                    <p>Общайтесь с другими игроками через встроенный чат с индикаторами набора текста</p>
-                </div>
-                
-                <div class="feature-card">
-                    <div class="feature-icon">📊</div>
-                    <h3>Система голосования</h3>
-                    <p>Принимайте решения коллективно с прозрачной системой голосования</p>
-                </div>
-                
-                <div class="feature-card">
-                    <div class="feature-icon">📱</div>
-                    <h3>Адаптивный дизайн</h3>
-                    <p>Играйте на любом устройстве - компьютере, планшете или смартфоне</p>
-                </div>
-                
-                <div class="feature-card">
-                    <div class="feature-icon">🔒</div>
-                    <h3>Безопасность</h3>
-                    <p>Защита от дублирования событий и оптимизированная нагрузка на сервер</p>
-                </div>
-                
-                <div class="feature-card">
-                    <div class="feature-icon">🎯</div>
-                    <h3>Простота использования</h3>
-                    <p>Интуитивно понятный интерфейс и быстрое подключение к играм</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Как играть -->
-    <section class="how-to-play">
-        <div class="container">
-            <h2 class="section-title">📖 Как играть</h2>
-            
-            <div class="steps">
-                <div class="step">
-                    <div class="step-number">1</div>
-                    <div class="step-content">
-                        <h3>Зарегистрируйтесь</h3>
-                        <p>Создайте аккаунт, чтобы получить доступ ко всем функциям игры</p>
+                <div class="game-preview-info">
+                    <div class="info-item">
+                        <span class="info-label">Создатель:</span>
+                        <span class="info-value">${game.creator}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Игроков:</span>
+                        <span class="info-value">${game.current_players}/${game.max_players}</span>
+                    </div>
+                    <div class="info-players">
+                        ${game.players.map(player => `<span class="player-tag">${player}</span>`).join('')}
                     </div>
                 </div>
                 
-                <div class="step">
-                    <div class="step-number">2</div>
-                    <div class="step-content">
-                        <h3>Войдите в лобби</h3>
-                        <p>Выберите существующую игру или создайте свою</p>
-                    </div>
-                </div>
-                
-                <div class="step">
-                    <div class="step-number">3</div>
-                    <div class="step-content">
-                        <h3>Играйте и общайтесь</h3>
-                        <p>Голосуйте за действия и общайтесь с другими игроками в чате</p>
-                    </div>
-                </div>
-                
-                <div class="step">
-                    <div class="step-number">4</div>
-                    <div class="step-content">
-                        <h3>Побеждайте!</h3>
-                        <p>Используйте стратегию и дипломатию для достижения целей игры</p>
-                    </div>
+                <div class="game-preview-actions">
+                    ${this.data.isAuthenticated ? 
+                        `<a href="/game/${game.id}" class="action-btn action-btn-small">
+                            ${game.status === 'waiting' && game.current_players < game.max_players ? 
+                                '🎮 Присоединиться' : '👁️ Наблюдать'}
+                        </a>` :
+                        `<a href="/login" class="action-btn action-btn-small">🔐 Войти чтобы играть</a>`
+                    }
                 </div>
             </div>
-        </div>
-    </section>
-
-    <!-- Активные игры -->
-    <section class="active-games">
-        <div class="container">
-            <h2 class="section-title">🎮 Активные игры</h2>
-            
-            <div class="games-preview" id="gamesPreview">
-                <!-- Игры будут загружены через JavaScript -->
+        `).join('');
+    }
+    
+    renderNoGamesMessage() {
+        return `
+            <div class="no-games-message">
+                <div class="no-games-icon">🎮</div>
+                <h3>Сейчас нет активных игр</h3>
+                <p>Станьте первым, кто создаст новую игру!</p>
+                ${this.data.isAuthenticated ? 
+                    '<a href="/lobby" class="action-btn action-btn-primary">➕ Создать игру</a>' :
+                    '<a href="/register" class="action-btn action-btn-primary">🎯 Зарегистрироваться</a>'
+                }
             </div>
-            
-            <div class="show-all-games" id="showAllGames" style="display:none;">
-                <a href="/lobby" class="action-btn action-btn-secondary">
-                    Показать все игры
+        `;
+    }
+    
+    renderFooter() {
+        return `
+            <footer class="footer">
+                <div class="container">
+                    <div class="footer-content">
+                        <div class="footer-section">
+                            <h3>${window.siteName || 'Игра'}</h3>
+                            <p>Увлекательная многопользовательская игра с real-time обновлениями</p>
+                        </div>
+                        
+                        <div class="footer-section">
+                            <h4>Быстрые ссылки</h4>
+                            <ul>
+                                <li><a href="/">Главная</a></li>
+                                <li><a href="/lobby">Лобби</a></li>
+                                <li><a href="/login">Войти</a></li>
+                                <li><a href="/register">Регистрация</a></li>
+                            </ul>
+                        </div>
+                        
+                        <div class="footer-section">
+                            <h4>Статус сервера</h4>
+                            <div class="server-status">
+                                <span class="status-indicator" id="serverStatusIndicator"></span>
+                                <span id="serverStatusText">Проверка...</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="footer-bottom">
+                        <p>&copy; 2024 ${window.siteName || 'Игра'}. Все права защищены.</p>
+                        <p>Сделано с ❤️ для любителей стратегических игр</p>
+                    </div>
+                </div>
+            </footer>
+        `;
+    }
+    
+    renderFloatingAction() {
+        return this.data.isAuthenticated ? `
+            <div class="floating-action" id="floatingAction">
+                <a href="/lobby" class="floating-btn" title="Перейти в лобби">
+                    🚀
                 </a>
             </div>
-        </div>
-    </section>
-
-    <!-- Подвал -->
-    <footer class="footer">
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-section">
-                    <h3 id="footerSiteName">Игра</h3>
-                    <p>Увлекательная многопользовательская игра с real-time обновлениями</p>
-                </div>
-                
-                <div class="footer-section">
-                    <h4>Быстрые ссылки</h4>
-                    <ul id="footerLinks">
-                        <li><a href="/">Главная</a></li>
-                        <li><a href="/lobby">Лобби</a></li>
-                        <li><a href="/login">Войти</a></li>
-                        <li><a href="/register">Регистрация</a></li>
-                    </ul>
-                </div>
-                
-                <div class="footer-section">
-                    <h4>Статус сервера</h4>
-                    <div class="server-status">
-                        <span class="status-indicator" id="serverStatusIndicator"></span>
-                        <span id="serverStatusText">Проверка...</span>
-                    </div>
+        ` : '';
+    }
+    
+    attachEventListeners() {
+        // Обновление статуса подключения
+        this.updateConnectionStatus();
+        setInterval(() => this.updateConnectionStatus(), 5000);
+        
+        // Обработка кликов по играм
+        document.addEventListener('click', (e) => {
+            const gameCard = e.target.closest('.game-preview-card');
+            if (gameCard && e.target.tagName !== 'A') {
+                const gameId = gameCard.dataset.gameId;
+                const link = gameCard.querySelector('a');
+                if (link) {
+                    link.click();
+                }
+            }
+        });
+    }
+    
+    updateConnectionStatus() {
+        const indicator = document.getElementById('statusIndicator');
+        const text = document.getElementById('statusText');
+        const serverIndicator = document.getElementById('serverStatusIndicator');
+        const serverText = document.getElementById('serverStatusText');
+        
+        if (indicator && text) {
+            indicator.className = 'status-indicator connected';
+            text.textContent = 'Подключено';
+        }
+        
+        if (serverIndicator && serverText) {
+            serverIndicator.className = 'status-indicator connected';
+            serverText.textContent = 'Онлайн';
+        }
+    }
+    
+    startAutoUpdate() {
+        // Обновление данных каждые 10 секунд
+        setInterval(async () => {
+            await Promise.all([
+                this.loadGameStats(),
+                this.loadActiveGames()
+            ]);
+            this.updateStatsDisplay();
+        }, 10000);
+    }
+    
+    updateStatsDisplay() {
+        const statsElements = {
+            activeGames: document.getElementById('activeGamesCount'),
+            onlinePlayers: document.getElementById('onlinePlayersCount'),
+            completedGames: document.getElementById('completedGamesCount')
+        };
+        
+        if (statsElements.activeGames) {
+            statsElements.activeGames.textContent = this.data.stats.active_games;
+        }
+        if (statsElements.onlinePlayers) {
+            statsElements.onlinePlayers.textContent = this.data.stats.total_players;
+        }
+        if (statsElements.completedGames) {
+            statsElements.completedGames.textContent = this.data.stats.completed_games;
+        }
+    }
+    
+    showContent() {
+        document.getElementById('loadingScreen').style.display = 'none';
+        document.getElementById('mainContentArea').style.display = 'block';
+    }
+    
+    showError(message) {
+        document.getElementById('mainContentArea').innerHTML = `
+            <div class="error-container">
+                <div class="error-message">
+                    <h3>Ошибка</h3>
+                    <p>${message}</p>
+                    <button onclick="window.location.reload()" class="action-btn action-btn-primary">
+                        Перезагрузить
+                    </button>
                 </div>
             </div>
-            
-            <div class="footer-bottom">
-                <p>&copy; 2024 <span id="footerCopyrightName">Игра</span>. Все права защищены.</p>
-                <p>Сделано с ❤️ для любителей стратегических игр</p>
-            </div>
-        </div>
-    </footer>
+        `;
+        this.showContent();
+    }
+}
 
-    <!-- Плавающая кнопка действия -->
-    <div class="floating-action" id="floatingAction" style="display:none;">
-        <a href="/lobby" class="floating-btn" title="Перейти в лобби">
-            🚀
-        </a>
-    </div>
-</div>
+// Инициализация при загрузке страницы
+document.addEventListener('DOMContentLoaded', () => {
+    // Установка глобальных переменных
+    window.siteName = '{{ site_name or "Игра" }}';
+    
+    new IndexPage();
+});
+</script>
+{% endblock %}

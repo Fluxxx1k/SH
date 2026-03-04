@@ -1,40 +1,337 @@
-<!-- Страница регистрации -->
-<div class="auth-container">
-    <link rel="stylesheet" href="/static/css/auth.css">
-    <div class="auth-card">
-        <div class="auth-header">
-            <h1>Регистрация</h1>
-            <p>Создайте новый аккаунт</p>
-        </div>
-        
-        <form id="registerForm" class="auth-form">
-            <div class="form-group">
-                <label for="username">Имя пользователя</label>
-                <input type="text" id="username" name="username" required>
-            </div>
-            
-            <div class="form-group">
-                <label for="email">Email</label>
-                <input type="email" id="email" name="email" required>
-            </div>
-            
-            <div class="form-group">
-                <label for="password">Пароль</label>
-                <input type="password" id="password" name="password" required>
-            </div>
-            
-            <div class="form-group">
-                <label for="confirmPassword">Подтвердите пароль</label>
-                <input type="password" id="confirmPassword" name="confirmPassword" required>
-            </div>
-            
-            <div id="errorMessage" class="error-message" style="display:none;"></div>
-            
-            <button type="submit" class="auth-btn">Зарегистрироваться</button>
-        </form>
-        
-        <div class="auth-footer">
-            <p>Уже есть аккаунт? <a href="/login">Войдите</a></p>
-        </div>
+{% extends "base.html" %}
+
+{% block title %}Регистрация - {{ site_name or 'Игра' }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="/static/css/auth.css">
+{% endblock %}
+
+{% block content %}
+<div id="authContainer">
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loading-spinner"></div>
+        <p>Проверка...</p>
+    </div>
+    
+    <div id="authContent" style="display:none;">
+        <!-- Контент будет отрендерен JavaScript -->
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Страница регистрации - полностью на JavaScript
+class RegisterPage {
+    constructor() {
+        this.container = document.getElementById('authContainer');
+        this.loadingScreen = document.getElementById('loadingScreen');
+        this.content = document.getElementById('authContent');
+        
+        this.init();
+    }
+    
+    async init() {
+        try {
+            await this.checkAuth();
+            this.renderPage();
+            this.attachEventListeners();
+            this.showContent();
+        } catch (error) {
+            console.error('Ошибка инициализации страницы регистрации:', error);
+            this.showError('Не удалось загрузить страницу регистрации');
+        }
+    }
+    
+    async checkAuth() {
+        try {
+            const response = await fetch('/api/auth/status');
+            const data = await response.json();
+            
+            if (data.authenticated) {
+                // Если пользователь уже авторизован, перенаправляем на главную
+                window.location.href = '/';
+                return;
+            }
+        } catch (error) {
+            console.log('Пользователь не авторизован');
+        }
+    }
+    
+    renderPage() {
+        this.content.innerHTML = `
+            <div class="auth-container">
+                <div class="auth-card">
+                    <div class="auth-header">
+                        <h1>Регистрация</h1>
+                        <p>Создайте новый аккаунт</p>
+                    </div>
+                    
+                    <form id="registerForm" class="auth-form">
+                        <div class="form-group">
+                            <label for="username">Имя пользователя</label>
+                            <input type="text" id="username" name="username" required>
+                            <div class="error-message" id="usernameError" style="display:none;"></div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" id="email" name="email" required>
+                            <div class="error-message" id="emailError" style="display:none;"></div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="password">Пароль</label>
+                            <input type="password" id="password" name="password" required>
+                            <div class="error-message" id="passwordError" style="display:none;"></div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="confirmPassword">Подтвердите пароль</label>
+                            <input type="password" id="confirmPassword" name="confirmPassword" required>
+                            <div class="error-message" id="confirmPasswordError" style="display:none;"></div>
+                        </div>
+                        
+                        <div id="errorMessage" class="error-message" style="display:none;"></div>
+                        
+                        <button type="submit" class="auth-btn" id="submitBtn">
+                            Зарегистрироваться
+                        </button>
+                    </form>
+                    
+                    <div class="auth-footer">
+                        <p>Уже есть аккаунт? <a href="/login">Войдите</a></p>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    
+    attachEventListeners() {
+        const form = document.getElementById('registerForm');
+        
+        // Валидация в реальном времени
+        document.getElementById('username').addEventListener('input', (e) => {
+            this.validateUsername(e.target.value);
+        });
+        
+        document.getElementById('email').addEventListener('input', (e) => {
+            this.validateEmail(e.target.value);
+        });
+        
+        document.getElementById('password').addEventListener('input', (e) => {
+            this.validatePassword(e.target.value);
+        });
+        
+        document.getElementById('confirmPassword').addEventListener('input', (e) => {
+            this.validatePasswordMatch(e.target.value);
+        });
+        
+        // Отправка формы
+        form.onsubmit = async (e) => {
+            e.preventDefault();
+            await this.handleRegistration();
+        };
+    }
+    
+    validateUsername(username) {
+        const errorDiv = document.getElementById('usernameError');
+        
+        if (username.length < 3) {
+            errorDiv.textContent = 'Имя пользователя должно быть не менее 3 символов';
+            errorDiv.style.display = 'block';
+            return false;
+        } else if (username.length > 20) {
+            errorDiv.textContent = 'Имя пользователя должно быть не более 20 символов';
+            errorDiv.style.display = 'block';
+            return false;
+        } else if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+            errorDiv.textContent = 'Имя пользователя может содержать только буквы, цифры и подчеркивание';
+            errorDiv.style.display = 'block';
+            return false;
+        } else {
+            errorDiv.style.display = 'none';
+            return true;
+        }
+    }
+    
+    validateEmail(email) {
+        const errorDiv = document.getElementById('emailError');
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        
+        if (!emailRegex.test(email)) {
+            errorDiv.textContent = 'Введите корректный email адрес';
+            errorDiv.style.display = 'block';
+            return false;
+        } else {
+            errorDiv.style.display = 'none';
+            return true;
+        }
+    }
+    
+    validatePassword(password) {
+        const errorDiv = document.getElementById('passwordError');
+        
+        if (password.length < 6) {
+            errorDiv.textContent = 'Пароль должен быть не менее 6 символов';
+            errorDiv.style.display = 'block';
+            return false;
+        } else {
+            errorDiv.style.display = 'none';
+            this.validatePasswordMatch(document.getElementById('confirmPassword').value);
+            return true;
+        }
+    }
+    
+    validatePasswordMatch(confirmPassword) {
+        const password = document.getElementById('password').value;
+        const errorDiv = document.getElementById('confirmPasswordError');
+        
+        if (confirmPassword && password !== confirmPassword) {
+            errorDiv.textContent = 'Пароли не совпадают';
+            errorDiv.style.display = 'block';
+            return false;
+        } else {
+            errorDiv.style.display = 'none';
+            return true;
+        }
+    }
+    
+    validateForm() {
+        const username = document.getElementById('username').value;
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+        
+        const isUsernameValid = this.validateUsername(username);
+        const isEmailValid = this.validateEmail(email);
+        const isPasswordValid = this.validatePassword(password);
+        const isPasswordMatchValid = this.validatePasswordMatch(confirmPassword);
+        
+        return isUsernameValid && isEmailValid && isPasswordValid && isPasswordMatchValid;
+    }
+    
+    async handleRegistration() {
+        if (!this.validateForm()) {
+            return;
+        }
+        
+        const submitBtn = document.getElementById('submitBtn');
+        const originalText = submitBtn.textContent;
+        
+        // Блокировка кнопки и показ загрузки
+        submitBtn.textContent = 'Регистрация...';
+        submitBtn.disabled = true;
+        this.hideError();
+        
+        try {
+            const formData = new FormData(document.getElementById('registerForm'));
+            const data = {
+                username: formData.get('username'),
+                email: formData.get('email'),
+                password: formData.get('password')
+            };
+            
+            const response = await fetch('/api/auth/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+            
+            let result;
+            try {
+                result = await response.json();
+            } catch (jsonError) {
+                console.error('Ошибка парсинга JSON:', jsonError);
+                throw new Error('Ошибка ответа сервера');
+            }
+            
+            if (response.ok) {
+                // Успешная регистрация - перенаправляем на главную
+                window.location.href = '/';
+            } else {
+                // Показываем ошибку
+                this.showError(result.error || 'Ошибка регистрации');
+                
+                // Подсвечиваем поля с ошибками
+                if (result.field_errors) {
+                    if (result.field_errors.username) {
+                        this.showFieldError('usernameError', result.field_errors.username);
+                    }
+                    if (result.field_errors.email) {
+                        this.showFieldError('emailError', result.field_errors.email);
+                    }
+                    if (result.field_errors.password) {
+                        this.showFieldError('passwordError', result.field_errors.password);
+                    }
+                }
+            }
+        } catch (error) {
+            console.error('Ошибка регистрации:', error);
+            this.showError(error.message || 'Ошибка соединения с сервером');
+        } finally {
+            // Восстанавливаем кнопку
+            submitBtn.textContent = originalText;
+            submitBtn.disabled = false;
+        }
+    }
+    
+    showFieldError(fieldId, message) {
+        const errorDiv = document.getElementById(fieldId);
+        if (errorDiv) {
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+    }
+    
+    showError(message) {
+        const errorDiv = document.getElementById('errorMessage');
+        errorDiv.textContent = message;
+        errorDiv.style.display = 'block';
+        
+        // Прокрутка к сообщению об ошибке
+        errorDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+    
+    hideError() {
+        const errorDiv = document.getElementById('errorMessage');
+        errorDiv.style.display = 'none';
+        
+        // Скрываем все полевые ошибки
+        const fieldErrors = document.querySelectorAll('.error-message');
+        fieldErrors.forEach(error => {
+            if (error.id !== 'errorMessage') {
+                error.style.display = 'none';
+            }
+        });
+    }
+    
+    showContent() {
+        this.loadingScreen.style.display = 'none';
+        this.content.style.display = 'block';
+    }
+    
+    showError(message) {
+        this.content.innerHTML = `
+            <div class="error-container">
+                <div class="error-message">
+                    <h3>Ошибка</h3>
+                    <p>${message}</p>
+                    <button onclick="window.location.reload()" class="action-btn action-btn-primary">
+                        Перезагрузить
+                    </button>
+                </div>
+            </div>
+        `;
+        this.showContent();
+    }
+}
+
+// Инициализация при загрузке страницы
+document.addEventListener('DOMContentLoaded', () => {
+    new RegisterPage();
+});
+</script>
+{% endblock %}

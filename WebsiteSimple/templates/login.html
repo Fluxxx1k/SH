@@ -1,29 +1,232 @@
-<!-- Страница входа -->
-<div class="auth-container">
-    <div class="auth-card">
-        <div class="auth-header">
-            <h1>Вход в игру</h1>
-            <p>Войдите в свой аккаунт</p>
-        </div>
-        
-        <form id="loginForm" class="auth-form">
-            <div class="form-group">
-                <label for="username">Имя пользователя</label>
-                <input type="text" id="username" name="username" required>
-            </div>
-            
-            <div class="form-group">
-                <label for="password">Пароль</label>
-                <input type="password" id="password" name="password" required>
-            </div>
-            
-            <div id="errorMessage" class="error-message" style="display:none;"></div>
-            
-            <button type="submit" class="auth-btn">Войти</button>
-        </form>
-        
-        <div class="auth-footer">
-            <p>Нет аккаунта? <a href="/register">Зарегистрируйтесь</a></p>
-        </div>
+{% extends "base.html" %}
+
+{% block title %}Вход - {{ site_name or 'Игра' }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="/static/css/auth.css">
+{% endblock %}
+
+{% block content %}
+<div class="auth-container" id="authContainer">
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loading-spinner"></div>
+        <p>Проверка авторизации...</p>
+    </div>
+    
+    <div class="auth-content" id="authContent" style="display:none;">
+        <!-- Контент будет отрендерен JavaScript -->
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Страница входа - полностью на JavaScript
+class LoginPage {
+    constructor() {
+        this.container = document.getElementById('authContainer');
+        this.loadingScreen = document.getElementById('loadingScreen');
+        this.content = document.getElementById('authContent');
+        
+        this.init();
+    }
+    
+    async init() {
+        try {
+            await this.checkAuth();
+            this.renderPage();
+            this.attachEventListeners();
+            this.showContent();
+        } catch (error) {
+            console.error('Ошибка инициализации страницы входа:', error);
+            this.showError('Не удалось загрузить страницу входа');
+        }
+    }
+    
+    async checkAuth() {
+        try {
+            const response = await fetch('/api/auth/status');
+            const data = await response.json();
+            
+            if (data.authenticated) {
+                window.location.href = '/';
+                return;
+            }
+        } catch (error) {
+            console.log('Пользователь не авторизован');
+        }
+    }
+    
+    renderPage() {
+        this.content.innerHTML = `
+            <div class="auth-card">
+                <div class="auth-header">
+                    <h1>Вход в игру</h1>
+                    <p>Войдите в свой аккаунт</p>
+                </div>
+                
+                <form id="loginForm" class="auth-form">
+                    <div class="form-group">
+                        <label for="username">Имя пользователя</label>
+                        <input type="text" id="username" name="username" required>
+                        <div class="error-message" id="usernameError" style="display:none;"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="password">Пароль</label>
+                        <input type="password" id="password" name="password" required>
+                        <div class="error-message" id="passwordError" style="display:none;"></div>
+                    </div>
+                    
+                    <div id="errorMessage" class="error-message" style="display:none;"></div>
+                    
+                    <button type="submit" class="auth-btn" id="submitBtn">
+                        Войти
+                    </button>
+                </form>
+                
+                <div class="auth-footer">
+                    <p>Нет аккаунта? <a href="/register">Зарегистрируйтесь</a></p>
+                </div>
+            </div>
+        `;
+    }
+    
+    attachEventListeners() {
+        const form = document.getElementById('loginForm');
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+        
+        // Валидация в реальном времени
+        usernameInput.addEventListener('input', (e) => {
+            this.validateUsername(e.target.value);
+        });
+        
+        passwordInput.addEventListener('input', (e) => {
+            this.validatePassword(e.target.value);
+        });
+        
+        // Отправка формы
+        form.onsubmit = async (e) => {
+            e.preventDefault();
+            await this.handleLogin();
+        };
+    }
+    
+    validateUsername(username) {
+        const errorDiv = document.getElementById('usernameError');
+        
+        if (username.length < 3) {
+            errorDiv.textContent = 'Имя пользователя должно быть не менее 3 символов';
+            errorDiv.style.display = 'block';
+            return false;
+        } else if (username.length > 20) {
+            errorDiv.textContent = 'Имя пользователя должно быть не более 20 символов';
+            errorDiv.style.display = 'block';
+            return false;
+        } else if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+            errorDiv.textContent = 'Имя пользователя может содержать только буквы, цифры и подчеркивания';
+            errorDiv.style.display = 'block';
+            return false;
+        } else {
+            errorDiv.style.display = 'none';
+            return true;
+        }
+    }
+    
+    validatePassword(password) {
+        const errorDiv = document.getElementById('passwordError');
+        
+        if (password.length < 6) {
+            errorDiv.textContent = 'Пароль должен быть не менее 6 символов';
+            errorDiv.style.display = 'block';
+            return false;
+        } else {
+            errorDiv.style.display = 'none';
+            return true;
+        }
+    }
+    
+    async handleLogin() {
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        const submitBtn = document.getElementById('submitBtn');
+        const errorDiv = document.getElementById('errorMessage');
+        
+        // Валидация перед отправкой
+        const isUsernameValid = this.validateUsername(username);
+        const isPasswordValid = this.validatePassword(password);
+        
+        if (!isUsernameValid || !isPasswordValid) {
+            return;
+        }
+        
+        // Блокировка кнопки и показ загрузки
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Вход...';
+        errorDiv.style.display = 'none';
+        
+        try {
+            const response = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    username: username,
+                    password: password
+                })
+            });
+            
+            const result = await response.json();
+            
+            if (response.ok) {
+                // Успешный вход - переход на главную
+                window.location.href = '/';
+            } else {
+                // Ошибка входа
+                errorDiv.textContent = result.error || 'Ошибка входа';
+                errorDiv.style.display = 'block';
+                
+                // Разблокировка кнопки
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Войти';
+            }
+        } catch (error) {
+            console.error('Ошибка входа:', error);
+            errorDiv.textContent = 'Ошибка соединения с сервером';
+            errorDiv.style.display = 'block';
+            
+            // Разблокировка кнопки
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Войти';
+        }
+    }
+    
+    showContent() {
+        this.loadingScreen.style.display = 'none';
+        this.content.style.display = 'block';
+    }
+    
+    showError(message) {
+        this.content.innerHTML = `
+            <div class="error-container">
+                <div class="error-message">
+                    <h3>Ошибка</h3>
+                    <p>${message}</p>
+                    <button onclick="window.location.reload()" class="action-btn action-btn-primary">
+                        Перезагрузить
+                    </button>
+                </div>
+            </div>
+        `;
+        this.showContent();
+    }
+}
+
+// Инициализация при загрузке страницы
+document.addEventListener('DOMContentLoaded', () => {
+    new LoginPage();
+});
+</script>
+{% endblock %}
